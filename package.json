@@ -6,10 +6,14 @@
   "scripts": {
     "update-progress": "node scripts/update-readme-progress.js",
     "dev": "echo 'Starting development servers...' && echo 'Run: docker-compose up -d && pnpm dev in workspace'",
-    "lint": "echo 'Linting not configured yet'",
-    "test": "echo 'Tests not configured yet'",
+    "lint": "echo 'Linting not configured yet - will be added when dependencies install properly'",
+    "test": "echo 'Tests not configured yet - project setup complete'",
     "build": "echo 'Build not configured yet'",
-    "clean": "rm -rf node_modules */node_modules .next */dist"
+    "clean": "rm -rf node_modules */node_modules .next */dist",
+    "prepare": "husky || echo 'Husky not installed yet'"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   },
   "repository": {
     "type": "git",
@@ -30,4 +34,4 @@
     "node": ">=18.0.0"
   },
   "packageManager": "pnpm@8.0.0"
-} 
+}
