@@ -1,0 +1,258 @@
+<context>
+# Overview  
+A professional-grade financial analysis platform that automates company evaluation through AI-powered scoring engines and customizable templates. The platform fetches real-time financial data from multiple sources, processes it through intelligent prompt chains, and delivers institutional-quality research reports in minutes instead of hours. 
+
+Designed for solo investors, research teams, and anyone seeking systematic, bias-free financial analysis at scale.
+
+---
+
+# Core Features
+
+| Feature | What it does | Why it's important | How it works (high level) |
+|---------|-------------|-------------------|---------------------------|
+| **Single‑Company Scan** | Fetches a firm's latest 10‑K/10‑Q plus Income Statement (IS), Balance Sheet (BS), and Cash‑Flow (CF); runs an LLM prompt chain; and delivers a templated health report with category scores plus overall rating. | Gives an instant, repeatable first look—no spreadsheets needed. | Async calls to FMP (or other source) → LangChain prompt chain → scoring module → JSON → dashboard card. |
+| **Bulk Screener** | Accepts 1–1,000+ tickers, processes them in parallel, and returns a sortable table of composite scores. | Surfaces the top ideas in minutes, not days. | Task queue (Celery/Lambda) farms out fetch + analysis jobs; results stream back to UI with progress bars. |
+| **Template Library & Builder** | Houses ~8–12 pre‑built sector templates (Tech, Energy, Banks, REITs, "Buffett‑style," etc.) and a drag‑and‑drop editor to create custom ones. | Lets users tailor KPIs, weights, and prompt language to their strategy. | Templates stored in Postgres; front‑end builder writes JSON; engine loads correct template at runtime. |
+| **Scoring Engine** | Translates raw metrics into 1–100 scores across Profitability, Growth, Balance‑Sheet, Capital Allocation, and Valuation; then rolls them up with adjustable weights. | Converts messy data into an apples‑to‑apples ranking system. | Pydantic‑validated module combines numeric rules with LLM judgments; weights stored per template. |
+| **Interactive Dashboard** | Real‑time tiles for individual companies, sortable screener table, and visual KPI breakdowns; all backed by search & filter. | Keeps research workflow inside one window instead of Excel + browser tabs. | Next.js front end with TanStack Query for live data, Recharts for visuals, Tailwind + shadcn/ui for clean, responsive layout. |
+| **Embeddings & Re‑use** | Caches filings, embeddings, and previous scores so repeat queries are instant and cheaper. | Cuts latency and reduces API costs. | Vector store (Postgres/pgvector) keyed by filing hash; freshness checks trigger re‑fetch only when needed. |
+| **Auth & Multi‑Tenant** | Email/social sign‑in, workspace separation, team roles. | Ready for both solo investors and small research teams. | Supabase/Auth0 plug‑in; tenancy enforced at API‑gateway layer. |
+
+---
+
+# User Experience
+
+## User Personas
+
+| Persona | Profile / Goals | Pain Points |
+|---------|----------------|-------------|
+| **Solo Investor** | • Analyzes 50–100 companies quarterly<br>• Wants to cut analysis time from hours to minutes<br>• Maintain consistency | • Manual data collection<br>• Subjective bias<br>• Staying current with filings |
+| **Broad Investor (Filterer)** | • Scans sectors to find top ideas<br>• Tracks multiple portfolio companies | • Information overload<br>• Missed opportunities<br>• Conflicting analyst reports |
+| **Custom Method Investor** | • Has a personal investing methodology<br>• Wants to formalize and implement it systematically | • No professional‑grade tooling<br>• Limited time<br>• Analysis paralysis |
+
+## Key User Flows
+
+### 1. Single‑Company Deep Dive
+**Description:** Evaluate one company in depth using pre‑built or custom templates
+
+**Key Steps:**
+1. Enter ticker symbol  
+2. System auto‑detects sector & suggests template (or user chooses)  
+3. Show progress bar  
+4. Dashboard with scores & metric breakdown  
+5. Export to PDF/Excel
+
+### 2. Bulk Portfolio Screening
+**Description:** Analyze multiple tickers simultaneously to rank or monitor a portfolio
+
+**Key Steps:**
+1. Upload CSV or choose from watchlist  
+2. Choose or auto‑select template  
+3. Queue progress shown  
+4. Sortable/filterable result table  
+5. Save & set alerts  
+6. Drill down to single‑company view
+
+### 3. Custom Template Creation
+**Description:** Build bespoke scoring frameworks and prompt chains
+
+**Key Steps:**
+1. Open visual template builder  
+2. Drag data‑source blocks (FMP or custom)  
+3. Connect prompt blocks; choose model & system prompt  
+4. Configure scoring for each prompt chain  
+5. Test & save template
+
+## UI/UX Considerations
+
+- **Clean Professional Interface** – Tailwind CSS with shadcn/ui for institutional‑grade appearance
+
+- **Data Visualization First** – Recharts/D3.js for financial charts; scores as intuitive gauges
+
+- **Progressive Disclosure** – Summary views with drill‑down to detail
+
+- **Real‑time Feedback** – WebSocket connections for live progress updates
+
+- **Mobile Responsive** – Tablet‑optimized for earnings calls & on‑the‑go analysis
+
+</context>
+
+<PRD>
+# Technical Architecture  
+
+## Data Models
+
+### Core Entities
+
+```python
+class Company(Base):
+    ticker: str  # PK
+    name: str
+    sector: str
+    industry: str
+    gics_code: str
+    metadata: JSONB
+
+class FinancialData(Base):
+    id: UUID
+    company_ticker: str  # FK
+    data_type: Literal["10K", "10Q", "IS", "BS", "CF"]
+    period: date
+    raw_data: JSONB
+    processed_data: JSONB
+    created_at: datetime
+    expires_at: datetime
+
+class AnalysisTemplate(Base):
+    id: UUID
+    name: str
+    category: Literal["sector", "style", "custom"]
+    prompt_chain: JSONB
+    scoring_weights: JSONB
+    required_data_points: list[str]
+    version: int
+    is_active: bool
+
+class AnalysisResult(Base):
+    id: UUID
+    company_ticker: str  # FK
+    template_id: UUID  # FK
+    dimension_scores: JSONB
+    overall_score: float
+    llm_insights: JSONB
+    created_at: datetime
+    analysis_metadata: JSONB
+
+class BulkAnalysisJob(Base):
+    id: UUID
+    user_id: UUID
+    tickers: list[str]
+    template_id: UUID
+    status: JobStatus
+    progress: int  # 0‑100
+    results: list[UUID]  # FK to AnalysisResult
+    created_at: datetime
+    completed_at: datetime
+```
+
+## External APIs
+
+### Financial Modeling Prep (FMP)
+- **Endpoints:** `/api/v3/income-statement`, `/balance-sheet`, `/cash-flow-statement`
+- **Rate limits:** 300 calls/minute
+- **Data format:** JSON (standardized fields)
+
+### LLM Providers (via LangChain)
+- **OpenAI GPT‑4o‑mini** (primary)
+- **Anthropic Claude 3.5 Sonnet** (premium)
+- **Google Gemini 1.5 Flash** (cost‑effective)
+- **Local Ollama models** (privacy‑focused)
+
+### Alternative Data Sources
+- **Yahoo Finance** (backup)
+- **Alpha Vantage** (extended metrics)
+- **Custom CSV/API ingestion**
+
+## Infrastructure Requirements
+
+- **Docker‑based micro‑services deployment**
+
+- **Kubernetes or ECS** for scaling worker pool
+
+- **Managed PostgreSQL** (Supabase/AWS RDS)
+
+- **Redis or SQS** for task queue
+
+- **CDN** for static assets & report downloads
+
+---
+
+# Development Roadmap  
+
+## MVP Requirements ("Solid Foundation" build strategy)
+
+### Phase 1 – Foundational Backend & Front‑End Skeleton
+
+- Set up monorepo & CI/CD
+
+- Implement data‑ingestion adapter for FMP
+
+- Deploy Postgres schema with JSONB fields
+
+- Build hard‑coded prompt chain for one template
+
+- Scaffold Next.js frontend with mock data
+
+- Minimal FastAPI gateway bridging FE/BE
+
+### Phase 2 – First Working Vertical Slice
+
+- Real‑time data pull from FMP
+
+- Parse & store IS/BS/CF/10‑K/10‑Q
+
+- Run prompt chain via LangChain worker
+
+- Display scores & insights in UI
+
+- Add caching for repeat requests
+
+### Phase 3 – Template Engine Foundations
+
+- JSON definition for prompt chains & weights
+
+- Load template dynamically per scan
+
+- Ship 3–5 pre‑loaded sector templates
+
+### Phase 4 – UI Polish & Export
+
+- Responsive layout & filtering
+
+- Recharts visualizations
+
+- Export report to PDF/CSV
+
+## Future Enhancements (Post‑MVP)
+
+- Bulk screening workflow (CSV upload)
+
+- Full visual template builder (drag‑and‑drop)
+
+- Embedding store (Postgres + pgvector)
+
+- Multi‑provider data support (Polygon, Tiingo, Yahoo)
+
+- Full auth, team roles, workspaces
+
+- Alerts & dashboard notifications
+
+- Local/offline LLM fallback (Ollama)
+
+- Peer comparison & sector heat‑maps
+
+---
+
+# Logical Dependency Chain
+
+**Phase 1 (Foundation)** – DB schema → prompt‑runner basics → FE scaffold
+
+**Phase 2 (Single Flow)** – Data fetcher → preprocessing → prompt chain → UI results; PDF export only after stable output
+
+**Phase 3 (Templates)** – Dynamic template loading relies on Phase 2's stable pipeline
+
+**Phase 4 (Polish)** – Visual/UI enhancements only after end‑to‑end functionality; caching optimization follows stable flow
+
+---
+
+# Risks and Mitigations  
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| **API Rate Limits / Data Gaps** | Analysis failures or delays | Cache results; implement fallback APIs; exponential back‑off |
+| **LLM Cost & Latency** | High cost, slow user experience | Caching embeddings & results; model selection based on cost/performance; batch processing |
+| **Complex Template Builder Scope Creep** | Delays MVP | Ship basic JSON‑based templates first; defer visual builder to post‑MVP |
+| **Resource Constraints** | Small team bandwidth | Modular micro‑services; prioritize vertical slices; reuse OSS components |
+| **Security & Compliance** | Data breaches, trust loss | Use vetted auth providers; encrypt at rest/in transit; regular audits |
+
+</PRD>

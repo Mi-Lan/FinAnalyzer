@@ -1,0 +1,150 @@
+# Overview
+FinAnalyzer is a financial analysis platform that automates single-company investment research by combining real-time financial data with AI-powered analytical capabilities. The application pulls standardized fundamentals from free and premium API sources, processes them through LLM-powered analysis, and delivers objective, scored financial health reports to accelerate investment decision-making.
+
+The platform addresses the time-intensive nature of fundamental analysis by automating data collection, applying consistent analytical frameworks, and producing actionable insights for individual companies. It serves institutional investors, research analysts, and sophisticated retail investors who need rapid, objective financial assessments.
+
+# Core Features
+| Feature                        | What it does                                                                                                                                                         | Why it matters                                                             | How it works (high level)                                                                                                     |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Single-Company Analysis**    | Fetches a company's latest financial statements (IS, BS, CF), runs AI analysis, and delivers a scored health report with category breakdowns.                        | Gives an instant, repeatable first look—no spreadsheets needed.            | API calls to data source → AI prompt chain → scoring module → JSON → dashboard display.                                      |
+| **Financial Data Integration** | Pulls standardized financial metrics from Financial Modeling Prep (FMP) with comprehensive coverage and high data quality.                                       | Ensures reliable, consistent data with professional-grade accuracy.         | Async data fetcher with smart caching and error handling for missing/inconsistent data.                                       |
+| **AI-Powered Scoring Engine**  | Translates raw metrics into 1–100 scores across Profitability, Growth, Balance Sheet, and Valuation; rolls up to overall company score.                           | Converts messy data into standardized, comparable assessment.               | Combination of financial ratio calculations and LLM analysis of key metrics and trends.                                       |
+| **Professional Dashboard**     | Clean, responsive interface showing company overview, detailed scores, key metrics, and AI insights with drill-down capabilities.                                   | Keeps analysis workflow in one place instead of multiple tools.            | Next.js frontend with real-time data display, charts via Recharts, professional styling with Tailwind + shadcn/ui.           |
+| **Analysis History & Export**  | Stores previous analyses with timestamps and allows export to PDF/CSV for further use or reporting.                                                                 | Enables tracking company progress over time and sharing insights.          | PostgreSQL storage with export functionality and basic search/filter capabilities.                                            |
+
+#User Personas
+| Persona                | Profile / Goals                                                           | Pain Points                                                               |
+| ---------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Solo Investor          | - Analyzes 10-20 companies monthly<br>- Wants to cut analysis time from hours to minutes<br>- Needs consistent methodology | - Manual data collection<br>- Subjective bias<br>- Time-consuming research |
+| Research Analyst       | - Evaluates companies for institutional recommendations<br>- Requires professional-grade analysis<br>- Values speed and consistency | - Data scattered across multiple sources<br>- Repetitive analysis work<br>- Need for defensible methodology |
+| Investment Advisor     | - Reviews client portfolio holdings<br>- Needs quick company health checks<br>- Must explain investment rationale | - Limited time per analysis<br>- Need clear, exportable reports<br>- Compliance documentation |
+
+#Key User Flows
+| Flow Name              | Description                                                              | Key Steps                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Quick Company Analysis | Evaluate one company using standardized financial health assessment     | - Enter ticker symbol<br>- System fetches latest financials<br>- Show progress<br>- Display scored dashboard<br>- Export report if needed |
+| Historical Review      | Compare company's current analysis with previous assessments             | - Enter ticker<br>- View current analysis<br>- Access historical results<br>- Compare trends over time |
+
+# Technical Architecture  
+## System Components
+| Layer                  | Component                                        | Responsibilities                                                                                   |
+| ---------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| **Frontend**           | Next.js + TypeScript app    ,Tailwind + shadcn/ui,tanstack query for cching,langchain                   | Dashboard, company analysis view, search interface, export functionality                           |
+| **API Gateway**        | FastAPI service                                  | REST endpoints, request validation, rate limiting, basic auth                                       |
+| **Analysis Engine**    | Python service                                   | Financial data processing, AI prompt execution, scoring calculations                                |
+| **Data Store**         | PostgreSQL                                       | Company data, analysis results, user preferences, cached financial data                            |
+| **External APIs**      | Financial Modeling Prep (FMP) - primary         | Financial statements, company metadata, stock prices, comprehensive fundamental data               |
+| **LLM Provider**       | OpenAI GPT-4o-mini (primary) ,langchain                   | Financial analysis, insight generation, anomaly detection                                          |
+
+## Data Models
+
+```python
+# Core Entities (Simplified)
+
+Company:
+  - ticker: str (primary key)
+  - name: str
+  - sector: str
+  - last_updated: timestamp
+  - metadata: JSONB
+
+FinancialData:
+  - id: UUID
+  - company_ticker: str (FK)
+  - period: date
+  - income_statement: JSONB
+  - balance_sheet: JSONB
+  - cash_flow: JSONB
+  - created_at: timestamp
+
+AnalysisResult:
+  - id: UUID
+  - company_ticker: str (FK)
+  - overall_score: float
+  - profitability_score: float
+  - growth_score: float
+  - balance_sheet_score: float
+  - valuation_score: float
+  - ai_insights: JSONB
+  - key_metrics: JSONB
+  - created_at: timestamp
+```
+
+## MVP Requirements ("Focused Foundation" build strategy)
+
+**Scope**: Build a complete single-company analysis workflow with one standardized template, focusing on reliability and user experience before adding complexity.
+
+### Phase 1: Core Infrastructure (2-3 weeks)
+- Set up Next.js frontend with basic routing and company search
+- Implement FastAPI backend with PostgreSQL database
+- Create FMP API adapter with error handling and rate limiting
+- Build basic financial data storage and retrieval
+- Implement simple UI components with mock data (company card, score displays)
+
+### Phase 2: Financial Analysis Engine (2-3 weeks)
+- Build financial ratio calculation engine (ROE, ROA, Debt-to-Equity, etc.)
+- Implement basic scoring algorithm for 4 main categories
+- Create simple LLM integration for qualitative insights
+- Connect frontend to backend with real data flow
+- Add progress indicators and error handling
+
+### Phase 3: Professional UI & Intelligence (2-3 weeks)
+- Polish dashboard with professional styling (Tailwind + shadcn/ui)
+- Add financial charts and visualizations (Recharts)
+- Implement AI-powered analysis with OpenAI integration
+- Create comprehensive scoring methodology
+- Add company overview and key metrics display
+
+### Phase 4: Polish & Export (2-3 weeks)
+- Implement analysis history and comparison features
+- Add PDF/CSV export functionality
+- Create responsive design for tablet/mobile
+- Add search and favorites functionality
+- Implement basic caching for performance
+
+### Future Enhancements (Post-MVP)
+- **Template System**: Multiple analysis frameworks (Tech, Finance, REIT, etc.)
+- **Bulk Analysis**: Process multiple companies in batches
+- **Alternative Data Sources**: Add backup sources (Yahoo Finance, Alpha Vantage) for redundancy
+- **Advanced Features**: Peer comparison, sector analysis, alerts
+- **Team Features**: User accounts, sharing, collaboration
+- **Template Builder**: Visual editor for custom analysis frameworks
+
+## Logical Dependency Chain
+
+### Phase 1 Dependencies (Foundation)
+- Database schema must be established before data ingestion
+- Frontend scaffold can be built with mock data while backend develops
+- FMP API adapter needs robust error handling and rate limiting from day one
+
+### Phase 2 Dependencies (Analysis Core)
+- Financial calculations require reliable data ingestion
+- Scoring engine needs validated financial ratios
+- LLM integration should start simple (basic insights only)
+
+### Phase 3 Dependencies (Intelligence)
+- UI polish requires working data flow from Phase 2
+- Advanced AI analysis builds on basic scoring from Phase 2
+- Charts and visualizations need real data structure
+
+### Phase 4 Dependencies (Production Ready)
+- Export functionality needs polished UI and reliable data
+- Historical features require consistent data storage format
+- Performance optimization only matters after core functionality works
+
+## Risk Mitigation Strategy
+
+### Technical Risks
+- **Data Quality**: Start with large-cap companies (S&P 500) that have consistent reporting
+- **API Reliability**: Implement robust retry logic and fallback error messages
+- **LLM Costs**: Cap analysis requests and implement smart caching
+
+### Business Risks
+- **Regulatory Compliance**: Add clear disclaimers that tool is for research/education only
+- **Cost Structure**: FMP subscription already secured, implement smart caching to optimize API usage
+- **User Validation**: Test with 5-10 target users after Phase 2
+
+### Development Risks
+- **Scope Creep**: Resist adding features until core workflow is perfect
+- **Over-Engineering**: Keep architecture simple but extensible
+- **Data Complexity**: Handle edge cases gracefully rather than trying to be perfect

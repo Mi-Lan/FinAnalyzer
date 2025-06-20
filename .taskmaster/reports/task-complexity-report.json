@@ -1,0 +1,157 @@
+{
+	"meta": {
+		"generatedAt": "2025-06-19T14:44:23.004Z",
+		"tasksAnalyzed": 18,
+		"totalTasks": 18,
+		"analysisCount": 18,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Setup Project Repository & CI/CD Pipeline",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the setup of the monorepo, configuration of pnpm workspaces, GitHub Actions workflows (linting, testing, deployment), Docker setup for local and production, and initial CI/CD verification.",
+			"reasoning": "This task involves multiple tools (pnpm, GitHub Actions, Docker) and requires coordination between repository structure, automation, and environment setup. Each component has its own configuration and integration points, increasing overall complexity."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Design and Deploy PostgreSQL Schema",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand into subtasks for schema design, tool selection (SQLAlchemy/Prisma), entity modeling, deployment to cloud DB, and schema validation.",
+			"reasoning": "Defining a relational schema with JSONB fields and deploying to managed services involves both design and operational steps, but is a common backend task with moderate complexity."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implement Data Ingestion Adapter for FMP API",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Decompose into subtasks for API client setup, async request handling, rate limiting, data parsing, Redis caching, error handling, and integration testing.",
+			"reasoning": "Building a robust, rate-limited, async adapter with caching and support for multiple data types is technically challenging and requires careful error handling and performance considerations."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Scaffold Next.js Frontend with Mock Data",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "List subtasks for Next.js project setup, Tailwind/shadcn integration, mock API endpoints, and initial UI prototyping.",
+			"reasoning": "Frontend scaffolding with modern frameworks and mock data is straightforward but involves several setup steps."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Build FastAPI Gateway for FE/BE Communication",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into FastAPI project setup, endpoint definition, authentication, request validation, and integration testing.",
+			"reasoning": "Developing a minimal API gateway with authentication and validation is moderately complex, especially with security considerations."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement Real-Time Data Pull and Storage",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Expand into subtasks for extending the adapter, parsing each data type, async processing, data validation, storage logic, error handling, and end-to-end testing.",
+			"reasoning": "Real-time data ingestion and storage with async processing and data integrity checks is a complex, multi-step backend task."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Develop Hard-Coded Prompt Chain for Single Template",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "List subtasks for LangChain setup, prompt logic implementation, integration with sample data, and output validation.",
+			"reasoning": "Implementing a basic prompt chain for one template is a focused task with limited scope, though it involves new tooling."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Build Scoring Module with Pydantic Validation",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into scoring logic design, Pydantic model creation, weight configuration, test case development, and integration.",
+			"reasoning": "Translating metrics into scores with validation and configurability is moderately complex, requiring careful logic and testing."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Display Scores & Insights in UI",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand into subtasks for backend integration, data fetching setup, UI component development, metric visualization, and user testing.",
+			"reasoning": "Integrating backend data into a dashboard with visualizations involves both frontend and backend coordination."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Add Caching for Repeat Requests",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "List subtasks for Redis setup, cache key design, integration with data flows, freshness checks, cache hit/miss logic, and testing.",
+			"reasoning": "Implementing effective caching across multiple data types with freshness validation is a non-trivial backend concern."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Develop JSON-Based Template Engine",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into JSON schema design, storage logic, dynamic loading, template switching, multi-template support, and validation.",
+			"reasoning": "Enabling dynamic, JSON-driven templates with database integration and runtime switching adds significant flexibility and complexity."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Implement Responsive Layout & Filtering",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Expand into subtasks for responsive UI design, component updates, table filtering/sorting, and cross-device testing.",
+			"reasoning": "Enhancing UI responsiveness and filtering is a standard frontend task, though it requires attention to detail."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Integrate Recharts for Data Visualization",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "List subtasks for Recharts integration, chart component development, data binding, and rendering validation.",
+			"reasoning": "Adding charting libraries and visualizations is a common frontend enhancement with moderate complexity."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Enable Report Export to PDF/CSV",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into PDF export logic, CSV export logic, UI integration, file download handling, and export validation.",
+			"reasoning": "Exporting data to multiple formats and integrating with the UI involves both backend and frontend work."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Implement Bulk Screening Workflow",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Expand into subtasks for task queue setup, parallel processing logic, progress tracking, result streaming, error handling, scaling tests, and UI integration.",
+			"reasoning": "Bulk processing with parallelism, progress tracking, and UI streaming is a complex, distributed systems challenge."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Add Auth & Multi-Tenant Support",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "List subtasks for auth provider integration, workspace separation logic, role management, API enforcement, UI updates, and security testing.",
+			"reasoning": "Implementing authentication and multi-tenancy with role-based access is a significant architectural and security task."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Implement Embeddings Store with pgvector",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into pgvector setup, embedding storage logic, retrieval API, freshness checks, and integration testing.",
+			"reasoning": "Adding vector storage and retrieval is moderately complex, especially with freshness and performance considerations."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Deploy Microservices with Kubernetes/ECS",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Expand into subtasks for containerization, service definition, deployment scripts, cluster setup, service discovery, scaling configuration, and deployment validation.",
+			"reasoning": "Deploying microservices with orchestration platforms involves containerization, infrastructure setup, and scaling, making it a high-complexity DevOps task."
+		}
+	]
+}
