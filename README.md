@@ -13,12 +13,12 @@ An AI-powered platform for automated financial data analysis and scoring.
 
 ## Development Progress
 
-**Overall Progress: 1/18 tasks completed (6%)**
+**Overall Progress: 2/18 tasks completed (11%)**
 
 | ID | Task | Status | Priority | Dependencies |
 |:---|:-----|:-------|:---------|:-------------|
 | 1 | Setup Project Repository & CI/CD Pipeline | ✅ done | high | none |
-| 2 | Design and Deploy PostgreSQL Schema | ⏳ pending | high | none |
+| 2 | Design and Deploy PostgreSQL Schema | ✅ done | high | none |
 | 3 | Implement Data Ingestion Adapter for FMP API | ⏳ pending | high | 1 |
 | 4 | Scaffold Next.js Frontend with Mock Data | ⏳ pending | medium | 1 |
 | 5 | Build FastAPI Gateway for FE/BE Communication | ⏳ pending | medium | 1, 2 |
