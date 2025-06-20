@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id              String   @id @default(cuid())
+  name            String
+  ticker          String   @unique
+  sector          String?
+  industry        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  financialData   FinancialData[]
+  analysisResults AnalysisResult[]
+}
+
+model FinancialData {
+  id        String   @id @default(cuid())
+  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String
+  year      Int
+  period    String // e.g., "Q1", "Q2", "FY"
+  data      Json // For raw financial statements (IS, BS, CF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, year, period])
+}
+
+model AnalysisTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  sectors     String[]
+  template    Json // The prompt chain and scoring logic
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  results     AnalysisResult[]
+}
+
+model AnalysisResult {
+  id           String           @id @default(cuid())
+  company      Company          @relation(fields: [companyId], references: [id])
+  companyId    String
+  template     AnalysisTemplate @relation(fields: [templateId], references: [id])
+  templateId   String
+  job          BulkAnalysisJob? @relation(fields: [jobId], references: [id])
+  jobId        String?
+  score        Float
+  insights     Json // LLM-generated insights
+  metricScores Json // Detailed breakdown of scores
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model BulkAnalysisJob {
+  id        String   @id @default(cuid())
+  status    String   // e.g., "PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"
+  progress  Float    @default(0)
+  results   AnalysisResult[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+} 

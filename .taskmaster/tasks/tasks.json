@@ -79,15 +79,15 @@
         "testStrategy": "Validate schema creation, table relationships, and JSONB field support.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Design Relational Schema with JSONB Fields",
             "description": "Define the database schema, including tables, relationships, and JSONB fields to accommodate flexible data structures as required by the application.",
             "dependencies": [],
-            "details": "Identify entities, their attributes, and relationships. Specify which fields require JSONB for semi-structured data. Document schema decisions for later reference.",
-            "status": "pending"
+            "details": "Identify entities, their attributes, and relationships. Specify which fields require JSONB for semi-structured data. Document schema decisions for later reference.\n<info added on 2025-06-20T19:21:02.749Z>\nCreated the initial `schema.prisma` file in `packages/database/prisma/`. The schema defines the core models: `Company`, `FinancialData`, `AnalysisTemplate`, `AnalysisResult`, and `BulkAnalysisJob`. Relationships and `Json` fields for flexible data storage have been included as per the design.\n</info added on 2025-06-20T19:21:02.749Z>",
+            "status": "done"
           },
           {
             "id": 2,
@@ -96,8 +96,8 @@
             "dependencies": [
               1
             ],
-            "details": "Compare features such as type safety, schema synchronization, language support, and ease of use. Document the rationale for the selected tool.",
-            "status": "pending"
+            "details": "Compare features such as type safety, schema synchronization, language support, and ease of use. Document the rationale for the selected tool.\n<info added on 2025-06-20T19:20:15.512Z>\nDecision: Prisma has been selected as the ORM for this project.\n\nRationale: Prisma is the ideal choice for this monorepo environment, which includes a Python/FastAPI backend and a Next.js/TypeScript frontend. Its schema-first approach provides a single source of truth, generating types for both the backend and frontend. This ensures type safety across the stack, reduces the risk of schema drift between services, and significantly improves developer experience by enabling autocompletion and compile-time checks. While SQLAlchemy offers deep, powerful features for Python, Prisma's seamless cross-language integration and modern developer experience are more aligned with the project's needs.\n</info added on 2025-06-20T19:20:15.512Z>",
+            "status": "done"
           },
           {
             "id": 3,
@@ -107,7 +107,7 @@
               2
             ],
             "details": "Translate the schema design into ORM models (e.g., SQLAlchemy classes or Prisma schema). Validate that JSONB fields are correctly represented and relationships are enforced.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 4,
@@ -117,7 +117,7 @@
               3
             ],
             "details": "Set up the cloud database instance, configure access, and run migrations or schema deployment commands to create tables and relationships as defined.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 5,
@@ -127,7 +127,7 @@
               4
             ],
             "details": "Use ORM validation features and/or custom scripts to verify schema correctness. Test CRUD operations, relationship integrity, and JSONB data handling.",
-            "status": "pending"
+            "status": "done"
           }
         ]
       },
@@ -1261,7 +1261,7 @@
     ],
     "metadata": {
       "created": "2025-06-19T14:40:29.469Z",
-      "updated": "2025-06-20T13:19:43.612Z",
+      "updated": "2025-06-20T19:29:27.150Z",
       "description": "Tasks for master context"
     }
   }

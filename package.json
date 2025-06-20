@@ -13,7 +13,11 @@
     "prepare": "husky || echo 'Husky not installed yet'"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "@types/node": "^24.0.3",
+    "dotenv-cli": "^8.0.0",
+    "husky": "^9.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "repository": {
     "type": "git",
@@ -31,7 +35,8 @@
   "author": "Milan",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0"
+    "node": "19.8.1",
+    "pnpm": ">=8.0.0 <9.0.0"
   },
   "packageManager": "pnpm@8.0.0"
 }
