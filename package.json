@@ -1,0 +1,33 @@
+{
+  "name": "finanalyzer",
+  "version": "0.1.0",
+  "description": "AI-powered financial analysis platform with automated data ingestion and scoring",
+  "private": true,
+  "scripts": {
+    "update-progress": "node scripts/update-readme-progress.js",
+    "dev": "echo 'Starting development servers...' && echo 'Run: docker-compose up -d && pnpm dev in workspace'",
+    "lint": "echo 'Linting not configured yet'",
+    "test": "echo 'Tests not configured yet'",
+    "build": "echo 'Build not configured yet'",
+    "clean": "rm -rf node_modules */node_modules .next */dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mi-Lan/FinAnalyzer.git"
+  },
+  "keywords": [
+    "financial-analysis",
+    "ai",
+    "task-master",
+    "nextjs",
+    "fastapi",
+    "postgresql",
+    "langchain"
+  ],
+  "author": "Milan",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@8.0.0"
+} 

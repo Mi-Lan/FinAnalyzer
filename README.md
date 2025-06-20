@@ -9,18 +9,72 @@ An AI-powered platform for automated financial data analysis and scoring.
 
 ---
 
+## Development Progress
+
+**Overall Progress: 0/18 tasks completed (0%)**
+
+| ID | Task | Status | Priority | Dependencies |
+|:---|:-----|:-------|:---------|:-------------|
+| 1 | Setup Project Repository & CI/CD Pipeline | ⏳ pending | high | none |
+| 2 | Design and Deploy PostgreSQL Schema | ⏳ pending | high | none |
+| 3 | Implement Data Ingestion Adapter for FMP API | ⏳ pending | high | 1 |
+| 4 | Scaffold Next.js Frontend with Mock Data | ⏳ pending | medium | 1 |
+| 5 | Build FastAPI Gateway for FE/BE Communication | ⏳ pending | medium | 1, 2 |
+| 6 | Implement Real-Time Data Pull and Storage | ⏳ pending | high | 2, 3 |
+| 7 | Develop Hard-Coded Prompt Chain for Single Temp... | ⏳ pending | medium | 2, 3 |
+| 8 | Build Scoring Module with Pydantic Validation | ⏳ pending | medium | 2, 7 |
+| 9 | Display Scores & Insights in UI | ⏳ pending | medium | 4, 5, 8 |
+| 10 | Add Caching for Repeat Requests | ⏳ pending | medium | 3, 6 |
+| 11 | Develop JSON-Based Template Engine | ⏳ pending | medium | 2, 7 |
+| 12 | Implement Responsive Layout & Filtering | ⏳ pending | medium | 4, 9 |
+| 13 | Integrate Recharts for Data Visualization | ⏳ pending | medium | 4, 9 |
+| 14 | Enable Report Export to PDF/CSV | ⏳ pending | medium | 9, 12 |
+| 15 | Implement Bulk Screening Workflow | ⏳ pending | medium | 2, 6, 11 |
+| 16 | Add Auth & Multi-Tenant Support | ⏳ pending | medium | 2, 5 |
+| 17 | Implement Embeddings Store with pgvector | ⏳ pending | low | 2, 10 |
+| 18 | Deploy Microservices with Kubernetes/ECS | ⏳ pending | medium | 1, 5 |
+
+
 ## Built with Task Master
 
 This project uses [Task Master](https://github.com/eyaltoledano/claude-task-master) for structured development - an AI-powered project management system that breaks down complex projects into manageable tasks.
 
 ### Task Master Implementation
-- **18 main tasks** broken into **86 detailed subtasks**
+- **18 main tasks** broken into **101 detailed subtasks**
 - AI-assisted task breakdown and complexity analysis  
 - Clear dependency management and execution order
 - Real-time progress tracking with status updates
 - Iterative development workflow
 
-**Current Progress:** [View Task Status](.taskmaster/tasks/tasks.json)
+### Progress Automation Rules
+
+To keep the progress table updated automatically:
+
+1. **After completing any task or subtask:**
+   ```bash
+   # Update task status
+   task-master set-status --id=<task-id> --status=done
+   
+   # Automatically update README progress table
+   npm run update-progress
+   ```
+
+2. **Commit progress updates:**
+   ```bash
+   git add README.md .taskmaster/tasks/tasks.json
+   git commit -m "progress: Complete task <id> - <task-title>"
+   ```
+
+3. **Automated script features:**
+   - Reads live data from `.taskmaster/tasks/tasks.json`
+   - Updates progress percentage and completion stats
+   - Maintains proper status icons and formatting
+   - Preserves all other README content
+
+4. **Weekly progress sync:**
+   - Review dependency blockers
+   - Plan next iteration focus
+   - Check for outdated task descriptions
 
 ---
 
@@ -115,14 +169,14 @@ pnpm dev                  # Start applications
 
 ---
 
-## Development Progress
+## Development Phases
 
 Using Task Master's structured approach:
 
 ### Phase 1: Foundation (Tasks 1-4)
-- [x] Repository setup and monorepo structure
-- [x] Database schema and migrations  
-- [x] Docker containerization
+- [ ] Repository setup and monorepo structure
+- [ ] Database schema and migrations  
+- [ ] Docker containerization
 - [ ] Next.js frontend with mock data
 
 ### Phase 2: Core Backend (Tasks 5-8)
@@ -143,15 +197,13 @@ Using Task Master's structured approach:
 - [ ] Deployment automation
 - [ ] Monitoring
 
-**Detailed status:** [tasks.json](.taskmaster/tasks/tasks.json)
-
 ---
 
 ## Task Master Workflow
 
 This project demonstrates Task Master's development methodology:
 
-**Current Stats**: 18 main tasks, 86 subtasks, real-time tracking
+**Current Stats**: 18 main tasks, 101 subtasks, real-time tracking
 
 **Workflow**:
 1. `task-master next` - Get next available task
