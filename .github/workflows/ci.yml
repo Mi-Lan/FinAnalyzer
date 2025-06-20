@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -15,21 +15,24 @@ jobs:
         node-version: [18.x, 20.x]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
+      - name: Verify project structure
+        run: |
+          echo "Checking project structure..."
+          ls -la
+          echo "Checking workspace config..."
+          cat pnpm-workspace.yaml
+          echo "Checking package.json..."
+          cat package.json
 
-    - name: Install dependencies
-      run: pnpm install -w
+      - name: Run lint
+        run: npm run lint
 
-    - name: Run lint
-      run: pnpm lint
-
-    - name: Run tests
-      run: pnpm test 
+      - name: Run tests
+        run: npm run test
