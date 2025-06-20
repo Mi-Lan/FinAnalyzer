@@ -10,7 +10,10 @@
     "test": "echo 'Tests not configured yet - project setup complete'",
     "build": "echo 'Build not configured yet'",
     "clean": "rm -rf node_modules */node_modules .next */dist",
-    "prepare": "echo 'Husky disabled temporarily due to installation issues'"
+    "prepare": "husky || echo 'Husky not installed yet'"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   },
   "repository": {
     "type": "git",

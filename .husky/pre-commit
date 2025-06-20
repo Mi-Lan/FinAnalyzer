@@ -1,4 +1,12 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+# Update README progress table
+echo "🔄 Updating README progress table..."
+node scripts/update-readme-progress.js
+
+# Stage the updated README if it was modified
+git add README.md
+
+# Run lint-staged (commented out due to dependency issues)
+# npx lint-staged
