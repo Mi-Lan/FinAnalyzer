@@ -135,7 +135,7 @@
         "id": 3,
         "title": "Implement Data Ingestion Adapter for FMP API",
         "description": "Build a robust, extensible adapter to fetch financial data from Financial Modeling Prep (FMP) with a modular design that can accommodate additional data sources in the future.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           1
         ],
@@ -149,7 +149,7 @@
             "description": "Register for an FMP account, obtain an API key, and configure secure storage and retrieval of the key for use in the application.",
             "dependencies": [],
             "details": "Follow FMP documentation to register and generate an API key. Store the key in environment variables (.env file for development, secure secrets manager for production). Create a configuration system that can handle multiple provider credentials.\n<info added on 2025-06-19T15:15:20.782Z>\n**API Key Storage Best Practices:**\n- Development: Store in `.env` file as `FMP_API_KEY=your_key_here`\n- Production: Use managed secrets (AWS Secrets Manager, Azure Key Vault, etc.)\n- Never commit API keys to version control\n- Add `.env` to `.gitignore`\n\n**FMP API Key Format:**\n- API key must be appended to requests as `?apikey=YOUR_API_KEY` or `&apikey=YOUR_API_KEY` if other params exist\n- Reference: https://site.financialmodelingprep.com/developer/docs/stable\n\n**Provider Configuration Structure:**\n```python\n# Example configuration for multiple providers\nPROVIDERS = {\n    'fmp': {\n        'api_key': os.getenv('FMP_API_KEY'),\n        'base_url': 'https://financialmodelingprep.com/stable',\n        'rate_limit': 300,  # calls per minute\n        'timeout': 30\n    },\n    # Future providers can be added here\n}\n```\n</info added on 2025-06-19T15:15:20.782Z>",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 2,
@@ -159,7 +159,7 @@
               1
             ],
             "details": "Use an async HTTP library (e.g., httpx or aiohttp for Python) to build a reusable client that attaches the API key to each request and supports async/await patterns. Design the client with interfaces that can be implemented for different data providers.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 3,
@@ -169,7 +169,7 @@
               2
             ],
             "details": "Implement a token bucket or leaky bucket algorithm, or use a third-party library, to throttle outgoing requests per FMP's documented rate limits. Integrate with the async client to queue or delay requests as needed. Make the rate limiting configurable per data provider.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 4,
@@ -180,7 +180,7 @@
               3
             ],
             "details": "Set up Redis connection pooling and implement cache read/write logic keyed by request parameters and endpoint. Configure cache expiration policies based on data volatility. Design the caching system to work with any data provider.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 5,
@@ -190,7 +190,7 @@
               2
             ],
             "details": "For each statement type, define data models and parsing logic to transform raw API responses into structured, validated objects suitable for downstream use. Reference specific FMP API endpoints: /income-statement, /balance-sheet-statement, /cash-flow-statement, /sec_filings.\n<info added on 2025-06-19T15:15:39.288Z>\n**Primary FMP Endpoints to Implement:**\n\n1. **Income Statements:**\n   - Annual: `GET /income-statement?symbol=AAPL&period=annual`\n   - Quarterly: `GET /income-statement?symbol=AAPL&period=quarter`\n\n2. **Balance Sheet:**\n   - Annual: `GET /balance-sheet-statement?symbol=AAPL&period=annual`\n   - Quarterly: `GET /balance-sheet-statement?symbol=AAPL&period=quarter`\n\n3. **Cash Flow:**\n   - Annual: `GET /cash-flow-statement?symbol=AAPL&period=annual`\n   - Quarterly: `GET /cash-flow-statement?symbol=AAPL&period=quarter`\n\n4. **SEC Filings (10-K/10-Q):**\n   - `GET /sec_filings?symbol=AAPL&type=10-K&page=0`\n   - `GET /sec_filings?symbol=AAPL&type=10-Q&page=0`\n\n5. **Bulk Endpoints for Scale:**\n   - `GET /income-statement-bulk?year=2024&period=annual`\n   - `GET /balance-sheet-statement-bulk?year=2024&period=annual`\n   - `GET /cash-flow-statement-bulk?year=2024&period=annual`\n\n**Parser Design Pattern:**\nCreate abstract parser interface that can handle different statement types and be extended for other providers:\n\n```python\nclass FinancialStatementParser(ABC):\n    @abstractmethod\n    def parse_income_statement(self, raw_data: dict) -> IncomeStatement:\n        pass\n    \n    @abstractmethod\n    def parse_balance_sheet(self, raw_data: dict) -> BalanceSheet:\n        pass\n    \n    @abstractmethod\n    def parse_cash_flow(self, raw_data: dict) -> CashFlow:\n        pass\n```\n</info added on 2025-06-19T15:15:39.288Z>",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 6,
@@ -203,7 +203,7 @@
               5
             ],
             "details": "Handle HTTP errors, timeouts, rate limit breaches, and data validation failures. Log errors and key metrics to a monitoring system (e.g., Sentry, Prometheus) for alerting and diagnostics. Create provider-agnostic error handling patterns.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 7,
@@ -217,7 +217,7 @@
               6
             ],
             "details": "Write tests that simulate real-world usage, including concurrent requests, cache hits/misses, rate limit scenarios, and error conditions. Use test doubles or sandbox endpoints where possible.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 8,
@@ -230,7 +230,7 @@
               5
             ],
             "details": "Create abstract base classes or interfaces for data providers, rate limiters, and parsers. Implement a provider registry and discovery mechanism. Document the extension points and provide examples for adding new providers.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 9,
@@ -241,7 +241,7 @@
               8
             ],
             "details": "Create a flexible configuration structure that supports different provider requirements. Implement validation for provider-specific settings. Support environment-based configuration switching (dev/test/prod).",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 10,
@@ -252,7 +252,7 @@
               9
             ],
             "details": "Document the plugin architecture, required interfaces, configuration format, and provide step-by-step examples of adding a new provider. Include diagrams showing the extension points and component interactions.",
-            "status": "pending"
+            "status": "done"
           }
         ]
       },
@@ -639,15 +639,15 @@
       {
         "id": 10,
         "title": "Add Caching for Repeat Requests",
-        "description": "Implement caching for financial data, prompt results, and scores to reduce latency and API costs.",
-        "details": "Use Redis v7 for caching. Key by filing hash and template ID. Implement freshness checks. Recommended: Redis v7.",
-        "testStrategy": "Test cache hit/miss behavior and data freshness validation.",
-        "priority": "medium",
+        "description": "Implement caching for prompt results and scores to reduce latency and API costs. Note: Caching for raw financial data (API responses) is now handled by the data-adapter package.",
+        "status": "pending",
         "dependencies": [
           3,
           6
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use Redis v7 for caching prompt results and generated scores. Key by relevant identifiers (e.g., input hash for prompts, company ID + template ID for scores). Implement freshness checks and appropriate TTLs. Recommended: Redis v7.",
+        "testStrategy": "Test cache hit/miss behavior and data freshness validation.",
         "subtasks": [
           {
             "id": 1,
@@ -660,41 +660,41 @@
           {
             "id": 2,
             "title": "Cache Key Design",
-            "description": "Design a cache key schema that supports multiple data types and efficient retrieval, considering data chunking and namespace separation.",
+            "description": "Design a cache key schema that supports prompt results and scores, considering namespace separation and efficient retrieval.",
             "dependencies": [
               1
             ],
-            "details": "Define naming conventions, key patterns, and strategies for splitting large data into smaller chunks. Ensure keys are unique and support future scalability.",
+            "details": "Define naming conventions and key patterns for prompt results (using input hash) and scores (using company ID + template ID). Ensure keys are unique and support future scalability.",
             "status": "pending"
           },
           {
             "id": 3,
             "title": "Integration with Data Flows",
-            "description": "Integrate Redis caching into application data flows, selecting appropriate caching patterns (e.g., cache-aside, write-through) for each data type.",
+            "description": "Integrate Redis caching into application data flows for prompt results and scores, using appropriate caching patterns.",
             "dependencies": [
               2
             ],
-            "details": "Modify data access logic to interact with Redis according to the chosen caching strategy. Ensure cache is updated or invalidated as needed.",
+            "details": "Modify data access logic to interact with Redis according to the chosen caching strategy. Focus on prompt results and score generation flows, not raw financial data which is now handled by the data-adapter package.",
             "status": "pending"
           },
           {
             "id": 4,
             "title": "Freshness and Expiry Checks",
-            "description": "Implement mechanisms to validate cache freshness, including TTL (time-to-live) settings and stale cache handling.",
+            "description": "Implement mechanisms to validate cache freshness, including TTL (time-to-live) settings and stale cache handling for prompt results and scores.",
             "dependencies": [
               3
             ],
-            "details": "Set appropriate expiration policies for different data types. Implement logic to check data freshness and reload or invalidate stale entries.",
+            "details": "Set appropriate expiration policies for prompt results and scores. Implement logic to check data freshness and reload or invalidate stale entries based on business requirements.",
             "status": "pending"
           },
           {
             "id": 5,
             "title": "Cache Hit/Miss Logic Implementation",
-            "description": "Develop logic to handle cache hits and misses, ensuring correct fallback to the primary data source and cache population on misses.",
+            "description": "Develop logic to handle cache hits and misses for prompt results and scores, ensuring correct fallback to generation services and cache population on misses.",
             "dependencies": [
               4
             ],
-            "details": "Implement cache-aside or write-through logic: check cache first, handle hits by returning cached data, handle misses by fetching from the database and updating the cache.",
+            "details": "Implement cache-aside logic: check cache first, handle hits by returning cached data, handle misses by generating new prompt results or scores and updating the cache.",
             "status": "pending"
           },
           {
@@ -1115,15 +1115,15 @@
       {
         "id": 17,
         "title": "Implement Embeddings Store with pgvector",
-        "description": "Cache filings and embeddings for instant repeat queries and cost savings.",
-        "details": "Use PostgreSQL with pgvector extension. Key by filing hash. Implement freshness checks. Recommended: PostgreSQL v15, pgvector v0.6.",
-        "testStrategy": "Test embedding storage, retrieval, and freshness validation.",
-        "priority": "low",
+        "description": "Implement an embeddings store using pgvector for instant repeat queries and cost savings related to embeddings. Note: Caching for raw financial filings (API responses) is now handled by the data-adapter package.",
+        "status": "pending",
         "dependencies": [
           2,
           10
         ],
-        "status": "pending",
+        "priority": "low",
+        "details": "Use PostgreSQL with the pgvector extension to store and retrieve embeddings. Key embeddings by an appropriate identifier (e.g., hash of the content that was embedded). Implement freshness checks if embeddings can become stale. Recommended: PostgreSQL v15, pgvector v0.6.",
+        "testStrategy": "Test embedding storage, retrieval, and freshness validation.",
         "subtasks": [
           {
             "id": 1,
@@ -1140,7 +1140,7 @@
             "dependencies": [
               1
             ],
-            "details": "Create tables with a vector column (e.g., `embedding vector(1536)`). Implement application logic to store and update embeddings, ensuring compatibility with pgvector's data types.",
+            "details": "Create tables with a vector column (e.g., `embedding vector(1536)`). Implement application logic to store and update embeddings, ensuring compatibility with pgvector's data types. Use appropriate identifiers (e.g., content hash) as the primary key.",
             "status": "pending"
           },
           {
@@ -1156,11 +1156,11 @@
           {
             "id": 4,
             "title": "Freshness Checks",
-            "description": "Implement mechanisms to ensure embedding data is up-to-date. Add logic to check and refresh embeddings as needed.",
+            "description": "Implement mechanisms to ensure embedding data is up-to-date when needed. Add logic to check and refresh embeddings as appropriate.",
             "dependencies": [
               2
             ],
-            "details": "Track timestamps or versioning for embeddings. Add logic to verify embedding freshness before retrieval, and trigger re-embedding if data is stale.",
+            "details": "Track timestamps or versioning for embeddings if they can become stale. Add logic to verify embedding freshness before retrieval, and trigger re-embedding if data is stale.",
             "status": "pending"
           },
           {
@@ -1172,6 +1172,16 @@
               4
             ],
             "details": "Write tests that insert, update, and retrieve embeddings via the API. Test freshness checks and ensure correct results are returned. Measure performance and correctness.",
+            "status": "pending"
+          },
+          {
+            "id": 6,
+            "title": "Integration with data-adapter package",
+            "description": "Ensure proper integration with the data-adapter package which now handles caching of raw financial filings.",
+            "dependencies": [
+              2
+            ],
+            "details": "Coordinate with the data-adapter package to ensure embeddings store works correctly with the cached financial filings. Define clear interfaces between the two systems.",
             "status": "pending"
           }
         ]
@@ -1261,7 +1271,7 @@
     ],
     "metadata": {
       "created": "2025-06-19T14:40:29.469Z",
-      "updated": "2025-06-20T19:29:27.150Z",
+      "updated": "2025-06-20T21:44:07.188Z",
       "description": "Tasks for master context"
     }
   }
