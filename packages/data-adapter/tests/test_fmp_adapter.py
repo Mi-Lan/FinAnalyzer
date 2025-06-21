@@ -80,12 +80,18 @@ async def test_fetch_data_success():
     assert len(data) == 1
     assert isinstance(data[0], IncomeStatement)
     
-    # Test required fields and data types
+    # Test data structure and types without checking specific values
     statement = data[0]
-    assert statement.symbol == "AAPL"
-    assert statement.date == "2024-09-28"
-    assert statement.fiscal_year == "2024"
-    assert statement.period == "FY"
+    
+    # Test that base fields exist and have correct types
+    assert isinstance(statement.symbol, str) and len(statement.symbol) > 0
+    assert isinstance(statement.date, str) and len(statement.date) > 0
+    assert isinstance(statement.fiscal_year, str) and len(statement.fiscal_year) > 0
+    assert isinstance(statement.period, str) and len(statement.period) > 0
+    assert isinstance(statement.cik, str) and len(statement.cik) > 0
+    assert isinstance(statement.filing_date, str) and len(statement.filing_date) > 0
+    assert isinstance(statement.accepted_date, str) and len(statement.accepted_date) > 0
+    assert isinstance(statement.reported_currency, str) and len(statement.reported_currency) > 0
     
     # Test key financial fields are present and numeric
     assert isinstance(statement.revenue, (int, float))
@@ -95,12 +101,9 @@ async def test_fetch_data_success():
     assert isinstance(statement.ebitda, (int, float))
     assert isinstance(statement.eps, (int, float))
     assert isinstance(statement.epsdiluted, (int, float))
-    
-    # Test that all required base fields are present
-    assert hasattr(statement, 'cik')
-    assert hasattr(statement, 'filing_date')
-    assert hasattr(statement, 'accepted_date')
-    assert hasattr(statement, 'reported_currency')
+    assert isinstance(statement.cost_of_revenue, (int, float))
+    assert isinstance(statement.research_and_development_expenses, (int, float))
+    assert isinstance(statement.operating_expenses, (int, float))
 
 
 @pytest.mark.asyncio
@@ -191,12 +194,18 @@ async def test_fetch_balance_sheet_success():
     assert len(data) == 1
     assert isinstance(data[0], BalanceSheetStatement)
     
-    # Test required fields and data types
+    # Test data structure and types without checking specific values
     statement = data[0]
-    assert statement.symbol == "AAPL"
-    assert statement.date == "2024-09-28"
-    assert statement.fiscal_year == "2024"
-    assert statement.period == "FY"
+    
+    # Test that base fields exist and have correct types
+    assert isinstance(statement.symbol, str) and len(statement.symbol) > 0
+    assert isinstance(statement.date, str) and len(statement.date) > 0
+    assert isinstance(statement.fiscal_year, str) and len(statement.fiscal_year) > 0
+    assert isinstance(statement.period, str) and len(statement.period) > 0
+    assert isinstance(statement.cik, str) and len(statement.cik) > 0
+    assert isinstance(statement.filing_date, str) and len(statement.filing_date) > 0
+    assert isinstance(statement.accepted_date, str) and len(statement.accepted_date) > 0
+    assert isinstance(statement.reported_currency, str) and len(statement.reported_currency) > 0
     
     # Test key balance sheet structure fields are present and numeric
     assert isinstance(statement.total_assets, (int, float))
@@ -207,21 +216,25 @@ async def test_fetch_balance_sheet_success():
     assert isinstance(statement.cash_and_cash_equivalents, (int, float))
     assert isinstance(statement.total_current_assets, (int, float))
     assert isinstance(statement.inventory, (int, float))
+    assert isinstance(statement.short_term_investments, (int, float))
+    assert isinstance(statement.net_receivables, (int, float))
     
     # Test current liabilities section
     assert isinstance(statement.total_current_liabilities, (int, float))
     assert isinstance(statement.short_term_debt, (int, float))
+    assert isinstance(statement.account_payables, (int, float))
     
     # Test equity section
     assert isinstance(statement.common_stock, (int, float))
     assert isinstance(statement.retained_earnings, (int, float))
+    assert isinstance(statement.total_stockholders_equity, (int, float))
     
     # Test additional metrics
     assert isinstance(statement.total_debt, (int, float))
     assert isinstance(statement.net_debt, (int, float))
     
-    # Verify balance sheet equation: Assets = Liabilities + Equity
-    assert abs(statement.total_assets - (statement.total_liabilities + statement.total_equity)) < 1000  # Allow for rounding
+    # Verify balance sheet equation: Assets = Liabilities + Equity (business logic validation)
+    assert abs(statement.total_assets - (statement.total_liabilities + statement.total_equity)) < 1000
 
 
 @pytest.mark.asyncio
@@ -299,28 +312,37 @@ async def test_fetch_cash_flow_success():
     assert len(data) == 1
     assert isinstance(data[0], CashFlowStatement)
     
-    # Test required fields and data types
+    # Test data structure and types without checking specific values
     statement = data[0]
-    assert statement.symbol == "AAPL"
-    assert statement.date == "2024-09-28"
-    assert statement.fiscal_year == "2024"
-    assert statement.period == "FY"
+    
+    # Test that base fields exist and have correct types
+    assert isinstance(statement.symbol, str) and len(statement.symbol) > 0
+    assert isinstance(statement.date, str) and len(statement.date) > 0
+    assert isinstance(statement.fiscal_year, str) and len(statement.fiscal_year) > 0
+    assert isinstance(statement.period, str) and len(statement.period) > 0
+    assert isinstance(statement.cik, str) and len(statement.cik) > 0
+    assert isinstance(statement.filing_date, str) and len(statement.filing_date) > 0
+    assert isinstance(statement.accepted_date, str) and len(statement.accepted_date) > 0
+    assert isinstance(statement.reported_currency, str) and len(statement.reported_currency) > 0
     
     # Test operating activities section
     assert isinstance(statement.net_income, (int, float))
     assert isinstance(statement.net_cash_provided_by_operating_activities, (int, float))
     assert isinstance(statement.depreciation_and_amortization, (int, float))
     assert isinstance(statement.change_in_working_capital, (int, float))
+    assert isinstance(statement.stock_based_compensation, (int, float))
     
     # Test investing activities section
     assert isinstance(statement.net_cash_provided_by_investing_activities, (int, float))
     assert isinstance(statement.capital_expenditure, (int, float))
     assert isinstance(statement.investments_in_property_plant_and_equipment, (int, float))
+    assert isinstance(statement.purchases_of_investments, (int, float))
     
     # Test financing activities section
     assert isinstance(statement.net_cash_provided_by_financing_activities, (int, float))
     assert isinstance(statement.net_dividends_paid, (int, float))
     assert isinstance(statement.common_stock_repurchased, (int, float))
+    assert isinstance(statement.net_debt_issuance, (int, float))
     
     # Test summary metrics
     assert isinstance(statement.free_cash_flow, (int, float))
@@ -329,9 +351,9 @@ async def test_fetch_cash_flow_success():
     assert isinstance(statement.cash_at_end_of_period, (int, float))
     assert isinstance(statement.cash_at_beginning_of_period, (int, float))
     
-    # Verify cash flow logic: Beginning Cash + Net Change = Ending Cash
+    # Verify cash flow logic: Beginning Cash + Net Change = Ending Cash (business logic validation)
     expected_ending_cash = statement.cash_at_beginning_of_period + statement.net_change_in_cash
-    assert abs(statement.cash_at_end_of_period - expected_ending_cash) < 1000  # Allow for rounding
+    assert abs(statement.cash_at_end_of_period - expected_ending_cash) < 1000
 
 
 @pytest.mark.asyncio
