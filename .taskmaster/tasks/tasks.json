@@ -266,15 +266,15 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Initialize Next.js 14 Project with TypeScript",
             "description": "Set up a new Next.js 14 project using create-next-app, enable TypeScript, configure ESLint, and establish a scalable project structure following best practices.",
             "dependencies": [],
-            "details": "Run the Next.js CLI to scaffold the project, select TypeScript, and organize folders (e.g., app, pages, public, src). Ensure TypeScript is fully integrated and linting is enabled for code quality.",
-            "status": "pending"
+            "details": "Run the Next.js CLI to scaffold the project, select TypeScript, and organize folders (e.g., app, pages, public, src). Ensure TypeScript is fully integrated and linting is enabled for code quality.\n<info added on 2025-06-21T14:06:27.882Z>\nSuccessfully created Next.js 14 project in apps/web with Next.js 15.3.4 (latest stable), React 19.0.0, TypeScript, and App Router. Project includes Tailwind CSS configuration, ESLint setup, src/ directory structure, and \"@/*\" import alias. The project has been properly integrated into the pnpm monorepo structure, providing a solid foundation for the frontend development.\n</info added on 2025-06-21T14:06:27.882Z>",
+            "status": "done"
           },
           {
             "id": 2,
@@ -283,8 +283,8 @@
             "dependencies": [
               1
             ],
-            "details": "Follow Tailwind CSS installation steps for Next.js, add required configuration files, and verify integration. Install shadcn/ui, import base components, and ensure compatibility with Tailwind.",
-            "status": "pending"
+            "details": "Follow Tailwind CSS installation steps for Next.js, add required configuration files, and verify integration. Install shadcn/ui, import base components, and ensure compatibility with Tailwind.\n<info added on 2025-06-21T14:07:53.816Z>\nSuccessfully integrated Tailwind CSS and shadcn/ui:\n- Tailwind CSS v4 was already configured during Next.js setup\n- shadcn/ui successfully initialized with next-monorepo template\n- Base color set to slate\n- CSS variables configured in globals.css\n- utils.ts file created for className utilities\n- Added essential UI components: button, card, table, badge\n- All dependencies properly linked in the monorepo\n</info added on 2025-06-21T14:07:53.816Z>",
+            "status": "done"
           },
           {
             "id": 3,
@@ -293,8 +293,8 @@
             "dependencies": [
               1
             ],
-            "details": "Use Next.js API routes to define endpoints (e.g., /api/companies, /api/financials). Populate with realistic mock data structures for companies, financial metrics, and analysis results.",
-            "status": "pending"
+            "details": "Use Next.js API routes to define endpoints (e.g., /api/companies, /api/financials). Populate with realistic mock data structures for companies, financial metrics, and analysis results.\n<info added on 2025-06-21T14:16:47.785Z>\nSuccessfully implemented mock API endpoints with comprehensive financial data:\n- Created TypeScript types matching FMP Pydantic models and Prisma schema\n- Implemented mock data generators for FMP financial statements (Income Statement, Balance Sheet, Cash Flow)\n- Created API endpoints:\n  - GET /api/companies - List all companies\n  - GET /api/companies/[ticker] - Get company details with financials and analysis\n  - GET /api/analysis/screen - Screen companies with filters\n  - GET/POST /api/analysis/bulk - Bulk analysis job management\n- Mock data includes realistic financial numbers based on company size and sector\n- All data structures match the exact FMP data models from the Python backend\n</info added on 2025-06-21T14:16:47.785Z>",
+            "status": "done"
           },
           {
             "id": 4,
@@ -304,8 +304,8 @@
               2,
               3
             ],
-            "details": "Build responsive dashboard and company analysis views, consuming mock API data. Ensure TypeScript types are used throughout components and data fetching logic.",
-            "status": "pending"
+            "details": "Build responsive dashboard and company analysis views, consuming mock API data. Ensure TypeScript types are used throughout components and data fetching logic.\n<info added on 2025-06-21T14:26:22.667Z>\nSuccessfully prototyped initial UI with dashboard and company analysis views:\n- Set up TanStack Query for data fetching with providers\n- Created custom hooks for API data fetching (useCompanies, useCompanyDetails, useScreening, useBulkAnalysisJob)\n- Built reusable components:\n  - ScoreCard: Visual display of analysis scores with color-coded metrics\n  - FinancialMetrics: Comprehensive display of income statement, balance sheet, and cash flow data\n- Created main dashboard page showing:\n  - Top 3 performing companies with score cards\n  - All companies table with filtering and navigation\n- Implemented detailed company analysis page with:\n  - Analysis scores and recommendations\n  - Key insights (strengths, weaknesses, opportunities, risks)\n  - Financial metrics display\n- Resolved Tailwind CSS v4 conflicts by downgrading to v3\n- Application is now running successfully on localhost:3000\n</info added on 2025-06-21T14:26:22.667Z>",
+            "status": "done"
           }
         ]
       },
@@ -1271,7 +1271,7 @@
     ],
     "metadata": {
       "created": "2025-06-19T14:40:29.469Z",
-      "updated": "2025-06-20T21:44:07.188Z",
+      "updated": "2025-06-21T14:27:24.205Z",
       "description": "Tasks for master context"
     }
   }

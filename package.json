@@ -35,7 +35,7 @@
   "author": "Milan",
   "license": "MIT",
   "engines": {
-    "node": "19.8.1",
+    "node": ">=20.11.0",
     "pnpm": ">=8.0.0 <9.0.0"
   },
   "packageManager": "pnpm@8.0.0"
