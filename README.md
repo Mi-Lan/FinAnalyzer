@@ -14,7 +14,7 @@ An AI-powered platform for automated financial data analysis and scoring built w
 
 ## Development Progress
 
-**Overall Progress: 4/18 tasks completed (22%)**
+**Overall Progress: 5/18 tasks completed (28%)**
 
 | ID | Task | Status | Priority | Dependencies |
 |:---|:-----|:-------|:---------|:-------------|
@@ -22,7 +22,7 @@ An AI-powered platform for automated financial data analysis and scoring built w
 | 2 | Design and Deploy PostgreSQL Schema | ✅ done | high | none |
 | 3 | Implement Data Ingestion Adapter for FMP API | ✅ done | high | 1 |
 | 4 | Scaffold Next.js Frontend with Mock Data | ✅ done | medium | 1 |
-| 5 | Build FastAPI Gateway for FE/BE Communication | ⏳ pending | medium | 1, 2 |
+| 5 | Build FastAPI Gateway for FE/BE Communication | ✅ done | medium | 1, 2 |
 | 6 | Implement Real-Time Data Pull and Storage | ⏳ pending | high | 2, 3 |
 | 7 | Develop Hard-Coded Prompt Chain for Single Temp... | ⏳ pending | medium | 2, 3 |
 | 8 | Build Scoring Module with Pydantic Validation | ⏳ pending | medium | 2, 7 |
@@ -719,3 +719,20 @@ MIT License - see [LICENSE](LICENSE) file.
 - [Prisma](https://prisma.io/) for database tooling
 - Financial Modeling Prep API
 - Open source community
+
+### API Gateway
+
+The `packages/api-gateway` service is a FastAPI application that acts as a secure entry point for the frontend. It handles authentication and will orchestrate calls to other backend services.
+
+## Getting Started
+
+First, install the dependencies:
+
+```bash
+# Clone the repository
+git clone https://github.com/Mi-Lan/FinAnalyzer.git
+cd FinAnalyzer
+
+# Build and start all services (web app, database, etc.)
+docker-compose up --build
+```

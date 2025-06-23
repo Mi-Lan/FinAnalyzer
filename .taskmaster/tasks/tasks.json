@@ -312,63 +312,132 @@
       {
         "id": 5,
         "title": "Build FastAPI Gateway for FE/BE Communication",
-        "description": "Develop a minimal FastAPI gateway to connect frontend and backend services.",
-        "details": "Use FastAPI v0.109 for API endpoints. Implement basic auth and request validation. Recommended: FastAPI v0.109, Pydantic v2.6.",
-        "testStrategy": "Test API endpoints with Postman/curl, validate request/response flow.",
-        "priority": "medium",
+        "description": "Develop a FastAPI gateway to connect frontend and backend services, implementing specific endpoints required by the Next.js frontend.",
+        "status": "done",
         "dependencies": [
           1,
           2
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use FastAPI v0.109 for API endpoints. Implement basic auth and request validation. Ensure all endpoints match the frontend's API contract requirements. Pydantic models must align with TypeScript interfaces in apps/web/src/types/financial.ts. Recommended: FastAPI v0.109, Pydantic v2.6.",
+        "testStrategy": "Test API endpoints with Postman/curl, validate request/response flow. Ensure responses match the expected formats from the frontend contract.",
         "subtasks": [
           {
             "id": 1,
             "title": "FastAPI Project Setup",
             "description": "Initialize a new FastAPI project, set up a virtual environment, and install required dependencies such as FastAPI and Uvicorn.",
+            "status": "done",
             "dependencies": [],
             "details": "Create a project directory, set up a Python virtual environment, and install FastAPI and Uvicorn using a requirements.txt file. Ensure the project structure is ready for further development.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Endpoint Definition",
-            "description": "Define the API endpoints for the gateway, including at least one sample route.",
+            "description": "Define the API endpoints for the gateway according to the frontend contract requirements.",
+            "status": "done",
             "dependencies": [
               1
             ],
-            "details": "Create a main.py file and define FastAPI routes using path operations (e.g., @app.get, @app.post). Ensure endpoints are structured for easy extension.",
-            "status": "pending"
+            "details": "Create a main.py file and implement the required endpoints: GET /api/companies, GET /api/companies/{ticker}, GET /api/analysis/screen, and GET/POST /api/analysis/bulk. Structure endpoints to match frontend expectations.",
+            "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Authentication Implementation",
             "description": "Add authentication to the API gateway to secure endpoints.",
+            "status": "done",
             "dependencies": [
               2
             ],
-            "details": "Implement authentication (e.g., OAuth2, JWT, or API key) using FastAPI's security utilities. Protect at least one endpoint to require authentication.",
-            "status": "pending"
+            "details": "Implement authentication (e.g., OAuth2, JWT, or API key) using FastAPI's security utilities. Protect all endpoints to require authentication as needed.",
+            "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Request Validation",
-            "description": "Implement request validation for incoming data using Pydantic models.",
+            "title": "Pydantic Model Implementation",
+            "description": "Create Pydantic models that match the TypeScript interfaces in the frontend.",
+            "status": "done",
             "dependencies": [
-              3
+              2
             ],
-            "details": "Define Pydantic models for request bodies and query parameters. Use these models in endpoint definitions to ensure data is validated automatically.",
-            "status": "pending"
+            "details": "Implement Pydantic models that align with TypeScript interfaces in apps/web/src/types/financial.ts. Include models for FMP financial statements (IncomeStatement, BalanceSheet, CashFlow), Analysis models (AnalysisResult, MetricScores, AnalysisInsights), and Company and FinancialData models.",
+            "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Integration Testing",
-            "description": "Write integration tests to verify endpoint functionality, authentication, and validation.",
+            "title": "Request Validation",
+            "description": "Implement request validation for incoming data using the defined Pydantic models.",
+            "status": "done",
             "dependencies": [
+              3,
               4
             ],
-            "details": "Set up a testing framework (e.g., pytest) and write tests that simulate requests to the API, checking for correct responses, authentication enforcement, and validation errors.",
-            "status": "pending"
+            "details": "Use the Pydantic models in endpoint definitions to ensure data is validated automatically. Implement proper error handling that matches frontend expectations.",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Companies List Endpoint Implementation",
+            "description": "Implement the GET /api/companies endpoint to return a list of companies with basic information.",
+            "status": "done",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Create the endpoint that returns company list data in the format expected by the frontend. Include pagination if necessary and ensure response format matches frontend expectations.",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Company Detail Endpoint Implementation",
+            "description": "Implement the GET /api/companies/{ticker} endpoint to return detailed company data.",
+            "status": "done",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Create the endpoint that returns detailed company information including financials and analysis for a specific ticker. Ensure the response format matches frontend expectations.",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Analysis Screening Endpoint Implementation",
+            "description": "Implement the GET /api/analysis/screen endpoint for filtering companies.",
+            "status": "done",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Create the endpoint that allows screening companies with filters such as minScore, sector, etc. Ensure query parameters are properly validated and the response format matches frontend expectations.",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Bulk Analysis Endpoint Implementation",
+            "description": "Implement the GET/POST /api/analysis/bulk endpoints for handling bulk analysis jobs.",
+            "status": "done",
+            "dependencies": [
+              2,
+              4
+            ],
+            "details": "Create endpoints to handle bulk analysis jobs with progress tracking. Implement both GET (status check) and POST (job submission) methods. Ensure response formats match frontend expectations.",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Integration Testing",
+            "description": "Write integration tests to verify all endpoint functionality, authentication, and validation.",
+            "status": "done",
+            "dependencies": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "details": "Set up a testing framework (e.g., pytest) and write tests that simulate requests to all API endpoints, checking for correct responses, authentication enforcement, and validation errors. Ensure tests verify that responses match the expected formats from the frontend contract.",
+            "testStrategy": ""
           }
         ]
       },
@@ -575,64 +644,72 @@
       {
         "id": 9,
         "title": "Display Scores & Insights in UI",
-        "description": "Integrate backend scoring results into the Next.js dashboard.",
-        "details": "Use TanStack Query v5 for data fetching. Display scores, insights, and metric breakdowns. Recommended: Next.js v14, TanStack Query v5.",
-        "testStrategy": "Verify UI updates with real scoring data and metric visualizations.",
-        "priority": "medium",
+        "description": "Integrate backend scoring results into the Next.js dashboard, focusing on connecting to real backend endpoints.",
+        "status": "pending",
         "dependencies": [
           4,
           5,
           8
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Connect the existing TanStack Query v5 implementation to real FastAPI endpoints. The UI components (ScoreCard, FinancialMetrics) and dashboard pages are already implemented. Focus on backend integration and real-time updates.",
+        "testStrategy": "Verify backend integration with real API endpoints, test real-time data updates, and ensure proper error handling with production data.",
         "subtasks": [
           {
             "id": 1,
             "title": "Backend Integration Setup",
-            "description": "Establish and configure the backend services and APIs required to supply dashboard data, ensuring secure and reliable endpoints for metric retrieval.",
+            "description": "Connect to real FastAPI endpoints instead of mock APIs, ensuring secure and reliable connections for metric retrieval.",
+            "status": "pending",
             "dependencies": [],
-            "details": "Define API endpoints, set up authentication, and ensure data sources are accessible. Coordinate with backend engineers to clarify data structure and update frequency.",
-            "status": "pending"
+            "details": "Update API configuration to point to production/staging FastAPI endpoints. Implement proper authentication and ensure data formats match what the existing UI components expect.",
+            "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Data Fetching Implementation",
-            "description": "Develop frontend logic to fetch data from backend APIs, handling loading states, errors, and data transformation as needed for dashboard consumption.",
+            "title": "Data Fetching Updates",
+            "description": "Update existing TanStack Query hooks (useCompanies, useCompanyDetails, useScreening, useBulkAnalysisJob) to connect to real backend endpoints.",
+            "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Implement data fetching hooks or services, manage API calls, and ensure data is formatted for use in UI components. Include error handling and loading indicators.",
-            "status": "pending"
+            "details": "Modify the existing hooks to use real API URLs, update any data transformation logic to match real API responses, and ensure caching strategies are appropriate for production use.",
+            "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "UI Component Development",
-            "description": "Build reusable UI components for the dashboard, such as cards, tables, and containers, to display fetched data in a clear and organized manner.",
+            "title": "Real-time Updates Implementation",
+            "description": "Add WebSocket connections or polling mechanisms to provide real-time data updates for dashboard metrics and analysis results.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Design and implement components following best practices for clarity and usability. Ensure components are modular and can be easily updated or extended.",
-            "status": "pending"
+            "details": "Implement WebSocket client or configure TanStack Query's polling capabilities to refresh data at appropriate intervals. Ensure UI components respond smoothly to data changes.",
+            "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Metric Visualization Integration",
-            "description": "Integrate data visualization libraries and develop visual components (charts, graphs, etc.) to represent key metrics and trends effectively.",
+            "title": "Enhanced Error Handling",
+            "description": "Improve error handling for real API integration, including graceful fallbacks, user-friendly error messages, and recovery strategies.",
+            "status": "pending",
             "dependencies": [
-              3
+              2
             ],
-            "details": "Choose appropriate visualization types for each metric, implement interactive features if needed, and ensure visual clarity and accessibility.",
-            "status": "pending"
+            "details": "Implement comprehensive error boundaries, create user-friendly error states for each component, and add logging for backend integration issues to aid troubleshooting.",
+            "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "User Testing and Feedback Collection",
-            "description": "Conduct user testing sessions to validate dashboard usability, data accuracy, and visualization effectiveness, gathering feedback for iterative improvements.",
+            "title": "Integration Testing",
+            "description": "Test the integration between frontend components and real backend services, ensuring data flows correctly and UI updates appropriately.",
+            "status": "pending",
             "dependencies": [
+              1,
+              2,
+              3,
               4
             ],
-            "details": "Prepare test scenarios, recruit representative users, collect feedback on clarity and functionality, and document actionable insights for refinement.",
-            "status": "pending"
+            "details": "Create test scenarios that verify end-to-end functionality with real APIs. Test edge cases like slow connections, API errors, and data format changes. Document any issues discovered during testing.",
+            "testStrategy": ""
           }
         ]
       },
@@ -787,105 +864,260 @@
         "id": 12,
         "title": "Implement Responsive Layout & Filtering",
         "description": "Enhance UI with responsive design and advanced filtering capabilities.",
-        "details": "Use Tailwind CSS v3.4 and shadcn/ui v0.7 for responsive components. Add sortable/filterable tables. Recommended: Next.js v14, Tailwind CSS v3.4, shadcn/ui v0.7.",
-        "testStrategy": "Test UI responsiveness and filtering on different devices.",
-        "priority": "medium",
+        "status": "pending",
         "dependencies": [
           4,
           9
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use Tailwind CSS v3.4 and shadcn/ui v0.7 for responsive components. Add sortable/filterable tables. Recommended: Next.js v14, Tailwind CSS v3.4, shadcn/ui v0.7.",
+        "testStrategy": "Test UI responsiveness and filtering on different devices.",
         "subtasks": [
           {
             "id": 1,
             "title": "Implement Responsive UI Layouts",
             "description": "Redesign and refactor UI layouts to ensure responsiveness across all screen sizes using flexible layouts, breakpoints, and scalable assets.",
+            "status": "completed",
             "dependencies": [],
             "details": "Apply best practices such as flexible layouts with relative units (percentages), define at least three breakpoints (mobile, tablet, desktop), and use SVGs for scalable graphics. Ensure images and containers resize proportionally and navigation adapts to different screens.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Update and Refactor UI Components",
             "description": "Update existing UI components to ensure they are modular, reusable, and responsive, following card-based and auto-layout principles.",
+            "status": "completed",
             "dependencies": [
               1
             ],
             "details": "Refactor components to use card interfaces where appropriate, leverage flexbox or CSS grid for layout efficiency, and ensure buttons and interactive elements are large and tap-friendly. Prioritize essential content and maintain a minimalist approach.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Enhance Table Filtering and Sorting Functionality",
-            "description": "Implement or improve filtering and sorting features for tables, ensuring usability and responsiveness on all devices.",
+            "title": "Implement Advanced Table Features",
+            "description": "Enhance table functionality with sorting, column filtering, and search capabilities.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Add or refine table filtering and sorting logic, ensuring controls are accessible and adapt to different screen sizes. Use responsive design patterns so tables remain readable and interactive on mobile, tablet, and desktop.",
-            "status": "pending"
+            "details": "Build upon the basic table functionality for companies list by adding column sorting (ascending/descending), column-specific filtering options, and a global search feature. Ensure all controls are accessible and responsive across device sizes.",
+            "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Conduct Cross-Device and Cross-Browser Testing",
-            "description": "Test the UI and components on various devices and browsers to ensure consistent appearance and functionality.",
+            "title": "Optimize Mobile Navigation",
+            "description": "Enhance the navigation experience specifically for mobile devices.",
+            "status": "pending",
             "dependencies": [
+              1
+            ],
+            "details": "Implement a mobile-friendly navigation pattern (e.g., hamburger menu, bottom navigation bar) that provides easy access to all key sections while maximizing screen space for content. Ensure touch targets are appropriately sized and positioned.",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Responsive Data Visualization",
+            "description": "Ensure all charts and graphics adapt appropriately to different screen sizes.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Optimize data visualizations to be fully responsive, potentially using different visualization approaches for mobile vs. desktop. Consider simplified views for small screens while maintaining data integrity and readability.",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Develop Advanced Filtering UI Components",
+            "description": "Create sophisticated filtering interfaces including dropdowns, date pickers, and multi-select options.",
+            "status": "pending",
+            "dependencies": [
+              2,
               3
             ],
-            "details": "Perform manual and automated testing across a range of devices (iOS, Android, tablets, desktops) and browsers. Validate that layouts, components, and table features work as intended, and address any issues found.",
-            "status": "pending"
+            "details": "Implement advanced filtering UI components that allow users to refine data views. Include date range pickers, multi-select dropdowns, and tag-based filtering. Ensure all filter components are responsive and maintain usability on mobile devices.",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement Performance Optimizations",
+            "description": "Optimize performance for large datasets using virtual scrolling and other techniques.",
+            "status": "pending",
+            "dependencies": [
+              3,
+              6
+            ],
+            "details": "Implement virtual scrolling or pagination for tables with large datasets to improve performance. Consider lazy loading for images and components that aren't immediately visible. Monitor and optimize render performance across different device capabilities.",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Conduct Cross-Device and Cross-Browser Testing",
+            "description": "Test the UI and components on various devices and browsers to ensure consistent appearance and functionality.",
+            "status": "pending",
+            "dependencies": [
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "details": "Perform manual and automated testing across a range of devices (iOS, Android, tablets, desktops) and browsers (Chrome, Firefox, Safari, Edge). Validate that layouts, components, and advanced features work as intended, and address any issues found.",
+            "testStrategy": ""
           }
         ]
       },
       {
         "id": 13,
         "title": "Integrate Recharts for Data Visualization",
-        "description": "Add financial charts and score gauges using Recharts.",
-        "details": "Use Recharts v2.8 for KPI breakdowns and score visualization. Integrate with dashboard. Recommended: Recharts v2.8.",
-        "testStrategy": "Validate chart rendering and data accuracy.",
-        "priority": "medium",
+        "description": "Add financial charts and score gauges using Recharts to visualize financial data and analysis scores.",
+        "status": "pending",
         "dependencies": [
           4,
           9
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use Recharts v2.8 to implement various chart types including score gauges/radar charts, line charts for trends, bar charts for comparisons, donut/pie charts for breakdowns, and treemaps for portfolio visualization. Leverage existing data structures in the Next.js frontend for financial statements, analysis scores, historical data, and performance metrics. Integrate with TanStack Query data fetching and ensure TypeScript type safety.",
+        "testStrategy": "Validate chart rendering and data accuracy across different chart types. Test responsiveness on mobile and desktop. Verify correct data mapping for financial metrics and scores.",
         "subtasks": [
           {
             "id": 1,
             "title": "Integrate Recharts Library into Project",
             "description": "Install the Recharts library and ensure it is properly added to the React project dependencies.",
+            "status": "pending",
             "dependencies": [],
             "details": "Run 'npm install recharts' in the project directory and verify that the package is listed in package.json. Import Recharts components as needed in your codebase.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Develop Chart Component",
             "description": "Create a reusable chart component using Recharts, following best practices for component structure.",
+            "status": "pending",
             "dependencies": [
               1
             ],
             "details": "Implement a chart component (e.g., LineChart, BarChart) in the appropriate directory (such as src/components/charts/). Include necessary Recharts elements like XAxis, YAxis, Tooltip, and Legend.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Bind Data to Chart Component",
             "description": "Connect the chart component to dynamic data sources and ensure correct data mapping.",
+            "status": "pending",
             "dependencies": [
               2
             ],
             "details": "Fetch or receive data (e.g., via props or API call), and pass it to the chart component. Map data fields to chart axes and series as required by Recharts.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Validate Chart Rendering and Data Accuracy",
             "description": "Test the chart component to confirm it renders correctly and accurately reflects the bound data.",
+            "status": "pending",
             "dependencies": [
               3
             ],
             "details": "Visually inspect the chart in the application, verify that all chart elements display as expected, and confirm that the data shown matches the source data. Address any rendering or data binding issues.",
-            "status": "pending"
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Score Gauges/Radar Charts",
+            "description": "Create visualizations for analysis scores by dimension (profitability, growth, balance sheet, capital allocation, valuation).",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Use Recharts RadarChart or create custom gauge components to display MetricScores. Ensure proper color coding based on score values. Integrate with the existing ScoreCard component.",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Develop Financial Trend Line Charts",
+            "description": "Implement line charts to visualize financial metrics over time.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Create line charts that display historical financial data across multiple periods (Q1, Q2, Q3, Q4). Include proper tooltips, legends, and responsive configurations. Integrate with the FinancialMetrics component.",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create Quarterly Comparison Bar Charts",
+            "description": "Build bar charts for comparing financial metrics across quarters.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement bar charts that allow users to compare key financial metrics across different quarters. Include proper labeling, tooltips, and color coding.",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement Financial Breakdown Donut/Pie Charts",
+            "description": "Create donut or pie charts to visualize financial breakdowns.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Use Recharts PieChart to display financial breakdowns such as revenue sources, expense categories, or other proportional financial data. Include proper legends and interactive elements.",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Develop Portfolio Treemap Visualization",
+            "description": "Implement a treemap chart for portfolio visualization.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a treemap using Recharts to visualize portfolio allocation or other hierarchical financial data. Configure proper sizing, coloring, and tooltips for effective data representation.",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Create Dedicated ChartsSection Component",
+            "description": "Develop a dedicated section for the dashboard to showcase various financial charts.",
+            "status": "pending",
+            "dependencies": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "details": "Create a ChartsSection component that organizes and displays the various chart types in a cohesive layout. Implement tabs or other navigation elements to allow users to switch between different chart views.",
+            "testStrategy": ""
+          },
+          {
+            "id": 11,
+            "title": "Implement Responsive Chart Configurations",
+            "description": "Ensure all charts are responsive and display properly on both mobile and desktop devices.",
+            "status": "pending",
+            "dependencies": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "details": "Configure charts to adapt to different screen sizes. Implement responsive width/height calculations, adjust font sizes and spacing, and possibly create alternative layouts for mobile views.",
+            "testStrategy": ""
+          },
+          {
+            "id": 12,
+            "title": "Integrate with TanStack Query and TypeScript",
+            "description": "Ensure proper integration with existing data fetching mechanisms and type safety.",
+            "status": "pending",
+            "dependencies": [
+              3
+            ],
+            "details": "Leverage the existing TanStack Query setup for data fetching. Create appropriate TypeScript interfaces for chart data and props. Ensure type safety throughout the chart components and data mapping functions.",
+            "testStrategy": ""
           }
         ]
       },
@@ -893,61 +1125,78 @@
         "id": 14,
         "title": "Enable Report Export to PDF/CSV",
         "description": "Add functionality to export analysis results to PDF and CSV.",
-        "details": "Use pdf-lib v1.17 for PDF generation, csv-writer for CSV. Add export buttons in UI. Recommended: pdf-lib v1.17, csv-writer v6.0.",
-        "testStrategy": "Test export functionality and file content accuracy.",
-        "priority": "medium",
+        "status": "pending",
         "dependencies": [
           9,
           12
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use pdf-lib v1.17 for PDF generation, csv-writer v6.0 for CSV. Integrate with existing Next.js frontend that already has UI components and data structures ready for export functionality. Focus on backend implementation and seamless frontend integration.",
+        "testStrategy": "Test export functionality and file content accuracy. Verify all exportable data types (company analysis, financial statements, recommendations, company lists) render correctly in both formats.",
         "subtasks": [
           {
             "id": 1,
             "title": "Implement PDF Export Logic",
             "description": "Develop backend logic to export data into PDF format, ensuring correct formatting and data integrity.",
+            "status": "pending",
             "dependencies": [],
-            "details": "Use a PDF generation library to convert data into a well-structured PDF document. Ensure headers, tables, and content are accurately represented.",
-            "status": "pending"
+            "details": "Use pdf-lib v1.17 to convert data into a well-structured PDF document. Support all exportable data types: company analysis results, financial statements, recommendations, and company lists. Ensure headers, tables, and content are accurately represented.",
+            "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Implement CSV Export Logic",
             "description": "Develop backend logic to export data into CSV format, handling headers, delimiters, and data encoding.",
+            "status": "pending",
             "dependencies": [],
-            "details": "Write logic to iterate over data rows and columns, outputting them as CSV with appropriate separators and handling edge cases like null values or special characters[1][3][4].",
-            "status": "pending"
+            "details": "Use csv-writer v6.0 to iterate over data rows and columns, outputting them as CSV with appropriate separators and handling edge cases like null values or special characters. Support all exportable data types that are already structured in TypeScript interfaces.",
+            "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Integrate Export Options into UI",
             "description": "Add export buttons and options to the user interface, allowing users to trigger PDF or CSV exports.",
+            "status": "pending",
             "dependencies": [
               1,
               2
             ],
-            "details": "Update the frontend to include export controls, such as dropdowns or buttons, and connect them to backend export endpoints.",
-            "status": "pending"
+            "details": "Integrate with existing Next.js frontend components at specified integration points: company detail pages, companies table toolbar, and dashboard for bulk exports. Implement format selection UI (PDF vs CSV options).",
+            "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Handle File Download in Frontend",
             "description": "Implement logic to handle file downloads in the browser after export is triggered from the UI.",
+            "status": "pending",
             "dependencies": [
               3
             ],
-            "details": "Ensure that when a user initiates an export, the resulting file (PDF or CSV) is downloaded automatically with a meaningful filename and correct MIME type.",
-            "status": "pending"
+            "details": "Use browser APIs (File API, URL.createObjectURL) to handle downloads. Implement progress indicators for large export jobs. Ensure files download automatically with meaningful filenames and correct MIME types. Implement error handling for export failures.",
+            "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Validate Export Functionality",
             "description": "Test and validate that exported files (PDF and CSV) contain correct data, proper formatting, and are downloadable from the UI.",
+            "status": "pending",
             "dependencies": [
               4
             ],
-            "details": "Perform manual and automated tests to verify data accuracy, file integrity, and user experience for both export formats.",
-            "status": "pending"
+            "details": "Perform manual and automated tests to verify data accuracy, file integrity, and user experience for both export formats. Test all integration points (company detail pages, table toolbar, dashboard) and all exportable data types (analysis results, financial statements, recommendations, company lists).",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Bulk Export Functionality",
+            "description": "Add capability to export multiple companies or reports simultaneously from the dashboard.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Develop backend logic to handle bulk export requests, potentially using background processing for large exports. Ensure proper progress indication and notification when exports are complete.",
+            "testStrategy": ""
           }
         ]
       },
@@ -955,86 +1204,117 @@
         "id": 15,
         "title": "Implement Bulk Screening Workflow",
         "description": "Enable processing of 1–1,000+ tickers in parallel with progress tracking.",
-        "details": "Use Celery v5.3 or AWS Lambda for task queue. Stream results to UI with progress bars. Recommended: Celery v5.3, Redis v7.",
-        "testStrategy": "Test bulk processing, progress updates, and result accuracy.",
-        "priority": "medium",
+        "status": "pending",
         "dependencies": [
           2,
           6,
           11
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use Celery v5.3 or AWS Lambda for task queue. Stream results to UI with progress bars. Leverage existing Next.js frontend components and hooks for bulk analysis job handling.",
+        "testStrategy": "Test bulk processing, progress updates, and result accuracy. Ensure compatibility with existing frontend API contract.",
         "subtasks": [
           {
             "id": 1,
             "title": "Task Queue Setup",
             "description": "Design and implement a robust task queue system to manage incoming work units and distribute them to worker processes.",
+            "status": "pending",
             "dependencies": [],
-            "details": "Select a queue technology (e.g., Redis, RabbitMQ, or in-memory), define the task schema, and ensure thread/process safety for concurrent access.",
-            "status": "pending"
+            "details": "Select a queue technology (Celery/Redis or AWS Lambda as specified), define the task schema compatible with existing BulkAnalysisJob interface, and ensure thread/process safety for concurrent access.",
+            "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Parallel Processing Logic",
             "description": "Develop logic for parallel task execution using a pool of worker processes or threads that fetch and process tasks from the queue.",
+            "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Implement worker pool management, task fetching, and execution logic. Ensure efficient resource utilization and avoid race conditions.",
-            "status": "pending"
+            "details": "Implement worker pool management, task fetching, and execution logic. Ensure efficient resource utilization and avoid race conditions. Support processing of 1-1,000+ tickers simultaneously.",
+            "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Progress Tracking",
             "description": "Implement mechanisms to track the progress of each task and overall job status in real time.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Design a progress reporting system, possibly using shared state or a database, and expose APIs or events for UI consumption.",
-            "status": "pending"
+            "details": "Implement backend progress tracking compatible with the existing frontend data structure (status: PENDING/IN_PROGRESS/COMPLETED/FAILED, progress: 0.0-1.0). Ensure compatibility with the useBulkAnalysisJob hook.",
+            "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Result Streaming",
             "description": "Enable streaming of task results to the UI or client as soon as they are available, rather than waiting for all tasks to complete.",
+            "status": "pending",
             "dependencies": [
               3
             ],
-            "details": "Implement result serialization and streaming (e.g., via websockets, SSE, or polling endpoints) to provide real-time feedback.",
-            "status": "pending"
+            "details": "Implement WebSocket connections for real-time updates. Ensure compatibility with existing TanStack Query implementation in the frontend for result streaming.",
+            "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Error Handling",
             "description": "Design and implement comprehensive error handling for failed tasks, including retries, logging, and user notifications.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Define error categories, implement retry logic, and ensure errors are surfaced to progress tracking and result streaming systems.",
-            "status": "pending"
+            "details": "Define error categories, implement retry logic, and ensure errors are surfaced to progress tracking and result streaming systems. Align with frontend error handling mechanisms.",
+            "testStrategy": ""
           },
           {
             "id": 6,
             "title": "Scaling Tests",
             "description": "Conduct scalability and performance tests to ensure the system can handle high task volumes and parallelism efficiently.",
+            "status": "pending",
             "dependencies": [
               2,
               5
             ],
-            "details": "Simulate large workloads, monitor resource usage, and identify bottlenecks or failure points under load.",
-            "status": "pending"
+            "details": "Simulate large workloads (up to 1,000+ tickers), monitor resource usage, and identify bottlenecks or failure points under load.",
+            "testStrategy": ""
           },
           {
             "id": 7,
-            "title": "UI Integration",
-            "description": "Integrate the backend systems with the user interface to display progress, stream results, and handle errors interactively.",
+            "title": "Backend API Implementation",
+            "description": "Implement the backend API endpoints to match the existing frontend contract.",
+            "status": "pending",
             "dependencies": [
               3,
               4,
               5
             ],
-            "details": "Develop frontend components to consume progress and result streams, and provide user feedback for errors and completion.",
-            "status": "pending"
+            "details": "Implement GET/POST /api/analysis/bulk endpoints to match the existing mock API contract. Ensure proper integration with the task queue and progress tracking systems.",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Job Persistence and Recovery",
+            "description": "Implement mechanisms for job persistence and recovery in case of system failures.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Design and implement a storage solution for job state that allows recovery after crashes or restarts. Ensure jobs can be resumed from their last known state.",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "WebSocket Server Implementation",
+            "description": "Set up WebSocket server for real-time progress and result updates.",
+            "status": "pending",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Implement WebSocket server that can push updates to connected clients. Ensure proper authentication, connection management, and message formatting compatible with the frontend expectations.",
+            "testStrategy": ""
           }
         ]
       },
@@ -1042,147 +1322,256 @@
         "id": 16,
         "title": "Add Auth & Multi-Tenant Support",
         "description": "Implement email/social sign-in, workspace separation, and team roles.",
-        "details": "Use Supabase Auth or Auth0. Enforce tenancy at API gateway. Recommended: Supabase Auth v2, Auth0.",
-        "testStrategy": "Test user authentication, workspace isolation, and role-based access.",
-        "priority": "medium",
+        "status": "pending",
         "dependencies": [
           2,
           5
         ],
-        "status": "pending",
+        "priority": "medium",
+        "details": "Use Supabase Auth or Auth0. Enforce tenancy at API gateway. Leverage existing Next.js frontend integration points for authentication and multi-tenancy features, including layout components, API hooks, middleware for route protection, and workspace context throughout the app.",
+        "testStrategy": "Test user authentication, workspace isolation, role-based access, and Next.js-specific integration points including middleware, server-side authentication, client-side auth state management, and API route authentication middleware.",
         "subtasks": [
           {
             "id": 1,
             "title": "Integrate Authentication Provider",
             "description": "Implement a secure and standards-based authentication provider integration using OAuth2 and OpenID Connect for single sign-on (SSO), leveraging trusted third-party providers like Google or Microsoft Azure to avoid managing passwords internally.",
+            "status": "pending",
             "dependencies": [],
             "details": "Use OAuth2 framework for token exchange and SSO to reduce user friction and improve security by offloading authentication to trusted providers. Follow best practices such as using HTTPS/TLS, secure token storage, and leveraging existing libraries to minimize custom implementation effort.",
-            "status": "pending"
+            "testStrategy": "Verify successful authentication flows with selected providers, token validation, and secure storage of authentication state."
           },
           {
             "id": 2,
             "title": "Implement Workspace Separation Logic",
             "description": "Design and implement multi-tenancy logic to separate data and access by workspace or tenant, ensuring isolation and security between different customer environments.",
+            "status": "pending",
             "dependencies": [
               1
             ],
             "details": "Define workspace boundaries in the data model and enforce access controls at the API and database layers to prevent cross-tenant data leakage. Use tenant identifiers in authentication tokens and API requests to scope data access appropriately.",
-            "status": "pending"
+            "testStrategy": "Test workspace isolation by verifying data access is properly scoped to the current workspace and that cross-workspace access is prevented."
           },
           {
             "id": 3,
             "title": "Develop Role Management System",
             "description": "Create a role-based access control (RBAC) system to manage user permissions within each workspace, assigning roles that grant the minimum necessary privileges.",
+            "status": "pending",
             "dependencies": [
               2
             ],
             "details": "Implement roles and permissions aligned with the principle of least privilege. Integrate role assignments with authentication tokens and enforce role checks in API endpoints to control user actions based on their assigned roles.",
-            "status": "pending"
+            "testStrategy": "Verify that users can only perform actions allowed by their assigned roles and that role changes are immediately reflected in access permissions."
           },
           {
             "id": 4,
             "title": "Enforce API Security and Access Controls",
             "description": "Apply authentication and authorization enforcement on all API endpoints, including validation of tokens, workspace scoping, and role-based permissions.",
+            "status": "pending",
             "dependencies": [
               3
             ],
             "details": "Use HTTPS/TLS for all API communications. Validate JWT or OAuth tokens on each request, check workspace identifiers, and verify user roles before granting access. Implement rate limiting, input validation, and logging for security and auditing purposes.",
-            "status": "pending"
+            "testStrategy": "Test API security by attempting unauthorized access, cross-workspace requests, and actions beyond role permissions to ensure proper enforcement."
           },
           {
             "id": 5,
             "title": "Update User Interface for Authentication and Authorization",
             "description": "Modify the UI to support authentication flows, workspace selection, and role-based access controls, providing users with appropriate views and actions based on their permissions.",
+            "status": "pending",
             "dependencies": [
               4
             ],
             "details": "Integrate login/logout flows using the chosen authentication provider. Display workspace context and allow users to switch workspaces if permitted. Show or hide UI elements based on user roles to prevent unauthorized actions.",
-            "status": "pending"
+            "testStrategy": "Verify that UI elements correctly reflect authentication state, workspace context, and user roles, with appropriate elements hidden or disabled based on permissions."
           },
           {
             "id": 6,
             "title": "Conduct Security Testing and Audits",
             "description": "Perform comprehensive security testing including penetration tests, vulnerability scans, and audits to ensure the authentication, workspace separation, role management, and API enforcement are secure and robust.",
+            "status": "pending",
             "dependencies": [
               4,
               5
             ],
             "details": "Test for common vulnerabilities such as injection attacks, improper access controls, token misuse, and data leakage between workspaces. Verify compliance with security best practices and document findings for remediation.",
-            "status": "pending"
+            "testStrategy": "Conduct penetration testing, vulnerability scanning, and security audits to identify and address potential security issues."
+          },
+          {
+            "id": 7,
+            "title": "Implement Next.js-Specific Authentication Integration",
+            "description": "Leverage Next.js features for authentication and authorization, including middleware for route protection and server-side authentication.",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement Next.js middleware for route protection, set up server-side authentication with getServerSideProps where needed, and create client-side auth state management using context providers. Ensure authentication state persists across page refreshes and implement automatic token refresh handling.",
+            "testStrategy": "Test route protection, server-side authentication, client-side auth state management, and token refresh functionality across different page navigation scenarios."
+          },
+          {
+            "id": 8,
+            "title": "Integrate Auth with TanStack Query and API Hooks",
+            "description": "Enhance existing API hooks to include authentication headers and workspace context for all data fetching operations.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2,
+              7
+            ],
+            "details": "Modify TanStack Query hooks to automatically include authentication tokens and workspace identifiers in API requests. Implement error handling for authentication failures and token refresh scenarios.",
+            "testStrategy": "Verify that API requests include proper authentication headers and workspace context, and that authentication failures are properly handled."
+          },
+          {
+            "id": 9,
+            "title": "Develop Workspace Switching UI in Navigation",
+            "description": "Create a user interface component for workspace selection and switching within the application navigation.",
+            "status": "pending",
+            "dependencies": [
+              2,
+              5
+            ],
+            "details": "Implement a dropdown or similar UI element in the navigation bar that displays the current workspace and allows users to switch between workspaces they have access to. Ensure the workspace context is updated throughout the application when switched.",
+            "testStrategy": "Test workspace switching functionality, verifying that the UI updates correctly and that data access is properly scoped to the newly selected workspace."
+          },
+          {
+            "id": 10,
+            "title": "Implement Component-Level Role-Based Visibility Controls",
+            "description": "Create a system for conditionally rendering UI components based on user roles and permissions.",
+            "status": "pending",
+            "dependencies": [
+              3,
+              5,
+              7
+            ],
+            "details": "Develop higher-order components or hooks that can wrap UI elements to conditionally render them based on the user's role and permissions. Integrate with the authentication context to access role information.",
+            "testStrategy": "Test component visibility controls by verifying that UI elements are correctly shown or hidden based on user roles and permissions."
+          },
+          {
+            "id": 11,
+            "title": "Implement Auth State Persistence and Token Refresh",
+            "description": "Ensure authentication state persists across page refreshes and implement automatic token refresh handling.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              7
+            ],
+            "details": "Use secure storage mechanisms for persisting authentication state. Implement token refresh logic to handle expiring tokens without disrupting the user experience. Ensure all components react appropriately to auth state changes.",
+            "testStrategy": "Test auth state persistence across page refreshes and browser sessions. Verify automatic token refresh works correctly when tokens approach expiration."
+          },
+          {
+            "id": 12,
+            "title": "Create API Route Authentication Middleware",
+            "description": "Develop middleware for Next.js API routes to enforce authentication and authorization checks.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              4,
+              7
+            ],
+            "details": "Create reusable middleware for Next.js API routes that validates authentication tokens, checks workspace context, and enforces role-based permissions before allowing access to API functionality.",
+            "testStrategy": "Test API route middleware by attempting various authenticated and unauthenticated requests with different roles and workspace contexts."
+          },
+          {
+            "id": 13,
+            "title": "Integrate Login/Logout Pages with Existing Layout",
+            "description": "Implement authentication UI pages that integrate seamlessly with the existing application layout.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              5
+            ],
+            "details": "Create login, logout, and related authentication pages that maintain consistent branding and UX with the rest of the application. Ensure smooth transitions between authenticated and unauthenticated states.",
+            "testStrategy": "Test authentication UI for usability, visual consistency, and proper integration with the existing application layout and navigation flow."
           }
         ]
       },
       {
         "id": 17,
         "title": "Implement Embeddings Store with pgvector",
-        "description": "Implement an embeddings store using pgvector for instant repeat queries and cost savings related to embeddings. Note: Caching for raw financial filings (API responses) is now handled by the data-adapter package.",
+        "description": "Implement an embeddings store using pgvector for AI-generated content and user queries to reduce latency and costs. This task focuses exclusively on storing embeddings for AI outputs, not raw financial data which is now handled by the data-adapter package.",
         "status": "pending",
         "dependencies": [
           2,
           10
         ],
         "priority": "low",
-        "details": "Use PostgreSQL with the pgvector extension to store and retrieve embeddings. Key embeddings by an appropriate identifier (e.g., hash of the content that was embedded). Implement freshness checks if embeddings can become stale. Recommended: PostgreSQL v15, pgvector v0.6.",
-        "testStrategy": "Test embedding storage, retrieval, and freshness validation.",
+        "details": "Use PostgreSQL with the pgvector extension to store and retrieve embeddings for AI-generated text (analysis summaries, insights) and user queries. Key embeddings by a hash of the content that was embedded. Implement freshness checks to re-generate embeddings if the source text changes. Recommended: PostgreSQL v15, pgvector v0.6.",
+        "testStrategy": "Test embedding storage, retrieval, and freshness validation for AI-generated content and user queries.",
         "subtasks": [
           {
             "id": 1,
             "title": "pgvector Setup",
             "description": "Install and configure the pgvector extension in PostgreSQL. Ensure the database is running with pgvector enabled and verify the extension is active.",
+            "status": "pending",
             "dependencies": [],
             "details": "Follow installation steps for pgvector, either via package manager or Docker. Run `CREATE EXTENSION IF NOT EXISTS vector;` in the database to enable pgvector. Confirm the extension is installed and operational.",
-            "status": "pending"
+            "testStrategy": ""
           },
           {
             "id": 2,
             "title": "Embedding Storage Logic",
-            "description": "Design and implement the database schema for storing embeddings. Develop logic to insert and update vector embeddings in the database.",
+            "description": "Design and implement the database schema for storing embeddings of AI-generated content and user queries. Develop logic to insert and update vector embeddings in the database.",
+            "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Create tables with a vector column (e.g., `embedding vector(1536)`). Implement application logic to store and update embeddings, ensuring compatibility with pgvector's data types. Use appropriate identifiers (e.g., content hash) as the primary key.",
-            "status": "pending"
+            "details": "Create tables with a vector column (e.g., `embedding vector(1536)`). Implement application logic to store and update embeddings, ensuring compatibility with pgvector's data types. Use content hash as the primary key. Create separate tables for AI-generated content embeddings and user query embeddings.",
+            "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Retrieval API",
-            "description": "Develop an API endpoint for retrieving embeddings using vector similarity search. Support nearest neighbor queries and return relevant results.",
+            "description": "Develop an API endpoint for retrieving embeddings using vector similarity search. Support nearest neighbor queries for finding similar AI-generated content or past user queries.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Implement API logic to query the database using pgvector's similarity operators (e.g., `<->` for Euclidean distance). Ensure the API can handle query parameters for similarity search.",
-            "status": "pending"
+            "details": "Implement API logic to query the database using pgvector's similarity operators (e.g., `<->` for Euclidean distance). Ensure the API can handle query parameters for similarity search across AI-generated content and previous user queries.",
+            "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Freshness Checks",
-            "description": "Implement mechanisms to ensure embedding data is up-to-date when needed. Add logic to check and refresh embeddings as appropriate.",
+            "description": "Implement mechanisms to ensure AI-generated content embeddings are up-to-date. Add logic to check and refresh embeddings when source text changes.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Track timestamps or versioning for embeddings if they can become stale. Add logic to verify embedding freshness before retrieval, and trigger re-embedding if data is stale.",
-            "status": "pending"
+            "details": "Track timestamps and content hashes for embeddings. Add logic to verify embedding freshness before retrieval, and trigger re-embedding if the source AI-generated content has changed.",
+            "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Integration Testing",
-            "description": "Develop and execute integration tests covering embedding storage, retrieval, and freshness logic. Validate end-to-end functionality and performance.",
+            "description": "Develop and execute integration tests covering embedding storage, retrieval, and freshness logic for AI-generated content and user queries. Validate end-to-end functionality and performance.",
+            "status": "pending",
             "dependencies": [
               3,
               4
             ],
-            "details": "Write tests that insert, update, and retrieve embeddings via the API. Test freshness checks and ensure correct results are returned. Measure performance and correctness.",
-            "status": "pending"
+            "details": "Write tests that insert, update, and retrieve embeddings via the API. Test freshness checks and ensure correct results are returned. Measure performance and correctness for both AI-generated content and user query scenarios.",
+            "testStrategy": ""
           },
           {
             "id": 6,
-            "title": "Integration with data-adapter package",
-            "description": "Ensure proper integration with the data-adapter package which now handles caching of raw financial filings.",
+            "title": "Clear Separation from data-adapter",
+            "description": "Ensure clear separation between this embeddings store and the data-adapter package's caching functionality.",
+            "status": "pending",
             "dependencies": [
               2
             ],
-            "details": "Coordinate with the data-adapter package to ensure embeddings store works correctly with the cached financial filings. Define clear interfaces between the two systems.",
-            "status": "pending"
+            "details": "Document the distinct responsibilities: data-adapter handles raw financial filing caching, while this embeddings store focuses exclusively on AI-generated content and user queries. Ensure no overlap in functionality or data storage.",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "User Query Embedding Storage",
+            "description": "Implement specialized storage for user query embeddings to enable finding similar past queries.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a dedicated table structure for storing user query embeddings with appropriate metadata (timestamp, user context, etc.). Implement logic to store new query embeddings and find similar past queries.",
+            "testStrategy": ""
           }
         ]
       },
@@ -1271,7 +1660,7 @@
     ],
     "metadata": {
       "created": "2025-06-19T14:40:29.469Z",
-      "updated": "2025-06-21T14:27:24.205Z",
+      "updated": "2025-06-23T19:34:29.777Z",
       "description": "Tasks for master context"
     }
   }
