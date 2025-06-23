@@ -12,7 +12,10 @@
     "test": "turbo run test",
     "build": "turbo run build",
     "clean": "rm -rf node_modules */node_modules .next */dist",
-    "prepare": "husky || echo 'Husky not installed yet'"
+    "prepare": "husky || echo 'Husky not installed yet'",
+    "ci": "echo '🚀 Testing GitHub Actions locally...' && pnpm install && pnpm run lint && pnpm run type-check && pnpm run build && echo '✅ All CI checks passed!'",
+    "ci:quick": "echo '⚡ Quick CI check...' && pnpm run lint && pnpm run type-check && echo '✅ Quick checks passed!'",
+    "ci:clean": "echo '🧹 Clean CI test...' && pnpm run clean && pnpm install && pnpm run ci"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",
