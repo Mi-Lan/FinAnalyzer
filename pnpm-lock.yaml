@@ -32,6 +32,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@19.1.8)(react@19.1.0)
+      '@repo/database':
+        specifier: workspace:^
+        version: link:../../packages/database
       '@tanstack/react-query':
         specifier: ^5.81.0
         version: 5.81.2(react@19.1.0)
@@ -103,6 +106,9 @@ importers:
       prisma:
         specifier: 5.14.0
         version: 5.14.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
 packages:
 

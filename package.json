@@ -7,6 +7,8 @@
     "update-progress": "node scripts/update-readme-progress.js",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
     "test": "turbo run test",
     "build": "turbo run build",
     "clean": "rm -rf node_modules */node_modules .next */dist",

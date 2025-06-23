@@ -6,10 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests configured yet' && exit 0"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
+    "@repo/database": "workspace:^",
     "@tanstack/react-query": "^5.81.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

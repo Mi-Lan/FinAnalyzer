@@ -9,6 +9,8 @@ RUN corepack enable && corepack prepare pnpm@10.2.0 --activate
 COPY package.json pnpm-lock.yaml ./
 # Copy workspace config
 COPY pnpm-workspace.yaml ./
+# Copy Turborepo config
+COPY turbo.json ./
 
 # Copy package.json from workspaces
 COPY apps/web/package.json ./apps/web/
@@ -29,11 +31,16 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
 
+# Copy configuration files
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=deps /app/turbo.json ./turbo.json
+
 # Copy source code
 COPY . .
 
-# Build the web application
-RUN pnpm --filter web build
+# Build using Turborepo (builds database first, then web)
+RUN pnpm turbo run build --filter=web...
 
 # 3. Runner Stage
 FROM node:20-slim AS runner
