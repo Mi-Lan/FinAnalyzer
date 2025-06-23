@@ -13,159 +13,12 @@ class Company(BaseModel):
     createdAt: datetime
     updatedAt: datetime
 
-class FMPFinancialStatement(BaseModel):
-    date: str
-    symbol: str
-    reportedCurrency: str
-    cik: str
-    filingDate: str
-    acceptedDate: str
-    calendarYear: Optional[str] = None
-    period: str
-    link: Optional[str] = None
-    finalLink: Optional[str] = None
-
-class FMPIncomeStatement(FMPFinancialStatement):
-    revenue: float
-    costOfRevenue: float
-    grossProfit: float
-    researchAndDevelopmentExpenses: float
-    generalAndAdministrativeExpenses: float
-    sellingAndMarketingExpenses: float
-    sellingGeneralAndAdministrativeExpenses: float
-    otherExpenses: float
-    operatingExpenses: float
-    costAndExpenses: float
-    interestIncome: float
-    interestExpense: float
-    depreciationAndAmortization: float
-    ebitda: float
-    ebit: float
-    operatingIncome: float
-    totalOtherIncomeExpensesNet: float
-    incomeBeforeTax: float
-    incomeTaxExpense: float
-    netIncome: float
-    netIncomeFromContinuingOperations: float
-    netIncomeFromDiscontinuedOperations: float
-    otherAdjustmentsToNetIncome: float
-    bottomLineNetIncome: float
-    netIncomeDeductions: float
-    netInterestIncome: float
-    nonOperatingIncomeExcludingInterest: float
-    eps: Optional[float] = None
-    epsDiluted: Optional[float] = None
-    weightedAverageShsOut: float
-    weightedAverageShsOutDil: float
-
-class FMPBalanceSheetStatement(FMPFinancialStatement):
-    cashAndCashEquivalents: float
-    shortTermInvestments: float
-    cashAndShortTermInvestments: float
-    netReceivables: float
-    accountsReceivables: float
-    otherReceivables: float
-    inventory: float
-    prepaids: float
-
-    otherCurrentAssets: float
-    totalCurrentAssets: float
-    propertyPlantEquipmentNet: float
-    goodwill: float
-    intangibleAssets: float
-    goodwillAndIntangibleAssets: float
-    longTermInvestments: float
-    taxAssets: float
-    otherNonCurrentAssets: float
-    totalNonCurrentAssets: float
-    otherAssets: float
-    totalAssets: float
-    totalPayables: float
-    accountPayables: float
-    otherPayables: float
-    accruedExpenses: float
-    shortTermDebt: float
-    capitalLeaseObligationsCurrent: float
-    taxPayables: float
-    deferredRevenue: float
-    otherCurrentLiabilities: float
-    totalCurrentLiabilities: float
-    longTermDebt: float
-    capitalLeaseObligationsNonCurrent: Optional[float] = None
-    deferredRevenueNonCurrent: float
-    deferredTaxLiabilitiesNonCurrent: float
-    otherNonCurrentLiabilities: float
-    totalNonCurrentLiabilities: float
-    otherLiabilities: float
-    capitalLeaseObligations: float
-    totalLiabilities: float
-    treasuryStock: float
-    preferredStock: float
-    commonStock: float
-    retainedEarnings: float
-    additionalPaidInCapital: float
-    accumulatedOtherComprehensiveIncomeLoss: float
-    otherTotalStockholdersEquity: float
-    totalStockholdersEquity: float
-    totalEquity: float
-    minorityInterest: float
-    totalLiabilitiesAndTotalEquity: float
-    totalInvestments: float
-    totalDebt: float
-    netDebt: float
-
-class FMPCashFlowStatement(FMPFinancialStatement):
-    netIncome: float
-    depreciationAndAmortization: float
-    deferredIncomeTax: float
-    stockBasedCompensation: float
-    changeInWorkingCapital: float
-    accountsReceivables: float
-    inventory: float
-    accountsPayables: float
-    otherWorkingCapital: float
-    otherNonCashItems: float
-    netCashProvidedByOperatingActivities: float
-    investmentsInPropertyPlantAndEquipment: float
-    acquisitionsNet: float
-    purchasesOfInvestments: float
-    salesMaturitiesOfInvestments: float
-    otherInvestingActivities: float
-    netCashProvidedByInvestingActivities: float
-    netDebtIssuance: float
-    longTermNetDebtIssuance: float
-    shortTermNetDebtIssuance: float
-    netStockIssuance: float
-    netCommonStockIssuance: float
-    commonStockIssuance: float
-    commonStockRepurchased: float
-    netPreferredStockIssuance: float
-    netDividendsPaid: float
-    commonDividendsPaid: float
-    preferredDividendsPaid: float
-    otherFinancingActivities: float
-    netCashProvidedByFinancingActivities: float
-    effectOfForexChangesOnCash: float
-    netChangeInCash: float
-    cashAtEndOfPeriod: float
-    cashAtBeginningOfPeriod: float
-    operatingCashFlow: float
-    capitalExpenditure: float
-    freeCashFlow: float
-    incomeTaxesPaid: float
-    interestPaid: float
-
-class FMPFinancialStatements(BaseModel):
-    incomeStatement: FMPIncomeStatement
-    balanceSheet: FMPBalanceSheetStatement
-    cashFlow: FMPCashFlowStatement
-
 class FinancialData(BaseModel):
     id: str
     companyId: str
     year: int
     period: str  # "Q1", "Q2", "Q3", "Q4", "FY"
-    data: FMPFinancialStatements
+    data: Dict[str, Any]  # This will store the FMP data as JSON
     createdAt: datetime
     updatedAt: datetime
 
@@ -212,6 +65,10 @@ class BulkAnalysisJob(BaseModel):
     createdAt: datetime
     updatedAt: datetime
 
+# API request/response models
+class BulkAnalysisRequest(BaseModel):
+    tickers: List[str]
+
 class ScreeningResultCompany(BaseModel):
     company: Company
     latestFinancials: FinancialData
@@ -226,7 +83,4 @@ class CompanyDetailsResponse(BaseModel):
     company: Company
     financialData: List[FinancialData]
     latestFinancials: FinancialData
-    analysisResult: AnalysisResult
-
-class BulkAnalysisRequest(BaseModel):
-    tickers: List[str] 
+    analysisResult: AnalysisResult 
