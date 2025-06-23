@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getMockCompanyData } from '@/lib/mockData';
 
+// Mark the route dynamic so it always runs on demand
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
-  { params }: { params: { ticker: string } }
+  context: { params: { ticker: string } }
 ) {
-  const { ticker } = params;
+  // ✅ wait for the params object before using it
+  const { ticker } = await context.params;
+
   const data = getMockCompanyData(ticker.toUpperCase());
 
   if (!data) {
