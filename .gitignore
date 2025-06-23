@@ -9,6 +9,9 @@ dev-debug.log
 # Dependency directories
 node_modules/
 
+# Turborepo cache
+.turbo/
+
 # Environment variables
 .env
 
@@ -41,6 +44,10 @@ eggs/
 .eggs/
 lib/
 lib64/
+
+# Allow TypeScript lib directories in source code
+!**/src/lib/
+!apps/**/lib/
 parts/
 sdist/
 var/

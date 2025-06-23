@@ -1,85 +1,207 @@
-# Data Ingestion Adapter
+# Data Adapter Package
 
-This package provides a robust and extensible adapter for fetching financial data from various providers. It is designed with a plugin-based architecture that allows for easy addition of new data sources.
+A Python-based data ingestion layer for the FinAnalyzer platform, providing standardized interfaces for financial data providers.
 
-## Features
+## Overview
 
-- **Async Support**: Uses `httpx` for non-blocking, asynchronous requests.
-- **Caching**: Integrates with Redis to cache API responses and reduce redundant calls.
-- **Rate Limiting**: Implements a token bucket algorithm with Redis for distributed rate limiting.
-- **Data Parsing**: Uses Pydantic models for data validation and parsing.
-- **Plugin Architecture**: Easily extensible to support new data providers.
-- **Structured Logging**: Provides structured logging for monitoring and debugging.
-- **Custom Exceptions**: Defines custom exceptions for specific error handling.
+The data adapter package implements a flexible, extensible architecture for integrating various financial data sources. It provides a common interface for data retrieval, validation, and transformation while supporting multiple providers through a plugin-based system.
 
 ## Architecture
 
-The adapter is built around a few key components:
+### Core Components
 
-- **`DataSourceAdapter`**: An abstract base class that defines the common interface for all data provider adapters.
-- **`FMPAdapter`**: A concrete implementation of the `DataSourceAdapter` for the Financial Modeling Prep API.
-- **`RateLimiter`**: A token bucket rate limiter implemented with Redis.
-- **`Parser`**: A class that uses Pydantic models to parse and validate API responses.
-- **`get_adapter` Factory**: A factory function that discovers and instantiates the correct adapter based on a configuration.
+- **Abstract Base Classes** (`abc.py`): Define interfaces for data providers
+- **Provider Factory** (`factory.py`): Manages provider instantiation and configuration
+- **Configuration Management** (`config.py`): Handles settings and API credentials
+- **Rate Limiting** (`rate_limiter.py`): Implements request throttling and backoff
+- **Transport Layer** (`transports.py`): HTTP client abstractions with retry logic
 
-## Extending the Adapter
+### Provider Implementation
 
-To add a new data provider, you need to:
+The package currently supports:
 
-1.  **Create a Provider Directory**: Create a new subdirectory inside `packages/data-adapter/src/data_adapter/providers/` for your new provider (e.g., `coolfinance/`).
-2.  **Create an Adapter Class**: Inside your new directory, create an `adapter.py` file with a class that inherits from `DataSourceAdapter` and implements the `fetch_data` method.
-3.  **Add Pydantic Models**: Create a `models.py` file in your provider's directory to define the Pydantic models for the data structures returned by the new provider's API.
-4.  **Create a Parser Class**: Create a `parser.py` with a class that inherits from `BaseParser` and implements the `parse` method for your provider's data.
-5.  **Register the New Provider**: In `factory.py`, import your new adapter and parser and add them to the `ADAPTER_REGISTRY`.
-6.  **Add Configuration**: Update your root `.env` file with the necessary settings for the new provider (e.g., `DATA_PROVIDERS__COOLFINANCE__API_KEY=your_key`).
+- **Financial Modeling Prep (FMP)** API integration
+- Extensible provider interface for additional data sources
+- Standardized data models with Pydantic validation
 
-### Example: Adding a "CoolFinance" Provider
+## Installation
 
-1.  **Directory Structure**:
+```bash
+# From project root
+cd packages/data-adapter
 
-    ```
-    providers/
-    └── coolfinance/
-        ├── __init__.py
-        ├── adapter.py
-        ├── models.py
-        └── parser.py
-    ```
+# Install in development mode
+pip install -e .
 
-2.  **`providers/coolfinance/adapter.py`**:
+# Or install dependencies only
+pip install -r requirements.txt
+```
 
-    ```python
-    class CoolFinanceAdapter(DataSourceAdapter):
-        # ... implementation
-    ```
+## Usage
 
-3.  **`providers/coolfinance/models.py`**:
+### Basic Usage
 
-    ```python
-    class CoolFinanceStatement(BaseModel):
-        # ... implementation
-    ```
+```python
+from data_adapter import create_provider
+from data_adapter.config import Config
 
-4.  **`providers/coolfinance/parser.py`**:
+# Initialize configuration
+config = Config()
 
-    ```python
-    class CoolFinanceParser(BaseParser):
-        # ... implementation
-    ```
+# Create provider instance
+provider = create_provider('fmp', config)
 
-5.  **Update `factory.py`**:
+# Fetch company data
+company_data = await provider.get_company_profile('AAPL')
+financial_data = await provider.get_financial_statements('AAPL', period='quarterly')
+```
 
-    ```python
-    from .providers.coolfinance.adapter import CoolFinanceAdapter
-    from .providers.coolfinance.parser import CoolFinanceParser
+### Configuration
 
-    ADAPTER_REGISTRY = {
-        "fmp": (FMPAdapter, FMPParser),
-        "coolfinance": (CoolFinanceAdapter, CoolFinanceParser),
-    }
-    ```
+Set up your API credentials:
 
-6.  **Update `.env`**:
-    ```
-    DATA_PROVIDERS__COOLFINANCE__API_KEY=your_coolfinance_key
-    ```
+```bash
+# Environment variables
+export FMP_API_KEY="your_fmp_api_key"
+export FMP_BASE_URL="https://financialmodelingprep.com/api/v3"
+
+# Or use .env file in project root
+FMP_API_KEY=your_fmp_api_key
+FMP_BASE_URL=https://financialmodelingprep.com/api/v3
+```
+
+### Error Handling
+
+The adapter includes comprehensive error handling:
+
+```python
+from data_adapter.exceptions import DataAdapterError, RateLimitExceeded
+
+try:
+    data = await provider.get_company_profile('AAPL')
+except RateLimitExceeded as e:
+    print(f"Rate limit hit: {e.retry_after} seconds")
+except DataAdapterError as e:
+    print(f"Data adapter error: {e}")
+```
+
+## Data Models
+
+All data is validated using Pydantic models:
+
+```python
+from data_adapter.providers.fmp.models import (
+    CompanyProfile,
+    FinancialStatements,
+    IncomeStatement,
+    BalanceSheet,
+    CashFlowStatement
+)
+
+# Automatic validation and type conversion
+profile: CompanyProfile = await provider.get_company_profile('AAPL')
+print(f"Company: {profile.company_name}")
+print(f"Market Cap: {profile.market_cap}")
+```
+
+## Testing
+
+```bash
+# Run tests
+python -m pytest tests/
+
+# Run with coverage
+python -m pytest tests/ --cov=data_adapter --cov-report=html
+
+# Run specific test files
+python -m pytest tests/test_fmp_adapter.py -v
+```
+
+## Development
+
+### Adding New Providers
+
+1. Create provider directory: `src/data_adapter/providers/new_provider/`
+2. Implement the provider interface from `abc.py`
+3. Define data models in `models.py`
+4. Add provider to factory in `factory.py`
+5. Write tests in `tests/test_new_provider.py`
+
+### Provider Interface
+
+```python
+from abc import ABC, abstractmethod
+from typing import Dict, List, Optional
+from data_adapter.abc import BaseDataProvider
+
+class NewProvider(BaseDataProvider):
+    async def get_company_profile(self, symbol: str) -> CompanyProfile:
+        """Fetch company profile data"""
+        pass
+
+    async def get_financial_statements(
+        self,
+        symbol: str,
+        period: str = 'annual'
+    ) -> FinancialStatements:
+        """Fetch financial statements"""
+        pass
+```
+
+## Configuration Options
+
+| Environment Variable     | Description                     | Default                                    |
+| ------------------------ | ------------------------------- | ------------------------------------------ |
+| `FMP_API_KEY`            | Financial Modeling Prep API key | Required                                   |
+| `FMP_BASE_URL`           | FMP API base URL                | `https://financialmodelingprep.com/api/v3` |
+| `DATA_ADAPTER_LOG_LEVEL` | Logging level                   | `INFO`                                     |
+| `RATE_LIMIT_REQUESTS`    | Max requests per minute         | `300`                                      |
+| `REQUEST_TIMEOUT`        | Request timeout in seconds      | `30`                                       |
+
+## Integration with FinAnalyzer
+
+This package is designed to integrate seamlessly with the FinAnalyzer monorepo:
+
+- **TypeScript Interop**: Data models designed for easy serialization to TypeScript
+- **FastAPI Integration**: Compatible with FastAPI backend for API endpoints
+- **Docker Support**: Included in multi-stage Docker builds
+- **Shared Configuration**: Uses monorepo-wide environment configuration
+
+## Performance Considerations
+
+- **Rate Limiting**: Built-in request throttling to respect API limits
+- **Caching**: Transport layer supports response caching
+- **Async Operations**: Fully async for concurrent data fetching
+- **Connection Pooling**: HTTP client reuses connections for efficiency
+
+## Error Handling
+
+The package provides structured error handling:
+
+- `DataAdapterError`: Base exception class
+- `ProviderNotFoundError`: Unknown provider requested
+- `ConfigurationError`: Invalid configuration
+- `RateLimitExceeded`: API rate limit hit
+- `ValidationError`: Data validation failed
+
+## Logging
+
+Comprehensive logging for debugging and monitoring:
+
+```python
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('data_adapter')
+
+# Logs include:
+# - API requests and responses
+# - Rate limiting events
+# - Data validation errors
+# - Provider initialization
+```
+
+## License
+
+This package is part of the FinAnalyzer project and is licensed under the MIT License.

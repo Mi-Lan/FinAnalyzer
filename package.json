@@ -5,18 +5,24 @@
   "private": true,
   "scripts": {
     "update-progress": "node scripts/update-readme-progress.js",
-    "dev": "echo 'Starting development servers...' && echo 'Run: docker-compose up -d && pnpm dev in workspace'",
-    "lint": "echo 'Linting not configured yet - will be added when dependencies install properly'",
-    "test": "echo 'Tests not configured yet - project setup complete'",
-    "build": "echo 'Build not configured yet'",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "build": "turbo run build",
     "clean": "rm -rf node_modules */node_modules .next */dist",
-    "prepare": "husky || echo 'Husky not installed yet'"
+    "prepare": "husky || echo 'Husky not installed yet'",
+    "ci": "echo '🚀 Testing GitHub Actions locally...' && pnpm install && pnpm run lint && pnpm run type-check && pnpm run build && echo '✅ All CI checks passed!'",
+    "ci:quick": "echo '⚡ Quick CI check...' && pnpm run lint && pnpm run type-check && echo '✅ Quick checks passed!'",
+    "ci:clean": "echo '🧹 Clean CI test...' && pnpm run clean && pnpm install && pnpm run ci"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",
     "dotenv-cli": "^8.0.0",
     "husky": "^9.1.7",
     "ts-node": "^10.9.2",
+    "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
   "repository": {
@@ -35,8 +41,8 @@
   "author": "Milan",
   "license": "MIT",
   "engines": {
-    "node": "19.8.1",
-    "pnpm": ">=8.0.0 <9.0.0"
+    "node": ">=20.11.0",
+    "pnpm": ">=10.2.0"
   },
-  "packageManager": "pnpm@8.0.0"
+  "packageManager": "pnpm@10.2.0"
 }
