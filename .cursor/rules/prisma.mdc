@@ -3,3 +3,38 @@ description:
 globs:
 alwaysApply: false
 ---
+- **Use Prisma as the Single Source of Truth**
+  - The `schema.prisma` file is the definitive source for database models.
+  - All database schema changes must be made through Prisma migrations.
+  - Both the Python (FastAPI) backend and the TypeScript (Next.js) frontend will use clients generated from this schema.
+
+- **Schema Definition**
+  - Define all models in `prisma/schema.prisma`.
+  - Use full relation-mode for defining relationships between models.
+  - Leverage native PostgreSQL types where possible (e.g., `JsonB` for `JSONB` columns).
+
+- **Client Generation**
+  - The TypeScript client should be generated into `packages/database/src/generated/client`.
+  - The Python client should be generated into a corresponding location accessible by the FastAPI application.
+  - Re-generate clients after any change to the `schema.prisma` file.
+    ```bash
+    pnpm prisma generate
+    ```
+
+- **Migrations**
+  - Use `prisma migrate dev` for development to create and apply migrations.
+  - Use `prisma migrate deploy` in production environments.
+  - All migrations should have descriptive names.
+    ```bash
+    pnpm prisma migrate dev --name init-user-model
+    ```
+
+- **Querying**
+  - Use the generated Prisma Client for all database interactions.
+  - Avoid raw SQL queries unless absolutely necessary and approved. Raw SQL bypasses Prisma's type safety and validation.
+  - Leverage Prisma's fluent API for complex queries, including joins and filtering.
+
+- **Rationale**
+  - **Cross-Language Type Safety**: Prisma provides a unified schema that generates types for both Python and TypeScript, ensuring consistency and reducing bugs between the frontend and backend.
+  - **Developer Experience**: The schema-first approach, autocompletion, and modern API significantly improve productivity.
+  - **Monorepo Integration**: It is perfectly suited for a monorepo setup, allowing seamless sharing of database models and types across different services and applications.

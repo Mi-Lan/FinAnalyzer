@@ -1,5 +1,17 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+- **Node.js Version**
+  - **Required Version:** `>=20.11.0`
+  - This project requires Node.js version 20.11.0 or higher, as enforced via the `engines` field in the root `package.json`.
+  - **Current Stable:** The project is tested and works well with Node.js v20.x.
+  - **Recommendation**: Use a version manager like `nvm` to manage Node.js versions (`nvm use 20`).
+
+- **Package Manager**
+  - **Required Manager:** `pnpm`
+  - **Required Version:** `>=10.2.0`
+  - This project uses `pnpm` as its package manager, enforced via the `packageManager` and `engines` fields in the root `package.json`.
+  - **Current Version:** `pnpm@10.2.0` as specified in `packageManager` field.
+  - **Reasoning**: `pnpm` is used for its efficiency in managing dependencies in a monorepo workspace.
