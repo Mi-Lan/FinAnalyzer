@@ -9,6 +9,9 @@ dev-debug.log
 # Dependency directories
 node_modules/
 
+# Turborepo cache
+.turbo/
+
 # Environment variables
 .env
 
