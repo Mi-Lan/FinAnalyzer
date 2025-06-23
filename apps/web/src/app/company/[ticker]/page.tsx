@@ -175,7 +175,8 @@ export default function CompanyDetailPage({
 }: {
   params: Promise<{ ticker: string }>;
 }) {
-  const { ticker } = use(params);
+  const resolvedParams = use(params);
+  const { ticker } = resolvedParams;
   return (
     <Suspense
       fallback={

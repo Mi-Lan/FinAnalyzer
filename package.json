@@ -5,10 +5,10 @@
   "private": true,
   "scripts": {
     "update-progress": "node scripts/update-readme-progress.js",
-    "dev": "echo 'Starting development servers...' && echo 'Run: docker-compose up -d && pnpm dev in workspace'",
-    "lint": "echo 'Linting not configured yet - will be added when dependencies install properly'",
-    "test": "echo 'Tests not configured yet - project setup complete'",
-    "build": "echo 'Build not configured yet'",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "build": "turbo run build",
     "clean": "rm -rf node_modules */node_modules .next */dist",
     "prepare": "husky || echo 'Husky not installed yet'"
   },
@@ -17,6 +17,7 @@
     "dotenv-cli": "^8.0.0",
     "husky": "^9.1.7",
     "ts-node": "^10.9.2",
+    "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
   "repository": {
@@ -36,7 +37,7 @@
   "license": "MIT",
   "engines": {
     "node": ">=20.11.0",
-    "pnpm": ">=8.0.0 <9.0.0"
+    "pnpm": ">=10.2.0"
   },
-  "packageManager": "pnpm@8.0.0"
+  "packageManager": "pnpm@10.2.0"
 }

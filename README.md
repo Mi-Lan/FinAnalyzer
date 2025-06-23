@@ -145,20 +145,36 @@ graph TB
 
 ### Prerequisites
 
-- Node.js 18+, Python 3.11+, Docker, pnpm
+- Node.js 20.11.0+, Docker, pnpm 8.x
 
-### Installation
+### Installation & Startup
+
+The entire development environment is containerized. To get started, simply run:
 
 ```bash
+# Clone the repository
 git clone https://github.com/Mi-Lan/FinAnalyzer.git
 cd FinAnalyzer
 
-# Copy API key template
-cp .cursor/mcp.json.example .cursor/mcp.json
-# Add your API keys to .cursor/mcp.json
+# Build and start all services (web app, database, etc.)
+docker-compose up --build
+```
 
-# Install Task Master (optional)
-npm install -g task-master-ai
+The web application will be available at `http://localhost:3000`.
+
+### Development Workflow
+
+This monorepo uses [Turborepo](https://turbo.build/repo) to manage scripts. Once the Docker containers are running, you can run commands from the root directory:
+
+```bash
+# Run all development servers
+pnpm dev
+
+# Run linting across all apps and packages
+pnpm lint
+
+# Run tests across all apps and packages
+pnpm test
 ```
 
 ### Development with Task Master

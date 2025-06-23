@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: Request,
-  context: { params: { ticker: string } }
+  { params }: { params: Promise<{ ticker: string }> }
 ) {
   // ✅ wait for the params object before using it
-  const { ticker } = await context.params;
+  const { ticker } = await params;
 
   const data = getMockCompanyData(ticker.toUpperCase());
 

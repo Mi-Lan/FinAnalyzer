@@ -1,29 +1,58 @@
-# Base image for installing dependencies
-FROM node:20-alpine AS deps
+# 1. Installer Stage
+FROM node:20-slim AS deps
 WORKDIR /app
-COPY package.json ./
-# Copy lock file if it exists
-COPY pnpm-loc[k].yaml* ./
-RUN npm install -g pnpm || echo "pnpm install skipped"
 
-# Base image for building the application
-FROM node:20-alpine AS builder
+# Install pnpm using corepack
+RUN corepack enable && corepack prepare pnpm@10.2.0 --activate
+
+# Copy dependency definition files
+COPY package.json pnpm-lock.yaml ./
+# Copy workspace config
+COPY pnpm-workspace.yaml ./
+
+# Copy package.json from workspaces
+COPY apps/web/package.json ./apps/web/
+COPY packages/database/package.json ./packages/database/
+
+# Install all dependencies
+RUN pnpm install --frozen-lockfile --prod=false
+
+# 2. Builder Stage
+FROM node:20-slim AS builder
 WORKDIR /app
-COPY --from=deps /app/ ./
+
+# Install pnpm using corepack
+RUN corepack enable && corepack prepare pnpm@10.2.0 --activate
+
+# Copy installed dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
+
+# Copy source code
 COPY . .
-RUN npm install -g pnpm || echo "pnpm install skipped"
 
-# Final image for running the application
-FROM node:20-alpine AS runner
+# Build the web application
+RUN pnpm --filter web build
+
+# 3. Runner Stage
+FROM node:20-slim AS runner
 WORKDIR /app
-COPY --from=builder /app/package.json ./package.json
-# Copy any built assets (placeholder for now)
-COPY --from=builder /app/scripts ./scripts
 
 # Create a non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 --ingroup nodejs nextjs
+
+# Copy standalone output
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
 USER nextjs
 
-# This is a placeholder command. Each service will override this.
-CMD ["node", "--version"] 
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME 0.0.0.0
+
+CMD ["node", "apps/web/server.js"] 
