@@ -1,13 +1,15 @@
-from typing import Dict, Tuple, Type
+from typing import Dict, Tuple, Type, Optional
 
 import httpx
 import redis.asyncio as redis
 
 from data_adapter.abc import BaseParser, DataSourceAdapter
 from data_adapter.config import settings
+from data_adapter.database import DatabaseManager
 from data_adapter.exceptions import ConfigurationError
 from data_adapter.providers.fmp.adapter import FMPAdapter
 from data_adapter.providers.fmp.parser import FMPParser
+from data_adapter.providers.fmp.storage_adapter import StorageEnabledFMPAdapter
 from data_adapter.rate_limiter import RateLimiter
 from data_adapter.transports import CachingTransport, RateLimitingTransport
 
@@ -16,13 +18,27 @@ ADAPTER_REGISTRY: Dict[str, Tuple[Type[DataSourceAdapter], Type[BaseParser]]] = 
     "fmp": (FMPAdapter, FMPParser),
 }
 
+# Storage-enabled adapter registry
+STORAGE_ADAPTER_REGISTRY: Dict[str, Tuple[Type[DataSourceAdapter], Type[BaseParser]]] = {
+    "fmp": (StorageEnabledFMPAdapter, FMPParser),
+}
 
-def get_adapter(provider_name: str) -> DataSourceAdapter:
+
+def get_adapter(provider_name: str, enable_storage: bool = False) -> DataSourceAdapter:
     """
     Factory function to get a data source adapter instance.
     This function composes the httpx client with caching and rate limiting transports.
+    
+    Args:
+        provider_name: Name of the data provider (e.g., 'fmp')
+        enable_storage: Whether to create a storage-enabled adapter
     """
-    registry_entry = ADAPTER_REGISTRY.get(provider_name)
+    if enable_storage:
+        registry = STORAGE_ADAPTER_REGISTRY
+    else:
+        registry = ADAPTER_REGISTRY
+        
+    registry_entry = registry.get(provider_name)
     if not registry_entry:
         raise ConfigurationError(f"No adapter found for provider: {provider_name}")
 
@@ -59,4 +75,19 @@ def get_adapter(provider_name: str) -> DataSourceAdapter:
 
     # 5. Instantiate parser and adapter
     parser = parser_class()
-    return adapter_class(client, provider_settings, parser) 
+    
+    if enable_storage:
+        # Create database manager for storage-enabled adapters
+        database_url = settings.get_database_url()
+        database_manager = DatabaseManager(database_url)
+        return adapter_class(client, provider_settings, parser, database_manager)
+    else:
+        return adapter_class(client, provider_settings, parser)
+
+
+def get_database_manager() -> DatabaseManager:
+    """
+    Factory function to get a database manager instance.
+    """
+    database_url = settings.get_database_url()
+    return DatabaseManager(database_url) 
