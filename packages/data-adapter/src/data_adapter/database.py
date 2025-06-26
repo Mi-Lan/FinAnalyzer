@@ -106,6 +106,7 @@ class DatabaseManager:
         company_id: str, 
         year: int, 
         period: str, 
+        type: str,
         financial_statements: Dict[str, Any],
         merge: bool = False
     ) -> str:
@@ -122,9 +123,9 @@ class DatabaseManager:
             result = await session.execute(
                 text(
                     'SELECT id, data FROM "FinancialData" '
-                    'WHERE "companyId" = :company_id AND year = :year AND period = :period'
+                    'WHERE "companyId" = :company_id AND year = :year AND period = :period AND type = :type'
                 ),
-                {"company_id": company_id, "year": year, "period": period}
+                {"company_id": company_id, "year": year, "period": period, "type": type}
             )
             existing_row = result.fetchone()
             
@@ -148,7 +149,7 @@ class DatabaseManager:
                     ),
                     {"id": existing_row[0], "data": merged_data_json}
                 )
-                logger.info(f"Merged and updated financial data for company {company_id}, {year} {period}")
+                logger.info(f"Merged and updated financial data for company {company_id}, {year} {period} {type}")
                 return existing_row[0]
             elif existing_row:
                 # Update existing data (overwrite)
@@ -158,25 +159,26 @@ class DatabaseManager:
                     ),
                     {"id": existing_row[0], "data": financial_statements_json}
                 )
-                logger.info(f"Updated financial data for company {company_id}, {year} {period}")
+                logger.info(f"Updated financial data for company {company_id}, {year} {period} {type}")
                 return existing_row[0]
             else:
                 # Insert new data
                 financial_data_id = str(__import__('uuid').uuid4())
                 await session.execute(
                     text(
-                        'INSERT INTO "FinancialData" (id, "companyId", year, period, data, "createdAt", "updatedAt") '
-                        'VALUES (:id, :company_id, :year, :period, :data, NOW(), NOW())'
+                        'INSERT INTO "FinancialData" (id, "companyId", year, period, type, data, "createdAt", "updatedAt") '
+                        'VALUES (:id, :company_id, :year, :period, :type, :data, NOW(), NOW())'
                     ),
                     {
                         "id": financial_data_id,
                         "company_id": company_id,
                         "year": year,
                         "period": period,
+                        "type": type,
                         "data": financial_statements_json
                     }
                 )
-                logger.info(f"Stored new financial data for company {company_id}, {year} {period}")
+                logger.info(f"Stored new financial data for company {company_id}, {year} {period} {type}")
                 return financial_data_id
     
     async def store_sec_filing(self, company_id: str, filing: SECFiling) -> Optional[str]:
@@ -185,19 +187,20 @@ class DatabaseManager:
         Each filing is stored as a unique record.
         """
         try:
-            filing_date = datetime.fromisoformat(filing.filing_date.split(" ")[0])
+            filing_date_str = filing.filing_date.split(" ")[0]
+            filing_date = datetime.fromisoformat(filing_date_str)
             year = filing_date.year
-            # Create a unique period identifier for the filing to avoid collision
-            period = f"FILING_{filing.form.replace(' ', '_')}_{filing.filing_date.split(' ')[0]}"
+            period = filing_date_str
+            filing_type = filing.form
 
             async with self.get_session() as session:
                 # Check if this specific filing already exists
                 result = await session.execute(
                     text(
                         'SELECT id FROM "FinancialData" '
-                        'WHERE "companyId" = :company_id AND year = :year AND period = :period'
+                        'WHERE "companyId" = :company_id AND period = :period AND type = :type'
                     ),
-                    {"company_id": company_id, "year": year, "period": period}
+                    {"company_id": company_id, "period": period, "type": filing_type}
                 )
                 if result.fetchone():
                     logger.info(f"SEC filing {filing.form} from {filing.filing_date} already exists for company {company_id}.")
@@ -207,14 +210,15 @@ class DatabaseManager:
                 financial_data_id = str(__import__('uuid').uuid4())
                 await session.execute(
                     text(
-                        'INSERT INTO "FinancialData" (id, "companyId", year, period, data, "createdAt", "updatedAt") '
-                        'VALUES (:id, :company_id, :year, :period, :data, NOW(), NOW())'
+                        'INSERT INTO "FinancialData" (id, "companyId", year, period, type, data, "createdAt", "updatedAt") '
+                        'VALUES (:id, :company_id, :year, :period, :type, :data, NOW(), NOW())'
                     ),
                     {
                         "id": financial_data_id,
                         "company_id": company_id,
                         "year": year,
                         "period": period,
+                        "type": filing_type,
                         "data": filing.model_dump_json()
                     }
                 )
@@ -249,7 +253,7 @@ class DatabaseManager:
     
     async def get_financial_data(self, company_id: str, year: int = None, period: str = None) -> List[Dict[str, Any]]:
         """Get financial data for a company, optionally filtered by year and period."""
-        query = 'SELECT id, year, period, data, "createdAt", "updatedAt" FROM "FinancialData" WHERE "companyId" = :company_id'
+        query = 'SELECT id, year, period, type, data, "createdAt", "updatedAt" FROM "FinancialData" WHERE "companyId" = :company_id'
         params = {"company_id": company_id}
         
         if year is not None:
@@ -270,9 +274,10 @@ class DatabaseManager:
                     "id": row[0],
                     "year": row[1],
                     "period": row[2],
-                    "data": row[3],
-                    "createdAt": row[4],
-                    "updatedAt": row[5]
+                    "type": row[3],
+                    "data": row[4],
+                    "createdAt": row[5],
+                    "updatedAt": row[6]
                 }
                 for row in rows
             ] 

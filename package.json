@@ -19,7 +19,7 @@
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:studio": "turbo run db:studio",
-    "db:reset": "turbo run db:migrate -- --reset"
+    "db:reset": "turbo run db:reset"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",

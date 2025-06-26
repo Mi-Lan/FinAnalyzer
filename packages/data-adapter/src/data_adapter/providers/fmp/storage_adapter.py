@@ -123,6 +123,13 @@ class StorageEnabledFMPAdapter(FMPAdapter):
                     industry=industry
                 )
                 
+                type_mapping = {
+                    "income-statement": "Income Statement",
+                    "balance-sheet-statement": "Balance Sheet",
+                    "cash-flow-statement": "Cash Flow Statement",
+                }
+                human_readable_type = type_mapping.get(endpoint, endpoint)
+
                 # Prepare financial data for storage
                 financial_data_to_add = self._prepare_financial_data(group_statements)
                 
@@ -131,6 +138,7 @@ class StorageEnabledFMPAdapter(FMPAdapter):
                     company_id=company_id,
                     year=year,
                     period=period,
+                    type=human_readable_type,
                     financial_statements=financial_data_to_add,
                     merge=True  # Enable merging
                 )

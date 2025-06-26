@@ -96,6 +96,35 @@ class AsyncProcessor:
         logger.info(f"Completed parallel data retrieval for {len(tickers)} tickers.")
         return ticker_results
 
+    async def fetch_and_store_sec_filings_for_tickers(
+        self,
+        tickers: List[str],
+        from_date: str,
+        to_date: str
+    ) -> Dict[str, List[str]]:
+        """
+        Fetch and store SEC filings for a list of tickers in parallel.
+        """
+        
+        async def task_func(adapter, ticker, from_date, to_date):
+            return await adapter.fetch_and_store_sec_filings(
+                ticker=ticker, from_date=from_date, to_date=to_date
+            )
+            
+        tasks_with_params = [
+            (task_func, [ticker, from_date, to_date], {}) for ticker in tickers
+        ]
+        
+        logger.info(f"Starting parallel SEC filing fetch for {len(tickers)} tickers.")
+        
+        results = await self.run_tasks(tasks_with_params)
+        
+        # Combine results into a dictionary keyed by ticker
+        ticker_results = {ticker: result for ticker, result in zip(tickers, results)}
+        
+        logger.info(f"Completed parallel SEC filing fetch for {len(tickers)} tickers.")
+        return ticker_results
+
 async def main():
     """
     Main function to demonstrate and test the AsyncProcessor.

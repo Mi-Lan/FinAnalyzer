@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Dict, Optional
 
@@ -25,15 +25,23 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
-        env_nested_delimiter="__",
     )
 
     data_providers: Dict[str, ProviderSettings] = {}
     database: Optional[DatabaseSettings] = None
     
+    # Support flat FMP_API_KEY from environment
+    fmp_api_key: Optional[str] = Field(None, alias='FMP_API_KEY')
+    
     # Database URL from environment variable
     database_url: Optional[str] = None
     
+    def __init__(self, **values):
+        super().__init__(**values)
+        # Manually populate fmp provider settings if fmp_api_key is present
+        if self.fmp_api_key and 'fmp' not in self.data_providers:
+            self.data_providers['fmp'] = ProviderSettings(api_key=self.fmp_api_key)
+
     def get_database_url(self) -> str:
         """Get the database URL from configuration."""
         if self.database and self.database.url:
