@@ -9,6 +9,7 @@ from data_adapter.database import DatabaseManager
 from data_adapter.exceptions import ConfigurationError
 from data_adapter.providers.fmp.adapter import FMPAdapter
 from data_adapter.providers.fmp.parser import FMPParser
+from data_adapter.providers.fmp.enhanced_parser import EnhancedFMPParser
 from data_adapter.providers.fmp.storage_adapter import StorageEnabledFMPAdapter
 from data_adapter.rate_limiter import RateLimiter
 from data_adapter.transports import CachingTransport, RateLimitingTransport
@@ -24,7 +25,7 @@ STORAGE_ADAPTER_REGISTRY: Dict[str, Tuple[Type[DataSourceAdapter], Type[BasePars
 }
 
 
-def get_adapter(provider_name: str, enable_storage: bool = False) -> DataSourceAdapter:
+def get_adapter(provider_name: str, enable_storage: bool = False, use_enhanced_parser: bool = False) -> DataSourceAdapter:
     """
     Factory function to get a data source adapter instance.
     This function composes the httpx client with caching and rate limiting transports.
@@ -32,6 +33,7 @@ def get_adapter(provider_name: str, enable_storage: bool = False) -> DataSourceA
     Args:
         provider_name: Name of the data provider (e.g., 'fmp')
         enable_storage: Whether to create a storage-enabled adapter
+        use_enhanced_parser: Whether to use the enhanced parser with field normalization
     """
     if enable_storage:
         registry = STORAGE_ADAPTER_REGISTRY
@@ -42,7 +44,12 @@ def get_adapter(provider_name: str, enable_storage: bool = False) -> DataSourceA
     if not registry_entry:
         raise ConfigurationError(f"No adapter found for provider: {provider_name}")
 
-    adapter_class, parser_class = registry_entry
+    adapter_class, base_parser_class = registry_entry
+
+    if use_enhanced_parser and provider_name == "fmp":
+        parser_class = EnhancedFMPParser
+    else:
+        parser_class = base_parser_class
 
     provider_settings = settings.data_providers.get(provider_name)
     if not provider_settings:

@@ -35,6 +35,7 @@ class EnhancedFMPParser(BaseParser):
         # SEC filings
         "sec_filings": SECFiling,
         "sec-filings": SECFiling,
+        "sec-filings-search/symbol": SECFiling,
         
         # Company profile
         "profile": CompanyProfile,
@@ -143,27 +144,34 @@ class EnhancedFMPParser(BaseParser):
         processed = self._handle_missing_fields(endpoint, processed)
         processed = self._normalize_field_names(processed)
         
+        # Only apply numeric cleaning to financial statement data
+        if endpoint in ["income-statement", "balance-sheet-statement", "cash-flow-statement"]:
+            processed = self._clean_numeric_fields(processed)
+
         return processed
 
     def _clean_numeric_fields(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Clean and normalize numeric fields."""
+        # More specific list of numeric fields
+        numeric_fields = [
+            'revenue', 'netIncome', 'eps', 'grossProfit', 'totalAssets',
+            'totalLiabilities', 'totalEquity', 'operatingCashFlow', 'freeCashFlow',
+            # Add other known numeric fields from your models here
+        ]
+
         for key, value in data.items():
-            if isinstance(value, str):
-                # Handle common numeric string formats
-                if value.lower() in ['null', 'none', 'n/a', 'na', '-', '']:
-                    data[key] = 0.0
-                elif value.replace('.', '').replace('-', '').replace('+', '').isdigit():
-                    try:
-                        data[key] = float(value)
-                    except ValueError:
-                        logger.warning(f"Could not convert '{value}' to float for field '{key}'")
+            # Only process fields that are known to be numeric or look like numbers
+            if key in numeric_fields:
+                if isinstance(value, str):
+                    if value.lower() in ['null', 'none', 'n/a', 'na', '-', '']:
                         data[key] = 0.0
-            elif value is None:
-                # Set None values to 0 for numeric fields that expect float
-                if any(numeric_hint in key.lower() for numeric_hint in [
-                    'revenue', 'income', 'expense', 'cost', 'assets', 'liabilities',
-                    'cash', 'debt', 'equity', 'profit', 'margin', 'ratio', 'rate'
-                ]):
+                    elif value.replace('.', '').replace('-', '').replace('+', '').isdigit():
+                        try:
+                            data[key] = float(value)
+                        except ValueError:
+                            logger.warning(f"Could not convert '{value}' to float for field '{key}'")
+                            data[key] = 0.0
+                elif value is None:
                     data[key] = 0.0
         
         return data
@@ -233,8 +241,13 @@ class EnhancedFMPParser(BaseParser):
 
     def _normalize_field_names(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize field names to handle variations."""
-        # Create a mapping of alternative field names
         field_mappings = {
+            # SEC filings endpoint mappings
+            'filingDate': 'filing_date',
+            'acceptedDate': 'accepted_date',
+            'formType': 'form',
+            'link': 'filing_url',
+            'finalLink': 'report_url',
             # Common variations
             'company_name': 'companyName',
             'fiscal_year': 'fiscalYear',
@@ -244,13 +257,14 @@ class EnhancedFMPParser(BaseParser):
             'filing_date': 'filingDate',
             'report_date': 'reportDate',
         }
-        
         normalized_data = {}
         for key, value in data.items():
-            # Use mapped name if available, otherwise use original
             normalized_key = field_mappings.get(key, key)
-            normalized_data[normalized_key] = value
-            
+            # For SEC filings, ensure all fields are strings
+            if normalized_key in ['symbol', 'cik', 'filing_date', 'accepted_date', 'form', 'filing_url', 'report_url'] and value is not None:
+                normalized_data[normalized_key] = str(value)
+            else:
+                normalized_data[normalized_key] = value
         return normalized_data
 
     def _parse_sec_filing(self, data: Dict[str, Any]) -> SECFiling:

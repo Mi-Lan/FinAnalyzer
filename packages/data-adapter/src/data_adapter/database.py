@@ -2,6 +2,7 @@ import asyncio
 from typing import Optional, Dict, Any, List
 from contextlib import asynccontextmanager
 import json
+from datetime import datetime
 
 import asyncpg
 from databases import Database
@@ -12,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from data_adapter.config import ProviderSettings
 from data_adapter.logging import get_logger
 from data_adapter.models import Base, Company, FinancialData
-from data_adapter.providers.fmp.models import FinancialStatement
+from data_adapter.providers.fmp.models import FinancialStatement, SECFiling
 
 logger = get_logger(__name__)
 
@@ -177,6 +178,51 @@ class DatabaseManager:
                 )
                 logger.info(f"Stored new financial data for company {company_id}, {year} {period}")
                 return financial_data_id
+    
+    async def store_sec_filing(self, company_id: str, filing: SECFiling) -> Optional[str]:
+        """
+        Store a single SEC filing in the database.
+        Each filing is stored as a unique record.
+        """
+        try:
+            filing_date = datetime.fromisoformat(filing.filing_date.split(" ")[0])
+            year = filing_date.year
+            # Create a unique period identifier for the filing to avoid collision
+            period = f"FILING_{filing.form.replace(' ', '_')}_{filing.filing_date.split(' ')[0]}"
+
+            async with self.get_session() as session:
+                # Check if this specific filing already exists
+                result = await session.execute(
+                    text(
+                        'SELECT id FROM "FinancialData" '
+                        'WHERE "companyId" = :company_id AND year = :year AND period = :period'
+                    ),
+                    {"company_id": company_id, "year": year, "period": period}
+                )
+                if result.fetchone():
+                    logger.info(f"SEC filing {filing.form} from {filing.filing_date} already exists for company {company_id}.")
+                    return None
+
+                # Insert new filing data
+                financial_data_id = str(__import__('uuid').uuid4())
+                await session.execute(
+                    text(
+                        'INSERT INTO "FinancialData" (id, "companyId", year, period, data, "createdAt", "updatedAt") '
+                        'VALUES (:id, :company_id, :year, :period, :data, NOW(), NOW())'
+                    ),
+                    {
+                        "id": financial_data_id,
+                        "company_id": company_id,
+                        "year": year,
+                        "period": period,
+                        "data": filing.model_dump_json()
+                    }
+                )
+                logger.info(f"Stored SEC filing {filing.form} from {filing.filing_date} for company {company_id}")
+                return financial_data_id
+        except Exception as e:
+            logger.error(f"Failed to store SEC filing for company {company_id}: {e}")
+            return None
     
     async def get_company_by_ticker(self, ticker: str) -> Optional[Dict[str, Any]]:
         """Get company information by ticker."""

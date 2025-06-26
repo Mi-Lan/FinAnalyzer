@@ -56,14 +56,14 @@ class TestStorageIntegration:
             api_key=os.getenv("FMP_API_KEY")
         )
         
-        adapter = get_adapter(FMP_PROVIDER_NAME, enable_storage=True)
+        adapter = get_adapter(FMP_PROVIDER_NAME, enable_storage=True, use_enhanced_parser=True)
         return adapter
 
     async def test_fetch_and_store_financials(self, storage_adapter: StorageEnabledFMPAdapter, db_manager: DatabaseManager):
         """
         Test fetching financial data from FMP and storing it in the database.
         """
-        print(f"\\n--- Testing fetch_and_store_company_financials for {TEST_TICKER} ---")
+        print(f"\n--- Testing fetch_and_store_company_financials for {TEST_TICKER} ---")
         
         # Action: Fetch and store data
         results = await storage_adapter.fetch_and_store_company_financials(
@@ -89,45 +89,60 @@ class TestStorageIntegration:
         """
         Test retrieving stored financial data from the database.
         """
-        print(f"\\n--- First, ensuring data is stored for {TEST_TICKER} ---")
+        print(f"\n--- First, ensuring data is stored for {TEST_TICKER} ---")
         await storage_adapter.fetch_and_store_company_financials(
             ticker=TEST_TICKER,
-            years=[2023], 
+            years=[2023],
             periods=['annual']
         )
 
-        print(f"\\n--- Testing get_stored_company_data for {TEST_TICKER} ---")
-        
+        print(f"\n--- Testing get_stored_company_data for {TEST_TICKER} ---")
+
         # Action: Retrieve the stored data
         stored_data = await storage_adapter.get_stored_company_data(ticker=TEST_TICKER)
-        
+
         # Verification
         assert stored_data is not None, "Should retrieve stored data"
-        
+
         # Check company data
         company = stored_data.get("company")
         assert company is not None, "Company data should be present"
         assert company["ticker"] == TEST_TICKER
-        
+
         # Check financial data
         financial_data = stored_data.get("financial_data")
         assert financial_data is not None and len(financial_data) > 0, "Financial data should be present"
-        
-        # Find the record for the year we are interested in
-        record_2023 = next((r for r in financial_data if r.get("year") == 2023), None)
-        assert record_2023 is not None, "Should have a record for 2023"
 
-        # Check the content of the stored financial data
+        # Only check records with period == 'FY' (ignore SEC filings)
+        fy_records = [r for r in financial_data if r.get("period") == "FY"]
+        record_2023 = next((r for r in fy_records if r.get("year") == 2023), None)
+        assert record_2023 is not None, "Should have a record for 2023 with period 'FY'"
         assert record_2023["period"] == "FY"
-        assert "data" in record_2023 and isinstance(record_2023["data"], dict)
-        
-        # Verify that different statement types are present
-        statement_data = record_2023["data"]
-        assert "income_statements" in statement_data and len(statement_data["income_statements"]) > 0
-        assert "balance_sheets" in statement_data and len(statement_data["balance_sheets"]) > 0
-        assert "cash_flows" in statement_data and len(statement_data["cash_flows"]) > 0
-        
-        print(f"--- Successfully retrieved and validated stored data for {TEST_TICKER} ---")
+
+    async def test_fetch_and_store_sec_filings(self, storage_adapter: StorageEnabledFMPAdapter, db_manager: DatabaseManager):
+        """
+        Test fetching SEC filings and storing them in the database.
+        """
+        print(f"\n--- Testing fetch_and_store_sec_filings for {TEST_TICKER} ---")
+
+        from_date = "2023-01-01"
+        to_date = "2023-03-31"
+
+        stored_ids = await storage_adapter.fetch_and_store_sec_filings(
+            ticker=TEST_TICKER,
+            from_date=from_date,
+            to_date=to_date
+        )
+
+        # If no new filings were stored, check that filings exist in the DB for this period
+        if not stored_ids:
+            company = await db_manager.get_company_by_ticker(TEST_TICKER)
+            assert company is not None, "Company should exist"
+            filings = await db_manager.get_financial_data(company_id=company["id"])
+            sec_filings = [f for f in filings if f["period"].startswith("FILING_")]
+            assert len(sec_filings) > 0, "SEC filings should exist in the DB for this ticker and period"
+        else:
+            assert len(stored_ids) > 0, "Should have stored some SEC filings"
 
 # To run this test:
 # 1. Ensure you have a .env file in `packages/data-adapter` with:

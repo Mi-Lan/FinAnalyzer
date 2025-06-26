@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import re
 
 from data_adapter.providers.fmp.adapter import FMPAdapter
-from data_adapter.providers.fmp.models import FinancialStatement, IncomeStatement, BalanceSheetStatement, CashFlowStatement
+from data_adapter.providers.fmp.models import FinancialStatement, IncomeStatement, BalanceSheetStatement, CashFlowStatement, SECFiling
 from data_adapter.logging import get_logger
 
 if TYPE_CHECKING:
@@ -198,6 +198,49 @@ class StorageEnabledFMPAdapter(FMPAdapter):
         
         return results
     
+    async def fetch_and_store_sec_filings(
+        self,
+        ticker: str,
+        from_date: str,
+        to_date: str,
+        company_name: str = None,
+        sector: str = None,
+        industry: str = None
+    ) -> List[str]:
+        """
+        Fetch SEC filings for a company within a date range and store them.
+        """
+        params = {
+            'symbol': ticker,
+            'from': from_date,
+            'to': to_date
+        }
+        
+        # Fetch data using the parent class method
+        filings = await self.fetch_data("sec-filings-search/symbol", params)
+        
+        if not filings:
+            logger.warning(f"No SEC filings found for {ticker} from {from_date} to {to_date}")
+            return []
+            
+        # Ensure company exists
+        company_id = await self.db_manager.ensure_company_exists(
+            ticker=ticker,
+            name=company_name or ticker,
+            sector=sector,
+            industry=industry
+        )
+        
+        stored_ids = []
+        for filing in filings:
+            if isinstance(filing, SECFiling):
+                stored_id = await self.db_manager.store_sec_filing(company_id, filing)
+                if stored_id:
+                    stored_ids.append(stored_id)
+        
+        logger.info(f"Stored {len(stored_ids)} new SEC filings for {ticker}.")
+        return stored_ids
+
     async def get_stored_company_data(self, ticker: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve stored financial data for a company from the database.

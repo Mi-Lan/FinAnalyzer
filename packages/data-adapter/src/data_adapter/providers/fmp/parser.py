@@ -8,6 +8,7 @@ from data_adapter.providers.fmp.models import (
     CashFlowStatement,
     FinancialStatement,
     IncomeStatement,
+    SECFiling,
 )
 
 logger = get_logger(__name__)
@@ -22,6 +23,7 @@ class FMPParser(BaseParser):
         "income-statement": IncomeStatement,
         "balance-sheet-statement": BalanceSheetStatement,
         "cash-flow-statement": CashFlowStatement,
+        "sec-filings-search/symbol": SECFiling,
     }
 
     def parse(

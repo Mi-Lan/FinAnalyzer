@@ -179,13 +179,12 @@ class SECFiling(BaseModel):
 
     symbol: str
     cik: str
-    accepted_date: str = Field(alias="acceptedDate")
     filing_date: str = Field(alias="filingDate")
-    report_date: str = Field(alias="reportDate")
-    form: str  # 10-K, 10-Q, etc.
-    filing_url: str = Field(alias="filingURL")
-    report_url: str = Field(alias="reportURL")
-    type: str
+    accepted_date: str = Field(alias="acceptedDate")
+    form: str = Field(alias="formType")
+    filing_url: str = Field(alias="link")
+    report_url: Optional[str] = Field(default=None, alias="finalLink")
+    type: str = "filing"
     size: Optional[int] = None
     period: Optional[str] = None
     fiscal_year: Optional[str] = Field(default=None, alias="fiscalYear")
