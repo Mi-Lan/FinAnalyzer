@@ -14,7 +14,7 @@ export interface FinancialData {
   companyId: string;
   year: number;
   period: string; // "Q1", "Q2", "Q3", "Q4", "FY"
-  data: FMPFinancialStatements; // The raw FMP data
+  data: FMPFinancialStatements; // This should be the correct, detailed type
   createdAt: string;
   updatedAt: string;
 }
@@ -270,6 +270,40 @@ export interface ScreeningResult {
 export interface CompanyDetailsResponse {
   company: Company;
   financialData: FinancialData[];
-  latestFinancials: FinancialData;
-  analysisResult: AnalysisResult;
+  latestFinancials: FinancialData | null;
+  analysisResult: AnalysisResult | null;
+}
+
+// These types now accurately reflect the data structure and fields
+// used by the FinancialMetrics component.
+export interface FMPIncomeStatement {
+  revenue: number;
+  grossProfit: number;
+  operatingIncome: number;
+  netIncome: number;
+  eps?: number; // Made optional to match usage
+  date: string;
+}
+
+export interface FMPBalanceSheetStatement {
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  cashAndCashEquivalents: number;
+  totalDebt: number;
+  totalCurrentAssets: number;
+  totalCurrentLiabilities: number;
+  date: string;
+}
+
+export interface FMPCashFlowStatement {
+  operatingCashFlow: number;
+  freeCashFlow: number;
+  capitalExpenditure: number;
+}
+
+export interface FMPFinancialStatements {
+  incomeStatement?: FMPIncomeStatement;
+  balanceSheet?: FMPBalanceSheetStatement;
+  cashFlow?: FMPCashFlowStatement;
 }

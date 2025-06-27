@@ -125,7 +125,11 @@ export default function DashboardPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {item.latestFinancials.period} {item.latestFinancials.year}
+                    {item.latestFinancials ? (
+                      `${item.latestFinancials.period} ${item.latestFinancials.year}`
+                    ) : (
+                      <span className="text-muted-foreground">N/A</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Button asChild size="sm">

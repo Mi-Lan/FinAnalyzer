@@ -24,8 +24,8 @@ services:
 
   api-gateway:
     build:
-      context: ./packages/api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/api-gateway/Dockerfile
     ports:
       - '8000:8000'
     depends_on:
@@ -38,7 +38,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - API_KEY=your-secret-api-key
-      - FMP_API_KEY=${FMP_API_KEY:-your_fmp_api_key}
+      - FMP_API_KEY=${FMP_API_KEY}
     volumes:
       - ./packages/api-gateway:/app
       - ./packages/data-adapter:/data-adapter
@@ -47,7 +47,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev # Use development Dockerfile
     ports:
       - '3000:3000'
     depends_on:
@@ -60,6 +60,14 @@ services:
       - API_GATEWAY_URL=http://api-gateway:8000
       - API_KEY=your-secret-api-key
       - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NODE_ENV=development
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/packages/database/node_modules
+    command: pnpm dev --filter web
 
 volumes:
   postgres_data:

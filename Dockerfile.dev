@@ -1,0 +1,22 @@
+FROM node:20-slim
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@10.2.0 --activate
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/database/package.json ./packages/database/
+
+# Install dependencies
+RUN pnpm install
+
+# Copy the rest of the files
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start in development mode
+CMD ["pnpm", "dev", "--filter", "web"] 

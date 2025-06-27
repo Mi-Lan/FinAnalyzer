@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 const API_GATEWAY_URL =
   process.env.API_GATEWAY_URL || 'http://api-gateway:8000';
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY || 'your-secret-api-key'; // Fallback for development
 
 export async function GET() {
   if (!API_KEY) {

@@ -12,7 +12,7 @@ import Link from 'next/link';
 function CompanyDetailContent({ ticker }: { ticker: string }) {
   const { data, isLoading, error } = useCompanyDetails(ticker);
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return (
       <div className="container mx-auto py-8">
         <div className="text-center">Loading company details...</div>
@@ -20,7 +20,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
     );
   }
 
-  if (error || !data) {
+  if (error) {
     return (
       <div className="container mx-auto py-8">
         <div className="text-center text-red-600">
@@ -31,6 +31,28 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
   }
 
   const { company, latestFinancials, analysisResult } = data;
+  console.log(data);
+
+  // Mock analysis data if not available
+  const mockAnalysis = {
+    metricScores: {
+      profitability: 0,
+      growth: 0,
+      valuation: 0,
+      financial_health: 0,
+      efficiency: 0,
+    },
+    insights: {
+      recommendation: 'Analysis Pending',
+      summary: 'Financial analysis is not yet available for this company.',
+      strengths: ['Data collection in progress'],
+      weaknesses: ['Analysis pending'],
+      opportunities: ['Full analysis coming soon'],
+      risks: ['Please check back later'],
+    },
+  };
+
+  const analysis = analysisResult || mockAnalysis;
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -55,8 +77,8 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         <div className="lg:col-span-1">
           <ScoreCard
             title="Analysis Score"
-            scores={analysisResult.metricScores}
-            recommendation={analysisResult.insights.recommendation}
+            scores={analysis.metricScores}
+            recommendation={analysis.insights.recommendation}
           />
         </div>
 
@@ -67,7 +89,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
               <CardTitle>Key Insights</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">{analysisResult.insights.summary}</p>
+              <p className="mb-4">{analysis.insights.summary}</p>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
@@ -75,7 +97,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
                     Strengths
                   </h4>
                   <ul className="list-disc list-inside space-y-1">
-                    {analysisResult.insights.strengths.map(
+                    {analysis.insights.strengths.map(
                       (strength: string, i: number) => (
                         <li key={i} className="text-sm">
                           {strength}
@@ -90,7 +112,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
                     Weaknesses
                   </h4>
                   <ul className="list-disc list-inside space-y-1">
-                    {analysisResult.insights.weaknesses.map(
+                    {analysis.insights.weaknesses.map(
                       (weakness: string, i: number) => (
                         <li key={i} className="text-sm">
                           {weakness}
@@ -115,7 +137,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
                     Opportunities
                   </h4>
                   <ul className="list-disc list-inside space-y-1">
-                    {analysisResult.insights.opportunities.map(
+                    {analysis.insights.opportunities.map(
                       (opportunity: string, i: number) => (
                         <li key={i} className="text-sm">
                           {opportunity}
@@ -128,13 +150,11 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
                 <div>
                   <h4 className="font-semibold text-orange-600 mb-2">Risks</h4>
                   <ul className="list-disc list-inside space-y-1">
-                    {analysisResult.insights.risks.map(
-                      (risk: string, i: number) => (
-                        <li key={i} className="text-sm">
-                          {risk}
-                        </li>
-                      )
-                    )}
+                    {analysis.insights.risks.map((risk: string, i: number) => (
+                      <li key={i} className="text-sm">
+                        {risk}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -144,14 +164,16 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
       </div>
 
       {/* Financial Metrics */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Financial Metrics</h2>
-        <FinancialMetrics
-          financials={latestFinancials.data}
-          period={latestFinancials.period}
-          year={latestFinancials.year}
-        />
-      </div>
+      {latestFinancials && latestFinancials.data && (
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Financial Metrics</h2>
+          <FinancialMetrics
+            financials={latestFinancials.data}
+            period={latestFinancials.period}
+            year={latestFinancials.year}
+          />
+        </div>
+      )}
 
       {/* Historical Data */}
       <Card>
@@ -160,9 +182,15 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Latest data from {latestFinancials.period} {latestFinancials.year}.
-            Historical trend analysis and multi-period comparisons will be
-            available in the full version.
+            {latestFinancials ? (
+              <>
+                Latest data from {latestFinancials.period}{' '}
+                {latestFinancials.year}. Historical trend analysis and
+                multi-period comparisons will be available in the full version.
+              </>
+            ) : (
+              'Financial data is being loaded. Please check back in a moment.'
+            )}
           </p>
         </CardContent>
       </Card>

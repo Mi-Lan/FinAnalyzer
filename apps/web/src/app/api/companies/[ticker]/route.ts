@@ -5,7 +5,13 @@ export const dynamic = 'force-dynamic';
 
 const API_GATEWAY_URL =
   process.env.API_GATEWAY_URL || 'http://api-gateway:8000';
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY || 'your-secret-api-key'; // Fallback for development
+
+console.log('Environment check:', {
+  API_GATEWAY_URL,
+  API_KEY: API_KEY ? 'Set' : 'Not set',
+  NODE_ENV: process.env.NODE_ENV,
+});
 
 export async function GET(
   request: Request,

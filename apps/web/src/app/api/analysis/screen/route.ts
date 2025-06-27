@@ -7,7 +7,7 @@ import { ScreeningResult } from '@/types/financial';
 
 const API_GATEWAY_URL =
   process.env.API_GATEWAY_URL || 'http://api-gateway:8000';
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY || 'your-secret-api-key'; // Fallback for development
 
 // List of known tickers to use for demo purposes
 const DEMO_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA'];

@@ -103,6 +103,9 @@ importers:
         specifier: 5.14.0
         version: 5.14.0(prisma@5.14.0)
     devDependencies:
+      dotenv-cli:
+        specifier: ^8.0.0
+        version: 8.0.0
       prisma:
         specifier: 5.14.0
         version: 5.14.0
