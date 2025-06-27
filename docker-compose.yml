@@ -9,6 +9,11 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U user -d findb']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -16,6 +21,28 @@ services:
       - '6379:6379'
     volumes:
       - redis_data:/data
+
+  api-gateway:
+    build:
+      context: ./packages/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/findb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - API_KEY=your-secret-api-key
+      - FMP_API_KEY=${FMP_API_KEY:-your_fmp_api_key}
+    volumes:
+      - ./packages/api-gateway:/app
+      - ./packages/data-adapter:/data-adapter
+    command: poetry run uvicorn api_gateway.main:app --host 0.0.0.0 --port 8000 --reload
 
   web:
     build:
@@ -26,9 +53,13 @@ services:
     depends_on:
       - postgres
       - redis
+      - api-gateway
     environment:
       - DATABASE_URL=postgresql://user:password@postgres:5432/findb
       - REDIS_URL=redis://redis:6379
+      - API_GATEWAY_URL=http://api-gateway:8000
+      - API_KEY=your-secret-api-key
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
 
 volumes:
   postgres_data:

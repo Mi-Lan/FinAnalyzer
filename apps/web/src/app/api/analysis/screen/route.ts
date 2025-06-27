@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import {
-  mockCompanies,
-  generateMockFinancialData,
   generateMockAnalysisResult,
   mockAnalysisTemplates,
 } from '@/lib/mockData';
 import { ScreeningResult } from '@/types/financial';
+
+const API_GATEWAY_URL =
+  process.env.API_GATEWAY_URL || 'http://api-gateway:8000';
+const API_KEY = process.env.API_KEY;
+
+// List of known tickers to use for demo purposes
+const DEMO_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA'];
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,32 +20,53 @@ export async function GET(request: Request) {
   const maxScore = searchParams.get('maxScore');
   const recommendation = searchParams.get('recommendation');
 
-  // Filter companies based on criteria
-  let filteredCompanies = [...mockCompanies];
-
-  if (sector) {
-    filteredCompanies = filteredCompanies.filter((c) => c.sector === sector);
+  if (!API_KEY) {
+    return NextResponse.json(
+      { error: 'API key is not configured' },
+      { status: 500 }
+    );
   }
 
-  // Generate analysis results for filtered companies
-  const screeningResults = filteredCompanies.map((company) => {
-    const financialData = generateMockFinancialData(company.id, company.ticker);
-    const latestFinancials =
-      financialData.find(
-        (fd) => fd.period === 'Q2' && fd.year === new Date().getFullYear()
-      ) || financialData[0];
-    const analysisResult = generateMockAnalysisResult(
-      company.id,
-      mockAnalysisTemplates[0].id,
-      latestFinancials
-    );
+  const screeningResults = [];
 
-    return {
-      company,
-      latestFinancials,
-      analysis: analysisResult,
-    };
-  });
+  // Fetch real data for demo tickers
+  for (const ticker of DEMO_TICKERS) {
+    try {
+      const response = await fetch(
+        `${API_GATEWAY_URL}/api/companies/${ticker}`,
+        {
+          headers: {
+            'X-API-Key': API_KEY,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Generate mock analysis for the real company data
+        const analysisResult = generateMockAnalysisResult(
+          data.company.id,
+          mockAnalysisTemplates[0].id
+        );
+
+        // Apply sector filter
+        if (sector && data.company.sector !== sector) {
+          continue;
+        }
+
+        screeningResults.push({
+          company: data.company,
+          latestFinancials: data.latestFinancials,
+          analysis: analysisResult,
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching ${ticker}:`, error);
+      // Continue with other tickers
+    }
+  }
 
   // Apply score and recommendation filters
   let filteredResults = screeningResults;
