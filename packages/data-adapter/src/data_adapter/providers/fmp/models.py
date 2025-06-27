@@ -171,3 +171,71 @@ class CashFlowStatement(FinancialStatement):
     free_cash_flow: float = Field(alias="freeCashFlow")
     income_taxes_paid: float = Field(alias="incomeTaxesPaid")
     interest_paid: float = Field(alias="interestPaid")
+
+
+class SECFiling(BaseModel):
+    """Base model for SEC filing information."""
+    model_config = ConfigDict(populate_by_name=True)
+
+    symbol: str
+    cik: str
+    filing_date: str = Field(alias="filingDate")
+    accepted_date: str = Field(alias="acceptedDate")
+    form: str = Field(alias="formType")
+    filing_url: str = Field(alias="link")
+    report_url: Optional[str] = Field(default=None, alias="finalLink")
+    type: str = "filing"
+    size: Optional[int] = None
+    period: Optional[str] = None
+    fiscal_year: Optional[str] = Field(default=None, alias="fiscalYear")
+    quarter: Optional[int] = None
+
+
+class TenKFiling(SECFiling):
+    """Represents a 10-K annual filing."""
+    form: str = Field(default="10-K")
+
+
+class TenQFiling(SECFiling):
+    """Represents a 10-Q quarterly filing.""" 
+    form: str = Field(default="10-Q")
+    quarter: int
+
+
+class CompanyProfile(BaseModel):
+    """Company profile information from FMP."""
+    model_config = ConfigDict(populate_by_name=True)
+    
+    symbol: str
+    company_name: str = Field(alias="companyName")
+    price: Optional[float] = None
+    beta: Optional[float] = None
+    vol_avg: Optional[int] = Field(default=None, alias="volAvg")
+    mkt_cap: Optional[int] = Field(default=None, alias="mktCap")
+    last_div: Optional[float] = Field(default=None, alias="lastDiv")
+    range: Optional[str] = None
+    changes: Optional[float] = None
+    changes_percentage: Optional[str] = Field(default=None, alias="changesPercentage")
+    exchange: Optional[str] = None
+    exchange_short_name: Optional[str] = Field(default=None, alias="exchangeShortName")
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    description: Optional[str] = None
+    ceo: Optional[str] = None
+    sector: Optional[str] = None
+    country: Optional[str] = None
+    full_time_employees: Optional[str] = Field(default=None, alias="fullTimeEmployees")
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    dcf_diff: Optional[float] = Field(default=None, alias="dcfDiff")
+    dcf: Optional[float] = None
+    image: Optional[str] = None
+    ipo_date: Optional[str] = Field(default=None, alias="ipoDate")
+    default_image: Optional[bool] = Field(default=None, alias="defaultImage")
+    is_etf: Optional[bool] = Field(default=None, alias="isEtf")
+    is_actively_trading: Optional[bool] = Field(default=None, alias="isActivelyTrading")
+    is_adr: Optional[bool] = Field(default=None, alias="isAdr")
+    is_fund: Optional[bool] = Field(default=None, alias="isFund")

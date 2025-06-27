@@ -28,21 +28,27 @@ class CachingTransport(httpx.AsyncBaseTransport):
             return await self.transport.handle_async_request(request)
 
         cache_key = self._get_cache_key(request)
-        try:
-            cached_response = await self.redis.get(cache_key)
-            if cached_response:
-                logger.info(f"Cache hit for {cache_key}")
-                return httpx.Response(200, content=cached_response, request=request)
-        except Exception as e:
-            logger.warning(f"Redis cache read failed for key {cache_key}: {e}")
+        
+        # Try to get the cached response
+        cached_response = await self.redis.get(cache_key)
+        if cached_response:
+            logger.info(f"Cache hit for {cache_key}")
+            return httpx.Response(200, content=cached_response, request=request)
 
         logger.info(f"Cache miss for {cache_key}")
+        
+        # If not in cache, make the actual request
         response = await self.transport.handle_async_request(request)
         
-        try:
-            await self.redis.set(cache_key, response.content, ex=self.ttl)
-        except Exception as e:
-            logger.warning(f"Redis cache write failed for key {cache_key}: {e}")
+        # Read the content to make it available for caching
+        await response.aread()
+
+        # Cache the new response if it was successful
+        if 200 <= response.status_code < 300:
+            try:
+                await self.redis.set(cache_key, response.content, ex=self.ttl)
+            except Exception as e:
+                logger.warning(f"Redis cache write failed for key {cache_key}: {e}")
 
         return response
 

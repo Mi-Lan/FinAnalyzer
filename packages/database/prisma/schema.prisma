@@ -28,11 +28,12 @@ model FinancialData {
   companyId String
   year      Int
   period    String // e.g., "Q1", "Q2", "FY"
+  type      String // e.g., "income-statement", "balance-sheet-statement"
   data      Json // For raw financial statements (IS, BS, CF)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([companyId, year, period])
+  @@unique([companyId, year, period, type])
 }
 
 model AnalysisTemplate {

@@ -1,206 +1,180 @@
 # Data Adapter Package
 
-A Python-based data ingestion layer for the FinAnalyzer platform, providing standardized interfaces for financial data providers.
+A Python-based data ingestion layer for the FinAnalyzer platform, providing standardized interfaces for financial data providers, with integrated support for data persistence and asynchronous processing.
 
 ## Overview
 
-The data adapter package implements a flexible, extensible architecture for integrating various financial data sources. It provides a common interface for data retrieval, validation, and transformation while supporting multiple providers through a plugin-based system.
+The data adapter package implements a flexible, extensible architecture for integrating various financial data sources. It provides a common interface for data retrieval, parsing, validation, and transformation. The package now includes a **storage layer** to persist financial data in a PostgreSQL database and an **async processor** for handling high-throughput, concurrent data ingestion tasks.
 
 ## Architecture
 
 ### Core Components
 
-- **Abstract Base Classes** (`abc.py`): Define interfaces for data providers
-- **Provider Factory** (`factory.py`): Manages provider instantiation and configuration
-- **Configuration Management** (`config.py`): Handles settings and API credentials
-- **Rate Limiting** (`rate_limiter.py`): Implements request throttling and backoff
-- **Transport Layer** (`transports.py`): HTTP client abstractions with retry logic
+- **Abstract Base Classes** (`abc.py`): Define interfaces for data providers and parsers.
+- **Provider Factory** (`factory.py`): Manages provider instantiation for both standard and storage-enabled adapters.
+- **Configuration Management** (`config.py`): Handles settings for providers and the database connection.
+- **Database Manager** (`database.py`): Manages asynchronous database connections, sessions, and CRUD operations using SQLAlchemy and `asyncpg`.
+- **Async Processor** (`async_processor.py`): Orchestrates concurrent data ingestion and retrieval tasks with configurable concurrency limits.
+- **Enhanced Parser** (`enhanced_parser.py`): A robust parsing engine with data cleaning, validation, error recovery, and support for multiple data formats.
+- **Transport & Rate Limiting**: The underlying transport layer (`transports.py`, `rate_limiter.py`) handles caching (Redis) and API rate limiting.
 
 ### Provider Implementation
 
 The package currently supports:
 
-- **Financial Modeling Prep (FMP)** API integration
-- Extensible provider interface for additional data sources
-- Standardized data models with Pydantic validation
+- **Financial Modeling Prep (FMP)** API integration.
+- A `StorageEnabledFMPAdapter` that extends the base adapter with database persistence logic.
+- Standardized data models with Pydantic for API data and SQLAlchemy for database schema.
 
 ## Installation
 
 ```bash
-# From project root
+# Navigate to the package directory from the project root
 cd packages/data-adapter
 
-# Install in development mode
-pip install -e .
-
-# Or install dependencies only
-pip install -r requirements.txt
+# Install all dependencies using Poetry
+poetry install
 ```
 
 ## Usage
 
-### Basic Usage
+The factory function `get_adapter` can create two types of adapters: a standard, stateless adapter or a storage-enabled one.
+
+### Basic Usage (Stateless)
+
+This adapter fetches data from the API without interacting with the database.
 
 ```python
-from data_adapter import create_provider
-from data_adapter.config import Config
+from data_adapter import get_adapter
 
-# Initialize configuration
-config = Config()
+# Create a standard FMP adapter instance
+fmp_adapter = get_adapter("fmp")
 
-# Create provider instance
-provider = create_provider('fmp', config)
-
-# Fetch company data
-company_data = await provider.get_company_profile('AAPL')
-financial_data = await provider.get_financial_statements('AAPL', period='quarterly')
+# Fetch data directly from the API
+income_statements = await fmp_adapter.fetch_data(
+    "income-statement",
+    {"symbol": "AAPL", "period": "annual"}
+)
+print(f"Fetched {len(income_statements)} income statements for AAPL.")
 ```
 
-### Configuration
+### Storage-Enabled Usage
 
-Set up your API credentials:
+This adapter fetches data and persists it to the PostgreSQL database.
+
+```python
+from data_adapter import get_adapter
+
+# Create a storage-enabled FMP adapter instance
+storage_adapter = get_adapter("fmp", enable_storage=True)
+
+# Fetch financial statements for a company and store them
+# This single call fetches income statements, balance sheets, and cash flows
+# and merges them into a single record per fiscal period in the database.
+results = await storage_adapter.fetch_and_store_company_financials(
+    ticker="AAPL",
+    years=[2023],
+    periods=['annual']
+)
+print("Stored data results:", results)
+
+# Retrieve the consolidated data from the database
+stored_data = await storage_adapter.get_stored_company_data("AAPL")
+print(f"Retrieved {len(stored_data['financial_data'])} records for AAPL from the database.")
+```
+
+### Asynchronous Batch Processing
+
+The `AsyncProcessor` is designed for high-throughput operations on multiple tickers.
+
+```python
+import asyncio
+from data_adapter.async_processor import AsyncProcessor
+
+async def main():
+    # Initialize the processor with a concurrency limit of 5
+    processor = AsyncProcessor(concurrency_limit=5)
+
+    tickers = ["AAPL", "MSFT", "GOOGL"]
+
+    # Fetch and store data for multiple tickers in parallel
+    await processor.fetch_and_store_for_tickers(
+        tickers=tickers,
+        years=[2023],
+        periods=['annual']
+    )
+
+    # Retrieve all stored data in parallel
+    all_data = await processor.get_stored_data_for_tickers(tickers)
+    for ticker, data in all_data.items():
+        print(f"Data retrieved for {ticker}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Configuration
+
+Set up your API credentials and database URL in a `.env` file in the `packages/data-adapter` directory.
 
 ```bash
-# Environment variables
-export FMP_API_KEY="your_fmp_api_key"
-export FMP_BASE_URL="https://financialmodelingprep.com/api/v3"
-
-# Or use .env file in project root
+# .env file content
 FMP_API_KEY=your_fmp_api_key
-FMP_BASE_URL=https://financialmodelingprep.com/api/v3
+DATABASE_URL=postgresql://user:password@localhost:5432/findb
 ```
 
-### Error Handling
-
-The adapter includes comprehensive error handling:
-
-```python
-from data_adapter.exceptions import DataAdapterError, RateLimitExceeded
-
-try:
-    data = await provider.get_company_profile('AAPL')
-except RateLimitExceeded as e:
-    print(f"Rate limit hit: {e.retry_after} seconds")
-except DataAdapterError as e:
-    print(f"Data adapter error: {e}")
-```
+| Environment Variable | Description                     | Default                           |
+| :------------------- | :------------------------------ | :-------------------------------- |
+| `FMP_API_KEY`        | Financial Modeling Prep API key | **Required**                      |
+| `DATABASE_URL`       | PostgreSQL connection URL       | **Required for storage features** |
+| `REDIS_HOST`         | Redis host for caching          | `localhost`                       |
+| `REDIS_PORT`         | Redis port for caching          | `6379`                            |
 
 ## Data Models
 
-All data is validated using Pydantic models:
+- **Pydantic Models** (`providers/fmp/models.py`): Used for validating and structuring the raw data from the FMP API.
+- **SQLAlchemy Models** (`models.py`): Define the database schema, mirroring the structure in `packages/database/prisma/schema.prisma`.
 
-```python
-from data_adapter.providers.fmp.models import (
-    CompanyProfile,
-    FinancialStatements,
-    IncomeStatement,
-    BalanceSheet,
-    CashFlowStatement
-)
+## Database & Storage
 
-# Automatic validation and type conversion
-profile: CompanyProfile = await provider.get_company_profile('AAPL')
-print(f"Company: {profile.company_name}")
-print(f"Market Cap: {profile.market_cap}")
-```
+The adapter's storage functionality is built around a `DatabaseManager` that handles all database interactions.
+
+- **Asynchronous Operations**: Uses `asyncpg` and `SQLAlchemy`'s asyncio extension for non-blocking database calls.
+- **Data Merging**: When storing data, the system performs an "upsert." If a record for a company's fiscal period already exists, the new financial statements are merged into the existing JSONB `data` field, ensuring a complete, consolidated record.
+- **JSONB Storage**: Financial statement data is stored in a single `JSONB` column, allowing for flexibility while still being queryable.
 
 ## Testing
 
 ```bash
-# Run tests
-python -m pytest tests/
+# Run all tests
+poetry run pytest tests/
 
-# Run with coverage
-python -m pytest tests/ --cov=data_adapter --cov-report=html
-
-# Run specific test files
-python -m pytest tests/test_fmp_adapter.py -v
+# Run specific integration tests (requires Docker services to be running)
+poetry run pytest tests/test_storage_integration.py -s -v
+poetry run pytest tests/test_async_processor.py -s -v
 ```
 
 ## Development
 
 ### Adding New Providers
 
-1. Create provider directory: `src/data_adapter/providers/new_provider/`
-2. Implement the provider interface from `abc.py`
-3. Define data models in `models.py`
-4. Add provider to factory in `factory.py`
-5. Write tests in `tests/test_new_provider.py`
+The process remains the same, with the option to also create a storage-enabled version of your new adapter.
 
-### Provider Interface
-
-```python
-from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
-from data_adapter.abc import BaseDataProvider
-
-class NewProvider(BaseDataProvider):
-    async def get_company_profile(self, symbol: str) -> CompanyProfile:
-        """Fetch company profile data"""
-        pass
-
-    async def get_financial_statements(
-        self,
-        symbol: str,
-        period: str = 'annual'
-    ) -> FinancialStatements:
-        """Fetch financial statements"""
-        pass
-```
-
-## Configuration Options
-
-| Environment Variable     | Description                     | Default                                    |
-| ------------------------ | ------------------------------- | ------------------------------------------ |
-| `FMP_API_KEY`            | Financial Modeling Prep API key | Required                                   |
-| `FMP_BASE_URL`           | FMP API base URL                | `https://financialmodelingprep.com/api/v3` |
-| `DATA_ADAPTER_LOG_LEVEL` | Logging level                   | `INFO`                                     |
-| `RATE_LIMIT_REQUESTS`    | Max requests per minute         | `300`                                      |
-| `REQUEST_TIMEOUT`        | Request timeout in seconds      | `30`                                       |
-
-## Integration with FinAnalyzer
-
-This package is designed to integrate seamlessly with the FinAnalyzer monorepo:
-
-- **TypeScript Interop**: Data models designed for easy serialization to TypeScript
-- **FastAPI Integration**: Compatible with FastAPI backend for API endpoints
-- **Docker Support**: Included in multi-stage Docker builds
-- **Shared Configuration**: Uses monorepo-wide environment configuration
-
-## Performance Considerations
-
-- **Rate Limiting**: Built-in request throttling to respect API limits
-- **Caching**: Transport layer supports response caching
-- **Async Operations**: Fully async for concurrent data fetching
-- **Connection Pooling**: HTTP client reuses connections for efficiency
+1.  Create provider directory: `src/data_adapter/providers/new_provider/`.
+2.  Implement the `DataSourceAdapter` interface from `abc.py`.
+3.  Define Pydantic models in `models.py`.
+4.  Add the provider to `ADAPTER_REGISTRY` in `factory.py`.
+5.  **(Optional)** Create a `StorageEnabledNewProviderAdapter` that inherits from your base adapter and implements storage logic. Add it to the `STORAGE_ADAPTER_REGISTRY`.
+6.  Write tests in `tests/test_new_provider.py`.
 
 ## Error Handling
 
-The package provides structured error handling:
+The package provides structured error handling for API, database, and parsing operations.
 
-- `DataAdapterError`: Base exception class
-- `ProviderNotFoundError`: Unknown provider requested
-- `ConfigurationError`: Invalid configuration
-- `RateLimitExceeded`: API rate limit hit
-- `ValidationError`: Data validation failed
-
-## Logging
-
-Comprehensive logging for debugging and monitoring:
-
-```python
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('data_adapter')
-
-# Logs include:
-# - API requests and responses
-# - Rate limiting events
-# - Data validation errors
-# - Provider initialization
-```
+- `DataAdapterError`: Base exception class.
+- `ConfigurationError`: Invalid or missing configuration.
+- `APIError`: An error related to an external API call.
+- `ParserError`: Failure during data parsing or validation.
 
 ## License
 
