@@ -91,12 +91,14 @@ A platform that automates financial analysis from data ingestion to scoring, des
 
 ### Core Features
 
-**1. Automated Data Ingestion**
+**1. Automated Data Ingestion & Storage**
 
-- Python-based data adapter with FMP API integration
-- Pydantic validation and error handling
-- Rate limiting and transport abstraction
-- Configurable data sources and normalization
+- Python-based data adapter with FMP API integration.
+- **Persistent Storage**: Asynchronously fetches and stores financial data in a PostgreSQL database, performing an "upsert" to merge new data with existing records for a complete, consolidated view.
+- **High-Throughput Processing**: Includes an `AsyncProcessor` to handle concurrent data ingestion and retrieval for multiple stock tickers.
+- Pydantic validation and an enhanced parser for robust data cleaning, validation, and error recovery.
+- Rate limiting and transport abstraction with Redis caching.
+- Configurable data sources and normalization.
 
 **2. Modern Frontend Architecture**
 
@@ -194,6 +196,11 @@ FinAnalyzer/
 │       ├── public/          # Static assets
 │       └── next.config.ts   # Next.js configuration
 ├── packages/
+│   ├── api-gateway/         # FastAPI gateway for frontend
+│   │   ├── src/api_gateway/ # Python package source
+│   │   │   ├── main.py      # FastAPI application
+│   │   │   └── security.py  # API key authentication
+│   │   └── pyproject.toml   # Python package configuration
 │   ├── database/            # Prisma database package
 │   │   ├── prisma/          # Database schema and migrations
 │   │   ├── index.ts         # Prisma client exports
@@ -201,9 +208,10 @@ FinAnalyzer/
 │   └── data-adapter/        # Python data ingestion layer
 │       ├── src/data_adapter/# Python package source
 │       │   ├── providers/   # API provider implementations
-│       │   ├── abc.py       # Abstract base classes
-│       │   ├── config.py    # Configuration management
-│       │   └── factory.py   # Provider factory pattern
+│       │   ├── async_processor.py # High-throughput data processing
+│       │   ├── database.py  # Asynchronous DB manager
+│       │   ├── factory.py   # Provider factory pattern
+│       │   └── models.py    # SQLAlchemy data models
 │       └── pyproject.toml   # Python package configuration
 ├── turbo.json              # Turborepo pipeline configuration
 ├── tsconfig.base.json      # Shared TypeScript configuration
@@ -597,15 +605,15 @@ Using Task Master's structured approach:
 
 ### Phase 1: Foundation (Tasks 1-4)
 
-- [ ] Repository setup and monorepo structure
-- [ ] Database schema and migrations
-- [ ] Docker containerization
-- [ ] Next.js frontend with mock data
+- [x] Repository setup and monorepo structure
+- [x] Database schema and migrations
+- [x] Docker containerization
+- [x] Next.js frontend with mock data
 
 ### Phase 2: Core Backend (Tasks 5-8)
 
-- [ ] FastAPI gateway and authentication
-- [ ] Data ingestion pipeline
+- [x] FastAPI gateway and authentication
+- [x] Data ingestion pipeline
 - [ ] LangChain prompt chains
 - [ ] Scoring module
 
