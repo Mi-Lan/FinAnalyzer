@@ -274,36 +274,36 @@ export interface CompanyDetailsResponse {
   analysisResult: AnalysisResult | null;
 }
 
-// These types now accurately reflect the data structure and fields
-// used by the FinancialMetrics component.
-export interface FMPIncomeStatement {
-  revenue: number;
-  grossProfit: number;
-  operatingIncome: number;
-  netIncome: number;
-  eps?: number; // Made optional to match usage
-  date: string;
-}
+// These types are specific subsets for the FinancialMetrics component.
+// They use Pick to select only the necessary fields from the main types,
+// avoiding re-declaration and potential conflicts.
 
-export interface FMPBalanceSheetStatement {
-  totalAssets: number;
-  totalLiabilities: number;
-  totalEquity: number;
-  cashAndCashEquivalents: number;
-  totalDebt: number;
-  totalCurrentAssets: number;
-  totalCurrentLiabilities: number;
-  date: string;
-}
+export type FinancialMetricsIncomeStatement = Pick<
+  FMPIncomeStatement,
+  'revenue' | 'grossProfit' | 'operatingIncome' | 'netIncome' | 'eps' | 'date'
+>;
 
-export interface FMPCashFlowStatement {
-  operatingCashFlow: number;
-  freeCashFlow: number;
-  capitalExpenditure: number;
-}
+export type FinancialMetricsBalanceSheetStatement = Pick<
+  FMPBalanceSheetStatement,
+  | 'totalAssets'
+  | 'totalLiabilities'
+  | 'totalEquity'
+  | 'cashAndCashEquivalents'
+  | 'totalDebt'
+  | 'totalCurrentAssets'
+  | 'totalCurrentLiabilities'
+  | 'date'
+>;
 
-export interface FMPFinancialStatements {
-  incomeStatement?: FMPIncomeStatement;
-  balanceSheet?: FMPBalanceSheetStatement;
-  cashFlow?: FMPCashFlowStatement;
+export type FinancialMetricsCashFlowStatement = Pick<
+  FMPCashFlowStatement,
+  'operatingCashFlow' | 'freeCashFlow' | 'capitalExpenditure'
+>;
+
+// This type represents the data structure required by the FinancialMetrics component,
+// with optional statement fields.
+export interface FinancialMetricsData {
+  incomeStatement?: FinancialMetricsIncomeStatement;
+  balanceSheet?: FinancialMetricsBalanceSheetStatement;
+  cashFlow?: FinancialMetricsCashFlowStatement;
 }

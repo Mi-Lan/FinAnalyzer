@@ -38,12 +38,13 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
     metricScores: {
       profitability: 0,
       growth: 0,
+      balanceSheet: 0,
+      capitalAllocation: 0,
       valuation: 0,
-      financial_health: 0,
-      efficiency: 0,
+      overall: 0,
     },
     insights: {
-      recommendation: 'Analysis Pending',
+      recommendation: undefined,
       summary: 'Financial analysis is not yet available for this company.',
       strengths: ['Data collection in progress'],
       weaknesses: ['Analysis pending'],
