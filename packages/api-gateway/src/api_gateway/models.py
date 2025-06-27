@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -8,10 +8,14 @@ class Company(BaseModel):
     id: str
     name: str
     ticker: str
-    sector: Optional[str] = None
-    industry: Optional[str] = None
+    sector: str
+    industry: str
     createdAt: datetime
     updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
 
 class FinancialData(BaseModel):
     id: str
@@ -22,65 +26,13 @@ class FinancialData(BaseModel):
     createdAt: datetime
     updatedAt: datetime
 
-class AnalysisTemplate(BaseModel):
-    id: str
-    name: str
-    description: Optional[str] = None
-    sectors: List[str]
-    template: Dict[str, Any]
-    createdAt: datetime
-    updatedAt: datetime
+    class Config:
+        from_attributes = True
 
-class AnalysisInsights(BaseModel):
-    summary: str
-    strengths: List[str]
-    weaknesses: List[str]
-    opportunities: List[str]
-    risks: List[str]
-    recommendation: str  # 'BUY' | 'HOLD' | 'SELL'
-
-class MetricScores(BaseModel):
-    profitability: float
-    growth: float
-    balanceSheet: float
-    capitalAllocation: float
-    valuation: float
-    overall: float
-
-class AnalysisResult(BaseModel):
-    id: str
-    companyId: str
-    templateId: str
-    jobId: Optional[str] = None
-    score: float
-    insights: AnalysisInsights
-    metricScores: MetricScores
-    createdAt: datetime
-    updatedAt: datetime
-
-class BulkAnalysisJob(BaseModel):
-    id: str
-    status: str  # 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
-    progress: float
-    createdAt: datetime
-    updatedAt: datetime
 
 # API request/response models
-class BulkAnalysisRequest(BaseModel):
-    tickers: List[str]
-
-class ScreeningResultCompany(BaseModel):
-    company: Company
-    latestFinancials: FinancialData
-    analysis: AnalysisResult
-
-class ScreeningResult(BaseModel):
-    companies: List[ScreeningResultCompany]
-    totalCount: int
-    filters: Dict[str, Any]
-
 class CompanyDetailsResponse(BaseModel):
     company: Company
     financialData: List[FinancialData]
-    latestFinancials: FinancialData
-    analysisResult: AnalysisResult 
+    latestFinancials: Optional[FinancialData] = None
+    analysisResult: Optional[Dict[str, Any]] = None 

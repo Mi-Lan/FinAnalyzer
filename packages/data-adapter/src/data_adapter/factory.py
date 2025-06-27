@@ -1,4 +1,5 @@
 from typing import Dict, Tuple, Type, Optional
+import os
 
 import httpx
 import redis.asyncio as redis
@@ -56,7 +57,9 @@ def get_adapter(provider_name: str, enable_storage: bool = False, use_enhanced_p
         raise ConfigurationError(f"No settings found for provider: {provider_name}")
 
     # 1. Create Redis client
-    redis_client = redis.Redis(host="localhost", port=6379, db=0)
+    redis_host = os.environ.get("REDIS_HOST", "localhost")
+    redis_port = int(os.environ.get("REDIS_PORT", "6379"))
+    redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
 
     # 2. Create caching transport (using our own class)
     cache_transport = CachingTransport(

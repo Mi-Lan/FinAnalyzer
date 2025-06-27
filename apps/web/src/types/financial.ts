@@ -14,7 +14,7 @@ export interface FinancialData {
   companyId: string;
   year: number;
   period: string; // "Q1", "Q2", "Q3", "Q4", "FY"
-  data: FMPFinancialStatements; // The raw FMP data
+  data: FMPFinancialStatements; // This should be the correct, detailed type
   createdAt: string;
   updatedAt: string;
 }
@@ -270,6 +270,40 @@ export interface ScreeningResult {
 export interface CompanyDetailsResponse {
   company: Company;
   financialData: FinancialData[];
-  latestFinancials: FinancialData;
-  analysisResult: AnalysisResult;
+  latestFinancials: FinancialData | null;
+  analysisResult: AnalysisResult | null;
+}
+
+// These types are specific subsets for the FinancialMetrics component.
+// They use Pick to select only the necessary fields from the main types,
+// avoiding re-declaration and potential conflicts.
+
+export type FinancialMetricsIncomeStatement = Pick<
+  FMPIncomeStatement,
+  'revenue' | 'grossProfit' | 'operatingIncome' | 'netIncome' | 'eps' | 'date'
+>;
+
+export type FinancialMetricsBalanceSheetStatement = Pick<
+  FMPBalanceSheetStatement,
+  | 'totalAssets'
+  | 'totalLiabilities'
+  | 'totalEquity'
+  | 'cashAndCashEquivalents'
+  | 'totalDebt'
+  | 'totalCurrentAssets'
+  | 'totalCurrentLiabilities'
+  | 'date'
+>;
+
+export type FinancialMetricsCashFlowStatement = Pick<
+  FMPCashFlowStatement,
+  'operatingCashFlow' | 'freeCashFlow' | 'capitalExpenditure'
+>;
+
+// This type represents the data structure required by the FinancialMetrics component,
+// with optional statement fields.
+export interface FinancialMetricsData {
+  incomeStatement?: FinancialMetricsIncomeStatement;
+  balanceSheet?: FinancialMetricsBalanceSheetStatement;
+  cashFlow?: FinancialMetricsCashFlowStatement;
 }
