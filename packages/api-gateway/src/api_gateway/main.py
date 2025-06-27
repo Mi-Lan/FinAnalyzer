@@ -86,6 +86,7 @@ def transform_financial_data(db_financial: Dict[str, Any]) -> FinancialData:
         companyId=str(company_id),
         year=db_financial['year'],
         period=db_financial['period'],
+        type=db_financial['type'],
         data=db_financial['data'],
         createdAt=created_at,
         updatedAt=updated_at
@@ -133,6 +134,7 @@ def assemble_latest_financials(financials: List[FinancialData]) -> Optional[Fina
         companyId=parent_fd_for_metadata.companyId if parent_fd_for_metadata else "unknown",
         year=latest_year,
         period='FY',
+        type='assembled-financial-statements',  # Special type for assembled data
         createdAt=parent_fd_for_metadata.createdAt if parent_fd_for_metadata else datetime.now(),
         updatedAt=parent_fd_for_metadata.updatedAt if parent_fd_for_metadata else datetime.now(),
         data={
