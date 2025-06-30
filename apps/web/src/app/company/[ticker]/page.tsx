@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { FMPFinancialStatements } from '@/types/financial';
 
 function CompanyDetailContent({ ticker }: { ticker: string }) {
   const { data, isLoading, error } = useCompanyDetails(ticker);
@@ -238,7 +239,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
           <div>
             <h2 className="text-2xl font-semibold mb-4">Financial Metrics</h2>
             <FinancialMetrics
-              financials={latestFinancials.data as any}
+              financials={latestFinancials.data as FMPFinancialStatements}
               period={latestFinancials.period}
               year={latestFinancials.year}
             />

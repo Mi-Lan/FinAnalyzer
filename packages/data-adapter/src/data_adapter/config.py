@@ -8,6 +8,7 @@ class ProviderSettings(BaseModel):
     api_key: str
     rate_limit: int = 300
     requests_per_minute: int = 300
+    max_data_points: int = 1500  # Maximum number of data records to fetch per operation
 
 
 class DatabaseSettings(BaseModel):
