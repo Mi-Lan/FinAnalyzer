@@ -38,6 +38,18 @@ An AI-powered platform for automated financial data analysis and scoring built w
 | 18 | Deploy Microservices with Kubernetes/ECS | ⏳ pending | medium | 1, 5 |
 
 
+## 📊 **Data Fetching Architecture**
+
+**NEW**: Comprehensive 10-Year Financial Data Fetching System  
+📖 **[Complete Data Fetching Documentation](./DATA_FETCHING.md)**
+
+The platform now features a sophisticated data fetching system that automatically retrieves:
+
+- **10 years of financial statements** (Income Statement, Balance Sheet, Cash Flow)
+- **SEC filings** (10-K and 10-Q regulatory documents)
+- **Smart data validation** with completeness checking
+- **API rate limiting** with intelligent prioritization (1500 data point limits)
+
 ## Built with Task Master
 
 This project uses [Task Master](https://github.com/eyaltoledano/claude-task-master) for structured development - an AI-powered project management system that breaks down complex projects into manageable tasks.
