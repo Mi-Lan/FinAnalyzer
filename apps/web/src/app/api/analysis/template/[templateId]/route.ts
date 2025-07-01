@@ -7,9 +7,9 @@ export const runtime = 'edge';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { templateId: string } }
+  context: { params: Promise<{ templateId: string }> }
 ) {
-  const { templateId } = params;
+  const { templateId } = await context.params;
 
   // For now, we only support the tech sector template
   if (templateId !== 'tech-default-v1') {
