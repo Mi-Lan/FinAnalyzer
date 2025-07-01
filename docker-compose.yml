@@ -61,6 +61,7 @@ services:
       - API_KEY=your-secret-api-key
       - NEXT_PUBLIC_API_URL=http://localhost:3000
       - NODE_ENV=development
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./apps/web:/app/apps/web
       - ./packages:/app/packages

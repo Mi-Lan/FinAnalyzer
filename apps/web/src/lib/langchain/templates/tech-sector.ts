@@ -143,14 +143,14 @@ export const techSectorTemplate: SectorTemplate = {
       6.  **Recommendation:** Provide a final investment recommendation: BUY, HOLD, or SELL.
 
       Output a JSON object with the following structure:
-      {
+      {{
         "summary": "...",
         "strengths": ["...", "..."],
         "weaknesses": ["...", "..."],
         "opportunities": ["...", "..."],
         "risks": ["...", "..."],
         "recommendation": "BUY" | "HOLD" | "SELL"
-      }
+      }}
     `,
   },
 };

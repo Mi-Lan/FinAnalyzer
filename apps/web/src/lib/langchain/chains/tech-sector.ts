@@ -42,16 +42,25 @@ const InsightsOutputSchema = z.object({
 
 // --- Model Initialization ---
 
-const model = new ChatOpenAI({
-  model: 'gpt-4o-mini',
-  temperature: 0.2,
-});
+const getModel = () => {
+  console.log('🔍 OPENAI_API_KEY debug at runtime:', {
+    exists: !!process.env.OPENAI_API_KEY,
+    length: process.env.OPENAI_API_KEY?.length,
+    prefix: process.env.OPENAI_API_KEY?.substring(0, 10),
+  });
+
+  return new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    temperature: 0.2,
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+};
 
 // --- Reusable Analysis Sub-Chain ---
 
 const createDimensionChain = (promptTemplate: string) => {
   const prompt = PromptTemplate.fromTemplate(promptTemplate);
-  return prompt.pipe(model.withStructuredOutput(ScoreOutputSchema));
+  return prompt.pipe(getModel().withStructuredOutput(ScoreOutputSchema));
 };
 
 // --- Chain Components ---
@@ -136,16 +145,14 @@ const insightsChain = RunnableSequence.from([
   }) => ({
     symbol: input.companyInfo.symbol,
     overallScore: input.scores.overall,
-    profitabilityAnalysis: JSON.stringify(input.dimensions.profitability),
-    growthAnalysis: JSON.stringify(input.dimensions.growth),
-    balanceSheetAnalysis: JSON.stringify(input.dimensions.balanceSheet),
-    capitalAllocationAnalysis: JSON.stringify(
-      input.dimensions.capitalAllocation
-    ),
-    valuationAnalysis: JSON.stringify(input.dimensions.valuation),
+    profitabilityAnalysis: `Score: ${input.dimensions.profitability.score}/100`,
+    growthAnalysis: `Score: ${input.dimensions.growth.score}/100`,
+    balanceSheetAnalysis: `Score: ${input.dimensions.balanceSheet.score}/100`,
+    capitalAllocationAnalysis: `Score: ${input.dimensions.capitalAllocation.score}/100`,
+    valuationAnalysis: `Score: ${input.dimensions.valuation.score}/100`,
   }),
   ChatPromptTemplate.fromTemplate(techSectorTemplate.prompts.insights),
-  model.withStructuredOutput(InsightsOutputSchema),
+  getModel().withStructuredOutput(InsightsOutputSchema),
 ]);
 
 // --- Main Analysis Chain ---
