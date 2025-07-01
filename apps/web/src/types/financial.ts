@@ -14,7 +14,8 @@ export interface FinancialData {
   companyId: string;
   year: number;
   period: string; // "Q1", "Q2", "Q3", "Q4", "FY"
-  data: FMPFinancialStatements; // This should be the correct, detailed type
+  type: string; // e.g., "income-statement", "balance-sheet-statement", "10-K", "10-Q"
+  data: FMPFinancialStatements | Record<string, unknown>; // Can be financial statements OR SEC filing data
   createdAt: string;
   updatedAt: string;
 }

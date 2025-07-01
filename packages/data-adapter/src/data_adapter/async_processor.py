@@ -49,19 +49,29 @@ class AsyncProcessor:
         self,
         tickers: List[str],
         years: List[int] = None,
-        periods: List[str] = None
+        periods: List[str] = None,
+        max_data_points: int = None
     ) -> Dict[str, Dict[str, List[str]]]:
         """
         Fetch and store financial data for a list of tickers in parallel.
+        Respects API limits by distributing data points across tickers.
         """
         
-        async def task_func(adapter, ticker, years, periods):
+        # Distribute max_data_points across tickers if specified
+        per_ticker_limit = None
+        if max_data_points and len(tickers) > 1:
+            per_ticker_limit = max_data_points // len(tickers)
+            logger.info(f"Distributing {max_data_points} data points across {len(tickers)} tickers: {per_ticker_limit} per ticker")
+        elif max_data_points:
+            per_ticker_limit = max_data_points
+        
+        async def task_func(adapter, ticker, years, periods, per_ticker_limit):
             return await adapter.fetch_and_store_company_financials(
-                ticker=ticker, years=years, periods=periods
+                ticker=ticker, years=years, periods=periods, max_data_points=per_ticker_limit
             )
             
         tasks_with_params = [
-            (task_func, [ticker, years, periods], {}) for ticker in tickers
+            (task_func, [ticker, years, periods, per_ticker_limit], {}) for ticker in tickers
         ]
         
         logger.info(f"Starting parallel fetch for {len(tickers)} tickers.")
@@ -95,24 +105,73 @@ class AsyncProcessor:
         
         logger.info(f"Completed parallel data retrieval for {len(tickers)} tickers.")
         return ticker_results
+    
+    async def check_data_completeness_for_tickers(self, tickers: List[str], required_years: List[int]) -> Dict[str, Dict[str, Any]]:
+        """
+        Check data completeness for a list of tickers in parallel.
+        Returns dict with ticker as key and completeness info as value.
+        """
+        
+        async def task_func(adapter, ticker, required_years):
+            # Get company info first
+            company = await adapter.db_manager.get_company_by_ticker(ticker)
+            if not company:
+                return {
+                    "is_complete": False,
+                    "company_exists": False,
+                    "has_complete_financials": False,
+                    "has_old_10k_filings": False,
+                    "has_recent_filings": False,
+                    "missing_financial_data": [],
+                    "old_10k_count": 0,
+                    "recent_filings_count": 0
+                }
+            
+            # Check completeness
+            completeness = await adapter.db_manager.check_data_completeness(company['id'], required_years)
+            completeness["company_exists"] = True
+            return completeness
+
+        tasks_with_params = [
+            (task_func, [ticker, required_years], {}) for ticker in tickers
+        ]
+        
+        logger.info(f"Starting parallel completeness check for {len(tickers)} tickers.")
+        
+        results = await self.run_tasks(tasks_with_params)
+        
+        # Combine results into a dictionary keyed by ticker
+        ticker_results = {ticker: result for ticker, result in zip(tickers, results)}
+        
+        logger.info(f"Completed parallel completeness check for {len(tickers)} tickers.")
+        return ticker_results
 
     async def fetch_and_store_sec_filings_for_tickers(
         self,
         tickers: List[str],
         from_date: str,
-        to_date: str
+        to_date: str,
+        max_filings_per_ticker: int = None
     ) -> Dict[str, List[str]]:
         """
         Fetch and store SEC filings for a list of tickers in parallel.
+        Respects limits by distributing SEC filing capacity across tickers.
         """
         
-        async def task_func(adapter, ticker, from_date, to_date):
+        # Distribute SEC filing capacity across tickers if specified
+        if max_filings_per_ticker is None:
+            # Default: reasonable limit per ticker for SEC filings
+            max_filings_per_ticker = 150 // len(tickers) if len(tickers) > 1 else 150
+        
+        logger.info(f"SEC filings limit: {max_filings_per_ticker} filings per ticker across {len(tickers)} tickers")
+        
+        async def task_func(adapter, ticker, from_date, to_date, max_filings):
             return await adapter.fetch_and_store_sec_filings(
-                ticker=ticker, from_date=from_date, to_date=to_date
+                ticker=ticker, from_date=from_date, to_date=to_date, max_filings=max_filings
             )
             
         tasks_with_params = [
-            (task_func, [ticker, from_date, to_date], {}) for ticker in tickers
+            (task_func, [ticker, from_date, to_date, max_filings_per_ticker], {}) for ticker in tickers
         ]
         
         logger.info(f"Starting parallel SEC filing fetch for {len(tickers)} tickers.")

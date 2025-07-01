@@ -159,36 +159,60 @@ class StorageEnabledFMPAdapter(FMPAdapter):
         periods: List[str] = None,
         company_name: str = None,
         sector: str = None,
-        industry: str = None
+        industry: str = None,
+        max_data_points: int = None
     ) -> Dict[str, List[str]]:
         """
         Fetch and store comprehensive financial data for a company.
+        Respects API limits by prioritizing recent years and essential data.
         Returns dict with endpoint names as keys and lists of stored data IDs as values.
         """
         if years is None:
-            years = [2023, 2024]  # Default to recent years
+            # Default to last 10 years for comprehensive analysis
+            current_year = datetime.now().year
+            years = list(range(current_year - 9, current_year + 1))
         
         if periods is None:
             periods = ['annual', 'quarter']  # Both annual and quarterly data
+            
+        if max_data_points is None:
+            max_data_points = self.settings.max_data_points
+        
+        # Define endpoints first
+        endpoints = ['income-statement', 'balance-sheet-statement', 'cash-flow-statement']
+        
+        # Estimate data points: 3 endpoints × periods × years
+        # Annual: ~1 record per endpoint per year
+        # Quarter: ~4 records per endpoint per year  
+        estimated_annual = len(endpoints) * len([y for y in years]) * 1
+        estimated_quarterly = len(endpoints) * len([y for y in years]) * 4
+        total_estimated = estimated_annual + (estimated_quarterly if 'quarter' in periods else 0)
+        
+        logger.info(f"Estimated data points for {ticker}: {total_estimated} (limit: {max_data_points})")
+        
+        # Apply smart limits if we exceed the threshold
+        if total_estimated > max_data_points:
+            logger.warning(f"Estimated data points ({total_estimated}) exceeds limit ({max_data_points}). Applying prioritization.")
+            # Prioritize: recent years first, annual data over quarterly
+            years = self._prioritize_years(years, max_data_points)
+            periods = self._prioritize_periods(periods, max_data_points, len(years))
         
         results = {}
-        endpoints = ['income-statement', 'balance-sheet-statement', 'cash-flow-statement']
+        data_points_fetched = 0
         
         for endpoint in endpoints:
             results[endpoint] = []
             
             for period in periods:
+                if data_points_fetched >= max_data_points:
+                    logger.warning(f"Reached data point limit ({max_data_points}). Stopping fetch for {ticker}")
+                    break
+                    
                 try:
                     params = {
                         'symbol': ticker,
                         'period': period
                     }
-                    
-                    # Add year filtering if quarterly data
-                    if period == 'quarter' and years:
-                        # For quarterly data, we might need to filter by years
-                        # FMP returns all quarters, so we'll filter after fetching
-                        pass
                     
                     stored_ids = await self.fetch_and_store_data(
                         endpoint=endpoint,
@@ -200,11 +224,43 @@ class StorageEnabledFMPAdapter(FMPAdapter):
                     
                     results[endpoint].extend(stored_ids)
                     
+                    # Estimate data points fetched (this is approximate)
+                    estimated_points = len(years) * (4 if period == 'quarter' else 1)
+                    data_points_fetched += estimated_points
+                    
                 except Exception as e:
                     logger.error(f"Failed to fetch {endpoint} data for {ticker} ({period}): {e}")
                     continue
+                    
+            if data_points_fetched >= max_data_points:
+                break
         
+        logger.info(f"Fetched approximately {data_points_fetched} data points for {ticker}")
         return results
+    
+    def _prioritize_years(self, years: List[int], max_data_points: int) -> List[int]:
+        """Prioritize recent years when hitting data limits."""
+        # Sort years in descending order (most recent first)
+        sorted_years = sorted(years, reverse=True)
+        
+        # Estimate how many years we can afford (conservative estimate)
+        # Assume 3 endpoints × 2 periods × 5 records per period-year = 30 per year
+        max_years = min(len(sorted_years), max_data_points // 30)
+        max_years = max(1, max_years)  # Always fetch at least 1 year
+        
+        return sorted_years[:max_years]
+    
+    def _prioritize_periods(self, periods: List[str], max_data_points: int, num_years: int) -> List[str]:
+        """Prioritize annual data over quarterly when hitting limits."""
+        if 'annual' in periods and 'quarter' in periods:
+            # Check if we can afford both
+            # Estimate: 3 endpoints × num_years × (1 annual + 4 quarterly) = 15 per year
+            estimated_both = 3 * num_years * 5
+            if estimated_both > max_data_points:
+                logger.info("Prioritizing annual data over quarterly due to data point limits")
+                return ['annual']
+        
+        return periods
     
     async def fetch_and_store_sec_filings(
         self,
@@ -213,15 +269,23 @@ class StorageEnabledFMPAdapter(FMPAdapter):
         to_date: str,
         company_name: str = None,
         sector: str = None,
-        industry: str = None
+        industry: str = None,
+        max_filings: int = None
     ) -> List[str]:
         """
         Fetch SEC filings for a company within a date range and store them.
+        Respects limits by prioritizing 10-K filings over other types.
         """
+        if max_filings is None:
+            # Reserve some capacity for SEC filings (about 10% of total limit)
+            max_filings = max(50, self.settings.max_data_points // 10)
+        
         params = {
             'symbol': ticker,
             'from': from_date,
-            'to': to_date
+            'to': to_date,
+            'page': 0,
+            'limit': 1500  # Request up to 1000 filings to get full 10-year history
         }
         
         # Fetch data using the parent class method
@@ -230,6 +294,12 @@ class StorageEnabledFMPAdapter(FMPAdapter):
         if not filings:
             logger.warning(f"No SEC filings found for {ticker} from {from_date} to {to_date}")
             return []
+        
+        # Prioritize 10-K filings, then 10-Q, then others
+        prioritized_filings = self._prioritize_sec_filings(filings, max_filings)
+        
+        if len(prioritized_filings) < len(filings):
+            logger.info(f"Limited SEC filings for {ticker} from {len(filings)} to {len(prioritized_filings)} due to limits")
             
         # Ensure company exists
         company_id = await self.db_manager.ensure_company_exists(
@@ -240,7 +310,7 @@ class StorageEnabledFMPAdapter(FMPAdapter):
         )
         
         stored_ids = []
-        for filing in filings:
+        for filing in prioritized_filings:
             if isinstance(filing, SECFiling):
                 stored_id = await self.db_manager.store_sec_filing(company_id, filing)
                 if stored_id:
@@ -248,6 +318,51 @@ class StorageEnabledFMPAdapter(FMPAdapter):
         
         logger.info(f"Stored {len(stored_ids)} new SEC filings for {ticker}.")
         return stored_ids
+    
+    def _prioritize_sec_filings(self, filings: List[SECFiling], max_filings: int) -> List[SECFiling]:
+        """
+        Prioritize SEC filings by type and recency.
+        Priority order: 10-K (annual) > 10-Q (quarterly) > others
+        Within each type: most recent first
+        """
+        if len(filings) <= max_filings:
+            return filings
+        
+        # Separate by filing type
+        ten_k_filings = [f for f in filings if f.form == '10-K']
+        ten_q_filings = [f for f in filings if f.form == '10-Q']
+        other_filings = [f for f in filings if f.form not in ['10-K', '10-Q']]
+        
+        # Sort each group by filing date (most recent first)
+        ten_k_filings.sort(key=lambda x: x.filing_date, reverse=True)
+        ten_q_filings.sort(key=lambda x: x.filing_date, reverse=True)
+        other_filings.sort(key=lambda x: x.filing_date, reverse=True)
+        
+        # Allocate filings based on priority
+        selected_filings = []
+        remaining_capacity = max_filings
+        
+        # First priority: 10-K filings (keep most important ones)
+        if ten_k_filings and remaining_capacity > 0:
+            ten_k_count = min(len(ten_k_filings), max(1, remaining_capacity // 2))  # At least 1, up to half capacity
+            selected_filings.extend(ten_k_filings[:ten_k_count])
+            remaining_capacity -= ten_k_count
+        
+        # Second priority: 10-Q filings
+        if ten_q_filings and remaining_capacity > 0:
+            ten_q_count = min(len(ten_q_filings), remaining_capacity // 2)  # Up to half remaining
+            selected_filings.extend(ten_q_filings[:ten_q_count])
+            remaining_capacity -= ten_q_count
+        
+        # Third priority: Other filings
+        if other_filings and remaining_capacity > 0:
+            selected_filings.extend(other_filings[:remaining_capacity])
+        
+        logger.info(f"Prioritized SEC filings: {len([f for f in selected_filings if f.form == '10-K'])} 10-K, "
+                   f"{len([f for f in selected_filings if f.form == '10-Q'])} 10-Q, "
+                   f"{len([f for f in selected_filings if f.form not in ['10-K', '10-Q']])} others")
+        
+        return selected_filings
 
     async def get_stored_company_data(self, ticker: str) -> Optional[Dict[str, Any]]:
         """

@@ -5,6 +5,9 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import os
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Add the data-adapter to the Python path
 sys.path.append('/data-adapter/src')
@@ -86,6 +89,7 @@ def transform_financial_data(db_financial: Dict[str, Any]) -> FinancialData:
         companyId=str(company_id),
         year=db_financial['year'],
         period=db_financial['period'],
+        type=db_financial['type'],
         data=db_financial['data'],
         createdAt=created_at,
         updatedAt=updated_at
@@ -133,6 +137,7 @@ def assemble_latest_financials(financials: List[FinancialData]) -> Optional[Fina
         companyId=parent_fd_for_metadata.companyId if parent_fd_for_metadata else "unknown",
         year=latest_year,
         period='FY',
+        type='assembled-financial-statements',  # Special type for assembled data
         createdAt=parent_fd_for_metadata.createdAt if parent_fd_for_metadata else datetime.now(),
         updatedAt=parent_fd_for_metadata.updatedAt if parent_fd_for_metadata else datetime.now(),
         data={
@@ -145,28 +150,60 @@ def assemble_latest_financials(financials: List[FinancialData]) -> Optional[Fina
 @router.get("/companies/{ticker}", response_model=CompanyDetailsResponse)
 async def get_company_details(ticker: str, processor: AsyncProcessor = Depends(get_processor)):
     try:
-        # Check for stored data first
-        company_data = await processor.get_stored_data_for_tickers([ticker.upper()])
-
-        # If no data exists, fetch and store it
-        if not company_data or ticker.upper() not in company_data:
-            current_year = datetime.now().year
-            await processor.fetch_and_store_for_tickers(
-                tickers=[ticker.upper()],
-                years=[current_year, current_year - 1, current_year - 2], # Fetch last 3 years
-                periods=['annual', 'quarter']
-            )
+        current_year = datetime.now().year
+        years_to_fetch = list(range(current_year - 9, current_year + 1))  # Last 10 years
+        
+        # Check data completeness first
+        completeness_check = await processor.check_data_completeness_for_tickers(
+            [ticker.upper()], 
+            years_to_fetch
+        )
+        
+        ticker_upper = ticker.upper()
+        completeness = completeness_check.get(ticker_upper, {"is_complete": False})
+        
+        # If data is not complete, fetch missing data
+        if not completeness.get("is_complete", False):
+            logger.info(f"Data incomplete for {ticker}. Status: financials={completeness.get('has_complete_financials')}, old_10k={completeness.get('has_old_10k_filings')}, recent_filings={completeness.get('has_recent_filings')}, missing={completeness.get('missing_financial_data', [])}")
             
-            # Try to get the data again
-            company_data = await processor.get_stored_data_for_tickers([ticker.upper()])
-            
-            if not company_data or ticker.upper() not in company_data:
-                raise HTTPException(
-                    status_code=404, 
-                    detail=f"Unable to fetch or find data for ticker {ticker}"
+            # Fetch financial statements if missing or incomplete
+            if not completeness.get("has_complete_financials", False):
+                logger.info(f"Fetching financial statements for {ticker}")
+                await processor.fetch_and_store_for_tickers(
+                    tickers=[ticker_upper],
+                    years=years_to_fetch,
+                    periods=['annual', 'quarter'],
+                    max_data_points=1500  # Enforce API limit
                 )
+            
+            # Fetch SEC filings if missing old 10-K filings or recent filings
+            if not completeness.get("has_old_10k_filings", False) or not completeness.get("has_recent_filings", False):
+                logger.info(f"Fetching SEC filings for {ticker} (old 10-K: {completeness.get('has_old_10k_filings')}, recent: {completeness.get('has_recent_filings')})")
+                try:
+                    from_date = f"{current_year - 9}-01-01"
+                    to_date = f"{current_year}-12-31"
+                    await processor.fetch_and_store_sec_filings_for_tickers(
+                        tickers=[ticker_upper],
+                        from_date=from_date,
+                        to_date=to_date,
+                        max_filings_per_ticker=150  # Reasonable limit for SEC filings
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to fetch SEC filings for {ticker}: {e}")
+                    # Continue without SEC filings if they fail
+        else:
+            logger.info(f"Data already complete for {ticker} - using cached data")
+        
+        # Get the (now hopefully complete) data
+        company_data = await processor.get_stored_data_for_tickers([ticker_upper])
+        
+        if not company_data or ticker_upper not in company_data:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Unable to fetch or find data for ticker {ticker}"
+            )
 
-        data = company_data[ticker.upper()]
+        data = company_data[ticker_upper]
         
         if not data.get('company'):
             raise HTTPException(status_code=404, detail=f"Company info for {ticker} not found in database.")

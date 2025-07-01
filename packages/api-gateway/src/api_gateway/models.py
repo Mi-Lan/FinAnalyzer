@@ -22,6 +22,7 @@ class FinancialData(BaseModel):
     companyId: str
     year: int
     period: str  # "Q1", "Q2", "Q3", "Q4", "FY"
+    type: str  # e.g., "income-statement", "balance-sheet-statement", "10-K", "10-Q"
     data: Dict[str, Any]  # This will store the FMP data as JSON
     createdAt: datetime
     updatedAt: datetime

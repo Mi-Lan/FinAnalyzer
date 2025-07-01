@@ -280,4 +280,68 @@ class DatabaseManager:
                     "updatedAt": row[6]
                 }
                 for row in rows
-            ] 
+            ]
+    
+    async def check_data_completeness(self, company_id: str, required_years: List[int]) -> Dict[str, Any]:
+        """
+        Check if we have complete financial data and SEC filings for a company.
+        Returns a dict with completeness status and missing data information.
+        """
+        async with self.get_session() as session:
+            current_year = datetime.now().year
+            oldest_required_year = current_year - 9  # 10 years back
+            
+            # Check financial statements completeness
+            financial_types = ['Income Statement', 'Balance Sheet', 'Cash Flow Statement']
+            missing_financial_data = []
+            
+            for year in required_years:
+                for financial_type in financial_types:
+                    result = await session.execute(
+                        text(
+                            'SELECT COUNT(*) FROM "FinancialData" '
+                            'WHERE "companyId" = :company_id AND year = :year AND type = :type AND period = :period'
+                        ),
+                        {"company_id": company_id, "year": year, "type": financial_type, "period": "FY"}
+                    )
+                    count = result.scalar()
+                    if count == 0:
+                        missing_financial_data.append(f"{financial_type} {year} FY")
+            
+            # Check for SEC 10-K filings - we need at least one 10-K that's at least 9 years old
+            result = await session.execute(
+                text(
+                    'SELECT COUNT(*) FROM "FinancialData" '
+                    'WHERE "companyId" = :company_id AND type = :type AND year <= :oldest_year'
+                ),
+                {"company_id": company_id, "type": "10-K", "oldest_year": oldest_required_year}
+            )
+            old_10k_count = result.scalar()
+            
+            # Check for recent SEC filings (last 2 years) to ensure we're up to date
+            result = await session.execute(
+                text(
+                    'SELECT COUNT(*) FROM "FinancialData" '
+                    'WHERE "companyId" = :company_id AND type IN (:type1, :type2) AND year >= :recent_year'
+                ),
+                {"company_id": company_id, "type1": "10-K", "type2": "10-Q", "recent_year": current_year - 1}
+            )
+            recent_filings_count = result.scalar()
+            
+            # Determine if data is complete
+            has_complete_financials = len(missing_financial_data) == 0
+            has_old_10k_filings = old_10k_count > 0
+            has_recent_filings = recent_filings_count > 0
+            
+            is_complete = has_complete_financials and has_old_10k_filings and has_recent_filings
+            
+            return {
+                "is_complete": is_complete,
+                "has_complete_financials": has_complete_financials,
+                "has_old_10k_filings": has_old_10k_filings,
+                "has_recent_filings": has_recent_filings,
+                "missing_financial_data": missing_financial_data,
+                "old_10k_count": old_10k_count,
+                "recent_filings_count": recent_filings_count,
+                "oldest_required_year": oldest_required_year
+            } 
