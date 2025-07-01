@@ -14,7 +14,7 @@ An AI-powered platform for automated financial data analysis and scoring built w
 
 ## Development Progress
 
-**Overall Progress: 6/18 tasks completed (33%)**
+**Overall Progress: 7/18 tasks completed (39%)**
 
 | ID | Task | Status | Priority | Dependencies |
 |:---|:-----|:-------|:---------|:-------------|
@@ -24,7 +24,7 @@ An AI-powered platform for automated financial data analysis and scoring built w
 | 4 | Scaffold Next.js Frontend with Mock Data | ✅ done | medium | 1 |
 | 5 | Build FastAPI Gateway for FE/BE Communication | ✅ done | medium | 1, 2 |
 | 6 | Implement Real-Time Data Pull and Storage | ✅ done | high | 2, 3 |
-| 7 | Develop Hard-Coded Prompt Chain for Single Temp... | ⏳ pending | medium | 2, 3 |
+| 7 | Develop Hard-Coded Prompt Chain for Single Temp... | ✅ done | medium | 2, 3 |
 | 8 | Build Scoring Module with Pydantic Validation | ⏳ pending | medium | 2, 7 |
 | 9 | Display Scores & Insights in UI | ⏳ pending | medium | 4, 5, 8 |
 | 10 | Add Caching for Repeat Requests | ⏳ pending | medium | 3, 6 |

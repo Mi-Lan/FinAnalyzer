@@ -1,0 +1,233 @@
+import {
+  Company,
+  FMPBalanceSheetStatement,
+  FMPCashFlowStatement,
+  FMPFinancialStatements,
+  FMPIncomeStatement,
+  FMPFinancialStatement,
+} from '@/types/financial';
+
+export const mockCompany: Company = {
+  id: '1',
+  ticker: 'MOCK',
+  name: 'Mock Tech Inc.',
+  sector: 'Technology',
+  industry: 'Software',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+type MockStatementBase = Omit<FMPFinancialStatement, 'link' | 'finalLink'>;
+
+const createMockStatement = (
+  year: string,
+  overrides: Partial<MockStatementBase> = {}
+): MockStatementBase => ({
+  date: `${year}-12-31`,
+  symbol: 'MOCK',
+  reportedCurrency: 'USD',
+  cik: '000123456',
+  filingDate: `${year}-12-31`,
+  acceptedDate: `${year}-12-31`,
+  calendarYear: year,
+  fiscalYear: year,
+  period: 'FY',
+  ...overrides,
+});
+
+const createMockIncomeStatement = (
+  year: string,
+  overrides: Partial<FMPIncomeStatement> = {}
+): FMPIncomeStatement => ({
+  ...createMockStatement(year),
+  revenue: 0,
+  costOfRevenue: 0,
+  grossProfit: 0,
+  researchAndDevelopmentExpenses: 0,
+  generalAndAdministrativeExpenses: 0,
+  sellingAndMarketingExpenses: 0,
+  sellingGeneralAndAdministrativeExpenses: 0,
+  otherExpenses: 0,
+  operatingExpenses: 0,
+  costAndExpenses: 0,
+  interestIncome: 0,
+  interestExpense: 0,
+  depreciationAndAmortization: 0,
+  ebitda: 0,
+  ebit: 0,
+  operatingIncome: 0,
+  totalOtherIncomeExpensesNet: 0,
+  incomeBeforeTax: 0,
+  incomeTaxExpense: 0,
+  netIncome: 0,
+  netIncomeFromContinuingOperations: 0,
+  netIncomeFromDiscontinuedOperations: 0,
+  otherAdjustmentsToNetIncome: 0,
+  bottomLineNetIncome: 0,
+  netIncomeDeductions: 0,
+  netInterestIncome: 0,
+  nonOperatingIncomeExcludingInterest: 0,
+  eps: 0,
+  epsDiluted: 0,
+  weightedAverageShsOut: 0,
+  weightedAverageShsOutDil: 0,
+  ...overrides,
+});
+
+const createMockBalanceSheet = (
+  year: string,
+  overrides: Partial<FMPBalanceSheetStatement> = {}
+): FMPBalanceSheetStatement => ({
+  ...createMockStatement(year),
+  cashAndCashEquivalents: 0,
+  shortTermInvestments: 0,
+  cashAndShortTermInvestments: 0,
+  netReceivables: 0,
+  accountsReceivables: 0,
+  otherReceivables: 0,
+  inventory: 0,
+  prepaids: 0,
+  otherCurrentAssets: 0,
+  totalCurrentAssets: 0,
+  propertyPlantEquipmentNet: 0,
+  goodwill: 0,
+  intangibleAssets: 0,
+  goodwillAndIntangibleAssets: 0,
+  longTermInvestments: 0,
+  taxAssets: 0,
+  otherNonCurrentAssets: 0,
+  totalNonCurrentAssets: 0,
+  otherAssets: 0,
+  totalAssets: 0,
+  totalPayables: 0,
+  accountPayables: 0,
+  otherPayables: 0,
+  accruedExpenses: 0,
+  shortTermDebt: 0,
+  capitalLeaseObligationsCurrent: 0,
+  taxPayables: 0,
+  deferredRevenue: 0,
+  otherCurrentLiabilities: 0,
+  totalCurrentLiabilities: 0,
+  longTermDebt: 0,
+  capitalLeaseObligationsNonCurrent: 0,
+  deferredRevenueNonCurrent: 0,
+  deferredTaxLiabilitiesNonCurrent: 0,
+  otherNonCurrentLiabilities: 0,
+  totalNonCurrentLiabilities: 0,
+  otherLiabilities: 0,
+  capitalLeaseObligations: 0,
+  totalLiabilities: 0,
+  treasuryStock: 0,
+  preferredStock: 0,
+  commonStock: 0,
+  retainedEarnings: 0,
+  additionalPaidInCapital: 0,
+  accumulatedOtherComprehensiveIncomeLoss: 0,
+  otherTotalStockholdersEquity: 0,
+  totalStockholdersEquity: 0,
+  totalEquity: 0,
+  minorityInterest: 0,
+  totalLiabilitiesAndTotalEquity: 0,
+  totalInvestments: 0,
+  totalDebt: 0,
+  netDebt: 0,
+  ...overrides,
+});
+
+const createMockCashFlow = (
+  year: string,
+  overrides: Partial<FMPCashFlowStatement> = {}
+): FMPCashFlowStatement => ({
+  ...createMockStatement(year),
+  netIncome: 0,
+  depreciationAndAmortization: 0,
+  deferredIncomeTax: 0,
+  stockBasedCompensation: 0,
+  changeInWorkingCapital: 0,
+  accountsReceivables: 0,
+  inventory: 0,
+  accountsPayables: 0,
+  otherWorkingCapital: 0,
+  otherNonCashItems: 0,
+  netCashProvidedByOperatingActivities: 0,
+  investmentsInPropertyPlantAndEquipment: 0,
+  acquisitionsNet: 0,
+  purchasesOfInvestments: 0,
+  salesMaturitiesOfInvestments: 0,
+  otherInvestingActivities: 0,
+  netCashProvidedByInvestingActivities: 0,
+  netDebtIssuance: 0,
+  longTermNetDebtIssuance: 0,
+  shortTermNetDebtIssuance: 0,
+  netStockIssuance: 0,
+  netCommonStockIssuance: 0,
+  commonStockIssuance: 0,
+  commonStockRepurchased: 0,
+  netPreferredStockIssuance: 0,
+  netDividendsPaid: 0,
+  commonDividendsPaid: 0,
+  preferredDividendsPaid: 0,
+  otherFinancingActivities: 0,
+  netCashProvidedByFinancingActivities: 0,
+  effectOfForexChangesOnCash: 0,
+  netChangeInCash: 0,
+  cashAtEndOfPeriod: 0,
+  cashAtBeginningOfPeriod: 0,
+  operatingCashFlow: 0,
+  capitalExpenditure: 0,
+  freeCashFlow: 0,
+  incomeTaxesPaid: 0,
+  interestPaid: 0,
+  ...overrides,
+});
+
+const createMockFinancials = (
+  year: string,
+  overrides: {
+    incomeStatement?: Partial<FMPIncomeStatement>;
+    balanceSheet?: Partial<FMPBalanceSheetStatement>;
+    cashFlow?: Partial<FMPCashFlowStatement>;
+  } = {}
+): FMPFinancialStatements => ({
+  incomeStatement: createMockIncomeStatement(year, overrides.incomeStatement),
+  balanceSheet: createMockBalanceSheet(year, overrides.balanceSheet),
+  cashFlow: createMockCashFlow(year, overrides.cashFlow),
+});
+
+export const mockFinancials: FMPFinancialStatements[] = [
+  createMockFinancials('2022', {
+    incomeStatement: {
+      revenue: 100000,
+      grossProfit: 60000,
+      operatingIncome: 30000,
+      netIncome: 20000,
+    },
+    balanceSheet: {
+      totalCurrentAssets: 80000,
+      totalCurrentLiabilities: 40000,
+      totalDebt: 60000,
+      totalEquity: 100000,
+      cashAndCashEquivalents: 30000,
+      totalAssets: 150000,
+    },
+    cashFlow: { freeCashFlow: 25000, operatingCashFlow: 35000 },
+  }),
+  createMockFinancials('2023', {
+    incomeStatement: {
+      revenue: 120000,
+      grossProfit: 80000,
+      operatingIncome: 45000,
+      netIncome: 30000,
+    },
+    balanceSheet: {
+      totalCurrentAssets: 90000,
+      totalCurrentLiabilities: 45000,
+      totalDebt: 70000,
+      totalEquity: 120000,
+      cashAndCashEquivalents: 40000,
+      totalAssets: 180000,
+    },
+    cashFlow: { freeCashFlow: 35000, operatingCashFlow: 50000 },
+  }),
+];
