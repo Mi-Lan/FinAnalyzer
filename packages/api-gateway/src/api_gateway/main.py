@@ -14,6 +14,35 @@ sys.path.append('/data-adapter/src')
 
 from data_adapter.async_processor import AsyncProcessor
 
+# **NEW: Configuration for data filtering**
+FINANCIAL_DATA_FILTER_CONFIG = {
+    # Financial statement types we want to include
+    "financial_statement_types": {
+        'Income Statement',
+        'income-statement', 
+        'Balance Sheet',
+        'balance-sheet-statement',
+        'Cash Flow Statement', 
+        'cash-flow-statement',
+        'assembled-financial-statements'  # Our custom assembled type
+    },
+    
+    # SEC filing types we want to include
+    "sec_filing_types": {
+        '10-K',     # Annual report
+        '10-Q',     # Quarterly report  
+        '8-K',      # Current report
+        '20-F',     # Annual report for foreign companies
+        '6-K',      # Report of foreign private issuer
+        'DEF 14A',  # Proxy statement
+        'S-1',      # Registration statement
+        'S-3',      # Registration statement
+        'S-4',      # Registration statement
+        'SC 13G',   # Beneficial ownership report
+        'SC 13D'    # Beneficial ownership report
+    }
+}
+
 app = FastAPI()
 router = APIRouter(prefix="/api", dependencies=[Depends(get_api_key)])
 
@@ -147,6 +176,42 @@ def assemble_latest_financials(financials: List[FinancialData]) -> Optional[Fina
         }
     )
 
+def filter_relevant_financial_data(financials: List[FinancialData]) -> Dict[str, List[FinancialData]]:
+    """
+    Filter and categorize financial data into statements and SEC filings.
+    Returns only the data types needed for the company detail page.
+    """
+    # Use configuration for maintainability
+    financial_statement_types = FINANCIAL_DATA_FILTER_CONFIG["financial_statement_types"]
+    sec_filing_types = FINANCIAL_DATA_FILTER_CONFIG["sec_filing_types"]
+    
+    # Separate and filter the data
+    financial_statements = []
+    sec_filings = []
+    filtered_out_count = 0
+    
+    for fd in financials:
+        if fd.type in financial_statement_types:
+            financial_statements.append(fd)
+        elif fd.type in sec_filing_types:
+            sec_filings.append(fd)
+        else:
+            # Track what we're filtering out for monitoring
+            filtered_out_count += 1
+    
+    # Log filtering performance for monitoring
+    total_input = len(financials)
+    total_output = len(financial_statements) + len(sec_filings)
+    
+    logger.info(f"Financial data filtering: {total_input} → {total_output} records "
+               f"({len(financial_statements)} statements, {len(sec_filings)} filings, "
+               f"{filtered_out_count} filtered out)")
+    
+    return {
+        'financial_statements': financial_statements,
+        'sec_filings': sec_filings
+    }
+
 @router.get("/companies/{ticker}", response_model=CompanyDetailsResponse)
 async def get_company_details(ticker: str, processor: AsyncProcessor = Depends(get_processor)):
     try:
@@ -210,14 +275,20 @@ async def get_company_details(ticker: str, processor: AsyncProcessor = Depends(g
 
         # Transform data for the response
         company = transform_company_data(data['company'])
-        financials = [transform_financial_data(fd) for fd in data.get('financial_data', [])]
+        all_financials = [transform_financial_data(fd) for fd in data.get('financial_data', [])]
         
-        # Assemble the latest financials payload
-        latest_financials_payload = assemble_latest_financials(financials)
+        # **NEW: Filter the financial data to only include what we need**
+        filtered_data = filter_relevant_financial_data(all_financials)
+        
+        # Combine filtered financial statements and SEC filings
+        relevant_financials = filtered_data['financial_statements'] + filtered_data['sec_filings']
+        
+        # Assemble the latest financials payload from financial statements only
+        latest_financials_payload = assemble_latest_financials(filtered_data['financial_statements'])
 
         return CompanyDetailsResponse(
             company=company,
-            financialData=financials,
+            financialData=relevant_financials,  # Now contains only relevant data
             latestFinancials=latest_financials_payload,
             analysisResult=None  # AI analysis not yet implemented
         )
