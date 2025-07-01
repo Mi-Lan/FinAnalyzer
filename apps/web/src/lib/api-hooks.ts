@@ -84,3 +84,96 @@ export function useBulkAnalysisJob(jobId?: string) {
     staleTime: 0, // Always refetch
   });
 }
+
+// --- Custom Hook for Streaming Company Analysis ---
+
+import { useState, useCallback } from 'react';
+import {
+  AnalysisResult,
+  FMPFinancialStatements,
+  Company,
+} from '@/types/financial';
+import { AnalysisChainOutput } from './langchain/chains';
+import { mapChainOutputToAnalysisResult } from './langchain/utils/output-mapper';
+
+export const useCompanyAnalysis = () => {
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [progress, setProgress] = useState<AnalysisChainOutput | null>(null);
+
+  const runAnalysis = useCallback(
+    async (
+      company: Company,
+      financials: FMPFinancialStatements[],
+      templateId: string
+    ) => {
+      setIsLoading(true);
+      setError(null);
+      setAnalysis(null);
+      setProgress(null);
+
+      try {
+        const response = await fetch(`/api/analysis/template/${templateId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ company, financials }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Analysis failed');
+        }
+
+        if (!response.body) throw new Error('Response body is null');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let lastResult: AnalysisChainOutput | null = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonString = line.substring(6);
+              if (jsonString) {
+                try {
+                  const parsedChunk = JSON.parse(
+                    jsonString
+                  ) as AnalysisChainOutput;
+                  lastResult = parsedChunk;
+                  setProgress(parsedChunk); // Update progress with the latest chunk
+                } catch {
+                  console.error('Failed to parse stream chunk:', jsonString);
+                }
+              }
+            }
+          }
+        }
+
+        if (lastResult) {
+          const finalResult = mapChainOutputToAnalysisResult({
+            chainOutput: lastResult,
+            companyId: company.id,
+            templateId,
+          });
+          setAnalysis(finalResult);
+        } else {
+          throw new Error('Stream ended without a final result.');
+        }
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  return { analysis, progress, isLoading, error, runAnalysis };
+};

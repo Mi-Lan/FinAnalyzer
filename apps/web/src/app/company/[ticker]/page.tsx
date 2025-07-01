@@ -64,21 +64,28 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
 
   const analysis = analysisResult || mockAnalysis;
 
-  // Filter out financial statements and show only actual SEC filings
+  // **SIMPLIFIED: Data is now pre-filtered by the API Gateway**
+  // financialData now contains only SEC filings and financial statements
+  // This significantly reduces payload size and improves performance
+
+  // SEC filing types (matching backend configuration)
+  const secFilingTypes = new Set([
+    '10-K',
+    '10-Q',
+    '8-K',
+    '20-F',
+    '6-K',
+    'DEF 14A',
+    'S-1',
+    'S-3',
+    'S-4',
+    'SC 13G',
+    'SC 13D',
+  ]);
+
   const filings =
     financialData
-      ?.filter((fd) => {
-        // Exclude financial statement types and only include SEC filing types
-        const financialStatementTypes = [
-          'Income Statement',
-          'Balance Sheet',
-          'Cash Flow Statement',
-          'income-statement',
-          'balance-sheet-statement',
-          'cash-flow-statement',
-        ];
-        return !financialStatementTypes.includes(fd.type);
-      })
+      ?.filter((fd) => secFilingTypes.has(fd.type))
       .map((fd) => {
         // For SEC filings, the data structure is different
         let filingData;
