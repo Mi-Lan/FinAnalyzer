@@ -1,17 +1,17 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Dict, Any, Optional
+from pydantic import BaseModel, ValidationError
+from typing import Dict, Any, Optional, List
 from ..scoring.scorer import calculate_score
-from ..scoring.config import default_tech_template
 from ..scoring.models import ScoringTemplate, FinalScore
 from ..security import get_api_key
+from ..database import fetch_template_by_name, fetch_all_template_names
 
 router = APIRouter()
 
 class ScoringRequest(BaseModel):
     """Request model for scoring calculation"""
     financial_metrics: Dict[str, Any]
-    template_name: Optional[str] = "default_tech"
+    template_name: str = "Technology Sector Scoring Model V1" # Default to a known template name
 
 class ScoringResponse(BaseModel):
     """Response model for scoring calculation"""
@@ -26,25 +26,32 @@ async def calculate_company_score(
     api_key: str = Depends(get_api_key)
 ):
     """
-    Calculate a financial score for a company based on provided metrics.
+    Calculate a financial score for a company based on provided metrics and a stored template.
     
     Args:
-        request: Contains financial metrics and optional template name
+        request: Contains financial metrics and the name of the template to use.
         api_key: API authentication (handled by dependency)
     
     Returns:
         ScoringResponse with calculated score and metadata
     """
     try:
-        # For now, we only support the default tech template
-        if request.template_name and request.template_name != "default_tech":
+        # Fetch the template from the database
+        db_template = await fetch_template_by_name(request.template_name)
+        if not db_template:
             raise HTTPException(
-                status_code=400,
-                detail=f"Template '{request.template_name}' not supported. Available: 'default_tech'"
+                status_code=404,
+                detail=f"Template '{request.template_name}' not found."
             )
         
-        # Use the default tech template
-        template = default_tech_template
+        # Parse the JSON template into our Pydantic model
+        try:
+            template = ScoringTemplate.model_validate(db_template['template'])
+        except (ValidationError, KeyError) as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to parse scoring template '{request.template_name}': {e}"
+            )
         
         # Calculate the score
         score_result = calculate_score(request.financial_metrics, template)
@@ -65,29 +72,30 @@ async def calculate_company_score(
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Scoring error: {str(e)}")
+    except HTTPException:
+        raise # Re-raise HTTPException to avoid being caught by the generic Exception handler
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@router.get("/templates")
+class TemplateInfo(BaseModel):
+    name: str
+
+@router.get("/templates", response_model=List[TemplateInfo])
 async def list_available_templates(api_key: str = Depends(get_api_key)):
     """
-    List all available scoring templates.
+    List all available scoring templates by name.
     
     Returns:
-        Dictionary of available templates with their descriptions
+        A list of available template names.
     """
-    return {
-        "templates": {
-            "default_tech": {
-                "name": default_tech_template.name,
-                "description": default_tech_template.description,
-                "dimensions": [dim.name for dim in default_tech_template.dimensions],
-                "total_weight": sum(dim.weight for dim in default_tech_template.dimensions)
-            }
-        }
-    }
+    template_names = await fetch_all_template_names()
+    return [{"name": name} for name in template_names]
 
-@router.get("/template/{template_name}")
+class TemplateDetailResponse(BaseModel):
+    template: ScoringTemplate
+    metrics_required: List[str]
+
+@router.get("/template/{template_name}", response_model=TemplateDetailResponse)
 async def get_template_details(
     template_name: str,
     api_key: str = Depends(get_api_key)
@@ -101,17 +109,28 @@ async def get_template_details(
     Returns:
         Detailed template configuration
     """
-    if template_name != "default_tech":
+    db_template = await fetch_template_by_name(template_name)
+    if not db_template:
         raise HTTPException(
             status_code=404,
             detail=f"Template '{template_name}' not found"
         )
     
-    return {
-        "template": default_tech_template.model_dump(),
-        "metrics_required": [
-            f"{dim.name}.{metric.name}" 
-            for dim in default_tech_template.dimensions
-            for metric in dim.metrics
-        ]
-    }
+    try:
+        template_model = ScoringTemplate.model_validate(db_template['template'])
+    except (ValidationError, KeyError) as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to parse scoring template '{template_name}': {e}"
+        )
+
+    metrics_required = [
+        f"{dim.name}.{metric.name}" 
+        for dim in template_model.dimensions
+        for metric in dim.metrics
+    ]
+
+    return TemplateDetailResponse(
+        template=template_model,
+        metrics_required=metrics_required
+    )

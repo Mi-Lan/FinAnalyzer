@@ -47,8 +47,8 @@ export interface FinancialMetrics {
 // --- Helper Functions ---
 
 const calculateRatio = (
-  numerator?: number,
-  denominator?: number
+  numerator?: number | null,
+  denominator?: number | null
 ): number | null => {
   if (
     numerator === undefined ||
@@ -104,40 +104,45 @@ const calculateMetricsForYear = (
   const previousCf = previous?.cashFlow;
 
   // Profitability
-  const grossMargin = calculateRatio(is.grossProfit, is.revenue);
-  const operatingMargin = calculateRatio(is.operatingIncome, is.revenue);
-  const netMargin = calculateRatio(is.netIncome, is.revenue);
+  const grossMargin = calculateRatio(is?.grossProfit, is?.revenue);
+  const operatingMargin = calculateRatio(is?.operatingIncome, is?.revenue);
+  const netMargin = calculateRatio(is?.netIncome, is?.revenue);
 
   // Growth
-  const revenueGrowth = calculateGrowth(is.revenue, previousIs?.revenue);
-  const netIncomeGrowth = calculateGrowth(is.netIncome, previousIs?.netIncome);
+  const revenueGrowth = calculateGrowth(is?.revenue, previousIs?.revenue);
+  const netIncomeGrowth = calculateGrowth(is?.netIncome, previousIs?.netIncome);
   const freeCashFlowGrowth = calculateGrowth(
-    cf.freeCashFlow,
+    cf?.freeCashFlow,
     previousCf?.freeCashFlow
   );
 
   // Balance Sheet
   const currentRatio = calculateRatio(
-    bs.totalCurrentAssets,
-    bs.totalCurrentLiabilities
+    bs?.totalCurrentAssets,
+    bs?.totalCurrentLiabilities
   );
-  const debtToEquity = calculateRatio(bs.totalDebt, bs.totalEquity);
+  const debtToEquity = calculateRatio(bs?.totalDebt, bs?.totalEquity);
 
   // Capital Allocation
-  const returnOnEquity = calculateRatio(is.netIncome, bs.totalEquity);
-  const returnOnAssets = calculateRatio(is.netIncome, bs.totalAssets);
+  const returnOnEquity = calculateRatio(is?.netIncome, bs?.totalEquity);
+  const returnOnAssets = calculateRatio(is?.netIncome, bs?.totalAssets);
   const investedCapital =
-    bs.totalDebt + bs.totalEquity - bs.cashAndCashEquivalents;
-  const ebit = is.operatingIncome + is.interestExpense; // Simplified EBIT
+    bs?.totalDebt && bs?.totalEquity && bs?.cashAndCashEquivalents
+      ? bs.totalDebt + bs.totalEquity - bs.cashAndCashEquivalents
+      : null;
+  const ebit =
+    is?.operatingIncome && is?.interestExpense
+      ? is.operatingIncome + is.interestExpense
+      : null; // Simplified EBIT
   const returnOnInvestedCapital = calculateRatio(ebit, investedCapital);
-  const assetTurnover = calculateRatio(is.revenue, bs.totalAssets);
+  const assetTurnover = calculateRatio(is?.revenue, bs?.totalAssets);
 
   // Cash Flow
   const operatingCashFlowMargin = calculateRatio(
-    cf.operatingCashFlow,
-    is.revenue
+    cf?.operatingCashFlow,
+    is?.revenue
   );
-  const freeCashFlowMargin = calculateRatio(cf.freeCashFlow, is.revenue);
+  const freeCashFlowMargin = calculateRatio(cf?.freeCashFlow, is?.revenue);
 
   return {
     grossMargin,

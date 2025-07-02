@@ -655,7 +655,7 @@
           2,
           7
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -663,7 +663,7 @@
             "description": "Develop the core logic for translating input metrics into numerical scores, including handling positive and negative scoring, thresholds, and point decay.",
             "dependencies": [],
             "details": "Define how each metric is scored, assign weights, and ensure the logic supports configurability and validation. Incorporate best practices such as clear criteria, negative scoring, and score thresholds.",
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 2,
@@ -703,7 +703,7 @@
               4
             ],
             "details": "Ensure seamless data flow between components, proper error handling, and that the system is ready for end-to-end testing and deployment.",
-            "status": "pending"
+            "status": "done"
           }
         ]
       },
@@ -1726,7 +1726,7 @@
     ],
     "metadata": {
       "created": "2025-06-19T14:40:29.469Z",
-      "updated": "2025-07-02T17:18:52.806Z",
+      "updated": "2025-07-02T17:25:13.049Z",
       "description": "Tasks for master context"
     }
   }
