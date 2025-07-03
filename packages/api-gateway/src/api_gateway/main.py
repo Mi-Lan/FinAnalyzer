@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from .security import get_api_key
+from .database import connect_db, disconnect_db
 from .models import CompanyDetailsResponse, Company, FinancialData
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -7,11 +8,14 @@ import os
 import sys
 import logging
 
+from .routes import scoring as scoring_router
+
 logger = logging.getLogger(__name__)
 
 # Add the data-adapter to the Python path
 sys.path.append('/data-adapter/src')
 
+# Temporarily commented out for scoring module testing
 from data_adapter.async_processor import AsyncProcessor
 
 # **NEW: Configuration for data filtering**
@@ -43,9 +47,19 @@ FINANCIAL_DATA_FILTER_CONFIG = {
     }
 }
 
-app = FastAPI()
+app = FastAPI(title="Financial Analysis API", description="API for financial scoring and analysis")
+
+@app.on_event("startup")
+async def startup_event():
+    await connect_db()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await disconnect_db()
+
 router = APIRouter(prefix="/api", dependencies=[Depends(get_api_key)])
 
+# Temporarily commented out data adapter functionality
 # Dependency to get the AsyncProcessor
 async def get_processor():
     processor = AsyncProcessor()
@@ -85,7 +99,6 @@ def transform_company_data(db_company: Dict[str, Any]) -> Company:
         createdAt=created_at,
         updatedAt=updated_at
     )
-
 
 def transform_financial_data(db_financial: Dict[str, Any]) -> FinancialData:
     """Transform database financial data to API model."""
@@ -311,11 +324,23 @@ def find_latest_annual_financials(financials: List[FinancialData]) -> Optional[F
     # Find the one with the highest year
     return max(annual_financials, key=lambda f: f.year, default=None)
 
-
 @router.get("/companies", response_model=List[Company])
 async def get_companies():
     # This would need a proper implementation to list all companies from DB
     raise HTTPException(status_code=501, detail="Not implemented")
 
+@router.get("/health")
+async def health_check():
+    """Simple health check endpoint"""
+    return {"status": "healthy", "message": "API Gateway is running"}
 
+# Include the main router (currently just health check)
 app.include_router(router)
+
+# Include the scoring router
+app.include_router(
+    scoring_router.router,
+    prefix="/api/scoring",
+    tags=["Scoring"],
+    dependencies=[Depends(get_api_key)]
+)
