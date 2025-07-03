@@ -14,13 +14,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable not set.")
 
-# If running script locally (not in Docker), connect to localhost
-# The Docker container name 'postgres' will not be resolvable.
-if __name__ == "__main__":
-    if "@postgres" in DATABASE_URL:
-        print("Script is run locally, replacing host '@postgres' with '@localhost' in DATABASE_URL.")
-        DATABASE_URL = DATABASE_URL.replace("@postgres", "@localhost")
-
 # The template data that was previously hardcoded
 DEFAULT_TECH_TEMPLATE = {
     "id": "tech_v1",
@@ -163,26 +156,77 @@ def seed_template():
             print("Please run migrations before seeding.")
             return
 
-        # Check if the template already exists
-        result = connection.execute(
+        # --- Seeding Logic with Upsert ---
+
+        # 1. Check if a template with the correct ID ('tech_v1') already exists.
+        result_by_id = connection.execute(
+            text("SELECT id FROM \"AnalysisTemplate\" WHERE id = :id"),
+            {"id": DEFAULT_TECH_TEMPLATE["id"]},
+        ).first()
+
+        if result_by_id:
+            print(f"Template with ID '{DEFAULT_TECH_TEMPLATE['id']}' found. Updating it.")
+            connection.execute(
+                text("""
+                    UPDATE "AnalysisTemplate" 
+                    SET name = :name, description = :description, sectors = :sectors, template = :template, "updatedAt" = NOW()
+                    WHERE id = :id
+                """),
+                {
+                    "id": DEFAULT_TECH_TEMPLATE["id"],
+                    "name": DEFAULT_TECH_TEMPLATE["name"],
+                    "description": DEFAULT_TECH_TEMPLATE["description"],
+                    "sectors": ["Technology"],
+                    "template": json.dumps(DEFAULT_TECH_TEMPLATE),
+                }
+            )
+            connection.commit()
+            print("Template updated successfully.")
+            return
+
+        # 2. If no template with the correct ID, check if one exists with the same name.
+        result_by_name = connection.execute(
             text("SELECT id FROM \"AnalysisTemplate\" WHERE name = :name"),
             {"name": DEFAULT_TECH_TEMPLATE["name"]},
         ).first()
 
-        if result:
-            print(f"Template '{DEFAULT_TECH_TEMPLATE['name']}' already exists. Skipping.")
+        if result_by_name:
+            old_id = result_by_name[0]
+            print(f"Template with name '{DEFAULT_TECH_TEMPLATE['name']}' found with old ID '{old_id}'.")
+            print(f"Updating it to the correct ID '{DEFAULT_TECH_TEMPLATE['id']}'.")
+            
+            # To avoid unique constraint on ID if 'tech_v1' somehow exists, delete it first
+            connection.execute(text("DELETE FROM \"AnalysisTemplate\" WHERE id = :id"), {"id": DEFAULT_TECH_TEMPLATE["id"]})
+            
+            # Update the old record to the new ID and content
+            connection.execute(
+                text("""
+                    UPDATE "AnalysisTemplate"
+                    SET id = :new_id, name = :name, description = :description, sectors = :sectors, template = :template, "updatedAt" = NOW()
+                    WHERE id = :old_id
+                """),
+                {
+                    "new_id": DEFAULT_TECH_TEMPLATE["id"],
+                    "name": DEFAULT_TECH_TEMPLATE["name"],
+                    "description": DEFAULT_TECH_TEMPLATE["description"],
+                    "sectors": ["Technology"],
+                    "template": json.dumps(DEFAULT_TECH_TEMPLATE),
+                    "old_id": old_id
+                }
+            )
+            connection.commit()
+            print("Template updated successfully to new ID.")
             return
-
-        print(f"Inserting template '{DEFAULT_TECH_TEMPLATE['name']}'...")
-        
-        # Insert new template
+            
+        # 3. If no template exists by ID or name, insert a new one.
+        print(f"No existing template found. Inserting new template '{DEFAULT_TECH_TEMPLATE['name']}' with ID '{DEFAULT_TECH_TEMPLATE['id']}'...")
         connection.execute(
             text("""
                 INSERT INTO "AnalysisTemplate" (id, name, description, sectors, template, "createdAt", "updatedAt")
                 VALUES (:id, :name, :description, :sectors, :template, NOW(), NOW())
             """),
             {
-                "id": f"seed_{os.urandom(4).hex()}", # Generate a unique enough ID
+                "id": DEFAULT_TECH_TEMPLATE["id"],
                 "name": DEFAULT_TECH_TEMPLATE["name"],
                 "description": DEFAULT_TECH_TEMPLATE["description"],
                 "sectors": ["Technology"],

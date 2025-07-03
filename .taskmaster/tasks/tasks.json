@@ -23,9 +23,7 @@
             "id": 2,
             "title": "Configure PNPM Workspaces",
             "description": "Configure pnpm to manage dependencies and scripts across all workspace packages.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Ensure pnpm is enabled and properly installed. Set up the pnpm-workspace.yaml file to include all relevant packages and apps. Initialize package.json files as needed in each workspace.\n<info added on 2025-06-20T12:54:16.999Z>\npnpm has been successfully enabled for the project and the `pnpm-workspace.yaml` file has been properly configured to include all relevant packages and apps. Note that the initialization of individual `package.json` files within workspaces will not be handled in this subtask, but will instead be addressed in the specific tasks dedicated to creating those applications and packages.\n</info added on 2025-06-20T12:54:16.999Z>",
             "status": "done"
           },
@@ -33,9 +31,7 @@
             "id": 3,
             "title": "Set Up Development Tooling",
             "description": "Install and configure essential development tools such as ESLint, Prettier, and any pre-commit hooks for code quality and consistency.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Add ESLint and Prettier as dev dependencies at the root. Create configuration files (.eslintrc.json, .prettierrc.json, etc.) and set up ignore files. Optionally, configure Husky and lint-staged for pre-commit checks.\n<info added on 2025-06-20T13:08:23.445Z>\nConfigured ESLint, Prettier, Husky, and lint-staged for the project. Created `.eslintrc.json`, `.prettierrc.json`, `.prettierignore`, and `.lintstagedrc.json`. Initialized Husky and updated the pre-commit hook. Note: The installation of npm packages failed due to a persistent environment issue, but all configuration is complete.\n</info added on 2025-06-20T13:08:23.445Z>",
             "status": "done"
           },
@@ -43,9 +39,7 @@
             "id": 4,
             "title": "Configure GitHub Actions Workflows",
             "description": "Set up GitHub Actions workflows for linting, testing, and deployment automation.",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Create workflow YAML files in .github/workflows for linting, running tests, and deployment. Ensure workflows use pnpm for installing dependencies and running scripts across workspaces.\n<info added on 2025-06-20T13:09:47.564Z>\nCreated a GitHub Actions workflow file at `.github/workflows/ci.yml` that triggers on push and pull requests to the main branch. The CI pipeline performs the following steps:\n1. Installs dependencies using pnpm\n2. Runs linting checks\n3. Executes test suites\n4. Tests compatibility across Node.js versions 18 and 20\n\nThe workflow ensures code quality and functionality are maintained with each contribution to the repository.\n</info added on 2025-06-20T13:09:47.564Z>",
             "status": "done"
           },
@@ -53,9 +47,7 @@
             "id": 5,
             "title": "Set Up Docker for Local and Production Environments",
             "description": "Create Dockerfiles and docker-compose configurations to support both local development and production deployments.",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Write Dockerfiles for each app/service as needed. Create a docker-compose.yml for local orchestration. Ensure production Dockerfiles are optimized for deployment (multi-stage builds, minimal images).\n<info added on 2025-06-20T13:10:51.171Z>\nCreated a multi-stage `Dockerfile` to serve as a base template for all future services, implementing best practices for optimized production images. Set up a `docker-compose.yml` configuration that includes a `postgres` service to support local development environments. Added a `.dockerignore` file to exclude unnecessary files from the build context, improving build performance and reducing image size.\n</info added on 2025-06-20T13:10:51.171Z>",
             "status": "done"
           },
@@ -63,9 +55,7 @@
             "id": 6,
             "title": "Initial CI/CD Verification",
             "description": "Run and verify the complete CI/CD pipeline, ensuring all workflows, linting, testing, and Docker builds function as expected.",
-            "dependencies": [
-              5
-            ],
+            "dependencies": [5],
             "details": "Trigger the GitHub Actions workflows manually or via a test commit. Confirm that linting, tests, and Docker builds pass successfully and that deployment steps (if any) execute without errors.\n<info added on 2025-06-20T13:11:17.951Z>\nAll configuration for CI/CD is complete. To verify:\n1. Commit current changes\n2. Push to a feature branch\n3. Open a pull request against main branch\n4. Observe GitHub Actions workflow triggering automatically\n5. Confirm all checks pass successfully\n\nWaiting for user to perform these manual verification steps before marking this subtask as complete.\n</info added on 2025-06-20T13:11:17.951Z>",
             "status": "done"
           }
@@ -93,9 +83,7 @@
             "id": 2,
             "title": "Select ORM Tool: SQLAlchemy vs Prisma",
             "description": "Evaluate and choose between SQLAlchemy and Prisma based on project requirements, language ecosystem, type safety, developer experience, and operational needs.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Compare features such as type safety, schema synchronization, language support, and ease of use. Document the rationale for the selected tool.\n<info added on 2025-06-20T19:20:15.512Z>\nDecision: Prisma has been selected as the ORM for this project.\n\nRationale: Prisma is the ideal choice for this monorepo environment, which includes a Python/FastAPI backend and a Next.js/TypeScript frontend. Its schema-first approach provides a single source of truth, generating types for both the backend and frontend. This ensures type safety across the stack, reduces the risk of schema drift between services, and significantly improves developer experience by enabling autocompletion and compile-time checks. While SQLAlchemy offers deep, powerful features for Python, Prisma's seamless cross-language integration and modern developer experience are more aligned with the project's needs.\n</info added on 2025-06-20T19:20:15.512Z>",
             "status": "done"
           },
@@ -103,9 +91,7 @@
             "id": 3,
             "title": "Model Entities Using Chosen ORM",
             "description": "Implement the entity models and relationships in code using the selected ORM tool, ensuring correct mapping of JSONB fields and relational constraints.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Translate the schema design into ORM models (e.g., SQLAlchemy classes or Prisma schema). Validate that JSONB fields are correctly represented and relationships are enforced.",
             "status": "done"
           },
@@ -113,9 +99,7 @@
             "id": 4,
             "title": "Deploy Schema to Managed Cloud Database",
             "description": "Provision a managed cloud database (e.g., AWS RDS, Azure Database, or similar), and deploy the schema using migration tools provided by the selected ORM.",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Set up the cloud database instance, configure access, and run migrations or schema deployment commands to create tables and relationships as defined.",
             "status": "done"
           },
@@ -123,9 +107,7 @@
             "id": 5,
             "title": "Implement and Test Schema Validation",
             "description": "Develop and execute validation routines to ensure the deployed schema matches the intended design, including constraints, data types, and JSONB field structure.",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Use ORM validation features and/or custom scripts to verify schema correctness. Test CRUD operations, relationship integrity, and JSONB data handling.",
             "status": "done"
           }
@@ -136,9 +118,7 @@
         "title": "Implement Data Ingestion Adapter for FMP API",
         "description": "Build a robust, extensible adapter to fetch financial data from Financial Modeling Prep (FMP) with a modular design that can accommodate additional data sources in the future.",
         "status": "done",
-        "dependencies": [
-          1
-        ],
+        "dependencies": [1],
         "priority": "high",
         "details": "Use Python with httpx or aiohttp for async requests. Implement rate limiting (300 calls/min). Cache responses in Redis. Design a plugin architecture to support multiple data providers. Reference FMP API documentation at https://site.financialmodelingprep.com/developer/docs/. Recommended: httpx v0.27, aiohttp v3.9, Redis v7.",
         "testStrategy": "Test API calls, rate limiting, and data parsing for IS/BS/CF/10-K/10-Q. Include tests for the plugin architecture and extension points.",
@@ -155,9 +135,7 @@
             "id": 2,
             "title": "Async HTTP Client Implementation",
             "description": "Implement an asynchronous HTTP client to interact with FMP API endpoints, supporting concurrent requests and proper authentication.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Use an async HTTP library (e.g., httpx or aiohttp for Python) to build a reusable client that attaches the API key to each request and supports async/await patterns. Design the client with interfaces that can be implemented for different data providers.",
             "status": "done"
           },
@@ -165,9 +143,7 @@
             "id": 3,
             "title": "Rate Limiting System",
             "description": "Design and implement a rate limiting mechanism to ensure API requests do not exceed FMP's allowed thresholds.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement a token bucket or leaky bucket algorithm, or use a third-party library, to throttle outgoing requests per FMP's documented rate limits. Integrate with the async client to queue or delay requests as needed. Make the rate limiting configurable per data provider.",
             "status": "done"
           },
@@ -175,10 +151,7 @@
             "id": 4,
             "title": "Redis Caching Layer",
             "description": "Integrate Redis as a caching layer to store and retrieve API responses, reducing redundant requests and improving performance.",
-            "dependencies": [
-              2,
-              3
-            ],
+            "dependencies": [2, 3],
             "details": "Set up Redis connection pooling and implement cache read/write logic keyed by request parameters and endpoint. Configure cache expiration policies based on data volatility. Design the caching system to work with any data provider.",
             "status": "done"
           },
@@ -186,9 +159,7 @@
             "id": 5,
             "title": "Data Parsing for Financial Statements",
             "description": "Develop robust parsers for different FMP financial statement endpoints: Income Statement (IS), Balance Sheet (BS), Cash Flow (CF), 10-K, and 10-Q.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "For each statement type, define data models and parsing logic to transform raw API responses into structured, validated objects suitable for downstream use. Reference specific FMP API endpoints: /income-statement, /balance-sheet-statement, /cash-flow-statement, /sec_filings.\n<info added on 2025-06-19T15:15:39.288Z>\n**Primary FMP Endpoints to Implement:**\n\n1. **Income Statements:**\n   - Annual: `GET /income-statement?symbol=AAPL&period=annual`\n   - Quarterly: `GET /income-statement?symbol=AAPL&period=quarter`\n\n2. **Balance Sheet:**\n   - Annual: `GET /balance-sheet-statement?symbol=AAPL&period=annual`\n   - Quarterly: `GET /balance-sheet-statement?symbol=AAPL&period=quarter`\n\n3. **Cash Flow:**\n   - Annual: `GET /cash-flow-statement?symbol=AAPL&period=annual`\n   - Quarterly: `GET /cash-flow-statement?symbol=AAPL&period=quarter`\n\n4. **SEC Filings (10-K/10-Q):**\n   - `GET /sec_filings?symbol=AAPL&type=10-K&page=0`\n   - `GET /sec_filings?symbol=AAPL&type=10-Q&page=0`\n\n5. **Bulk Endpoints for Scale:**\n   - `GET /income-statement-bulk?year=2024&period=annual`\n   - `GET /balance-sheet-statement-bulk?year=2024&period=annual`\n   - `GET /cash-flow-statement-bulk?year=2024&period=annual`\n\n**Parser Design Pattern:**\nCreate abstract parser interface that can handle different statement types and be extended for other providers:\n\n```python\nclass FinancialStatementParser(ABC):\n    @abstractmethod\n    def parse_income_statement(self, raw_data: dict) -> IncomeStatement:\n        pass\n    \n    @abstractmethod\n    def parse_balance_sheet(self, raw_data: dict) -> BalanceSheet:\n        pass\n    \n    @abstractmethod\n    def parse_cash_flow(self, raw_data: dict) -> CashFlow:\n        pass\n```\n</info added on 2025-06-19T15:15:39.288Z>",
             "status": "done"
           },
@@ -196,12 +167,7 @@
             "id": 6,
             "title": "Error Handling and Monitoring",
             "description": "Implement comprehensive error handling for network, API, and parsing errors, and integrate monitoring/logging for observability.",
-            "dependencies": [
-              2,
-              3,
-              4,
-              5
-            ],
+            "dependencies": [2, 3, 4, 5],
             "details": "Handle HTTP errors, timeouts, rate limit breaches, and data validation failures. Log errors and key metrics to a monitoring system (e.g., Sentry, Prometheus) for alerting and diagnostics. Create provider-agnostic error handling patterns.",
             "status": "done"
           },
@@ -209,13 +175,7 @@
             "id": 7,
             "title": "Integration and End-to-End Testing",
             "description": "Develop integration and end-to-end tests covering async client, rate limiting, caching, data parsing, and error handling for all supported endpoints.",
-            "dependencies": [
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
+            "dependencies": [2, 3, 4, 5, 6],
             "details": "Write tests that simulate real-world usage, including concurrent requests, cache hits/misses, rate limit scenarios, and error conditions. Use test doubles or sandbox endpoints where possible.",
             "status": "done"
           },
@@ -223,12 +183,7 @@
             "id": 8,
             "title": "Plugin Architecture Design",
             "description": "Design and implement a plugin architecture that allows for easy addition of new financial data providers beyond FMP.",
-            "dependencies": [
-              2,
-              3,
-              4,
-              5
-            ],
+            "dependencies": [2, 3, 4, 5],
             "details": "Create abstract base classes or interfaces for data providers, rate limiters, and parsers. Implement a provider registry and discovery mechanism. Document the extension points and provide examples for adding new providers.",
             "status": "done"
           },
@@ -236,10 +191,7 @@
             "id": 9,
             "title": "Provider-Specific Configuration System",
             "description": "Develop a configuration system that can handle settings for multiple data providers, including credentials, rate limits, and endpoint URLs.",
-            "dependencies": [
-              1,
-              8
-            ],
+            "dependencies": [1, 8],
             "details": "Create a flexible configuration structure that supports different provider requirements. Implement validation for provider-specific settings. Support environment-based configuration switching (dev/test/prod).",
             "status": "done"
           },
@@ -247,10 +199,7 @@
             "id": 10,
             "title": "Documentation for Provider Extension",
             "description": "Create comprehensive documentation on how to extend the adapter with new data providers.",
-            "dependencies": [
-              8,
-              9
-            ],
+            "dependencies": [8, 9],
             "details": "Document the plugin architecture, required interfaces, configuration format, and provide step-by-step examples of adding a new provider. Include diagrams showing the extension points and component interactions.",
             "status": "done"
           }
@@ -263,9 +212,7 @@
         "details": "Use Next.js v14, Tailwind CSS v3.4, shadcn/ui v0.7. Create mock data endpoints for dashboard and company views. Recommended: Next.js v14, Tailwind CSS v3.4, shadcn/ui v0.7.",
         "testStrategy": "Verify UI components render with mock data and responsive layout.",
         "priority": "medium",
-        "dependencies": [
-          1
-        ],
+        "dependencies": [1],
         "status": "done",
         "subtasks": [
           {
@@ -280,9 +227,7 @@
             "id": 2,
             "title": "Integrate Tailwind CSS and shadcn/ui Components",
             "description": "Install and configure Tailwind CSS for utility-first styling and set up shadcn/ui for reusable, accessible UI components.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Follow Tailwind CSS installation steps for Next.js, add required configuration files, and verify integration. Install shadcn/ui, import base components, and ensure compatibility with Tailwind.\n<info added on 2025-06-21T14:07:53.816Z>\nSuccessfully integrated Tailwind CSS and shadcn/ui:\n- Tailwind CSS v4 was already configured during Next.js setup\n- shadcn/ui successfully initialized with next-monorepo template\n- Base color set to slate\n- CSS variables configured in globals.css\n- utils.ts file created for className utilities\n- Added essential UI components: button, card, table, badge\n- All dependencies properly linked in the monorepo\n</info added on 2025-06-21T14:07:53.816Z>",
             "status": "done"
           },
@@ -290,9 +235,7 @@
             "id": 3,
             "title": "Implement Mock API Endpoints with Comprehensive Financial Data",
             "description": "Create mock API endpoints within the Next.js app to serve sample financial data for dashboards and company analysis views.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Use Next.js API routes to define endpoints (e.g., /api/companies, /api/financials). Populate with realistic mock data structures for companies, financial metrics, and analysis results.\n<info added on 2025-06-21T14:16:47.785Z>\nSuccessfully implemented mock API endpoints with comprehensive financial data:\n- Created TypeScript types matching FMP Pydantic models and Prisma schema\n- Implemented mock data generators for FMP financial statements (Income Statement, Balance Sheet, Cash Flow)\n- Created API endpoints:\n  - GET /api/companies - List all companies\n  - GET /api/companies/[ticker] - Get company details with financials and analysis\n  - GET /api/analysis/screen - Screen companies with filters\n  - GET/POST /api/analysis/bulk - Bulk analysis job management\n- Mock data includes realistic financial numbers based on company size and sector\n- All data structures match the exact FMP data models from the Python backend\n</info added on 2025-06-21T14:16:47.785Z>",
             "status": "done"
           },
@@ -300,10 +243,7 @@
             "id": 4,
             "title": "Prototype Initial UI: Dashboard and Company Analysis Views",
             "description": "Develop initial UI screens for the financial analysis platform, including a dashboard overview and detailed company analysis pages, using TypeScript, Tailwind, and shadcn/ui components.",
-            "dependencies": [
-              2,
-              3
-            ],
+            "dependencies": [2, 3],
             "details": "Build responsive dashboard and company analysis views, consuming mock API data. Ensure TypeScript types are used throughout components and data fetching logic.\n<info added on 2025-06-21T14:26:22.667Z>\nSuccessfully prototyped initial UI with dashboard and company analysis views:\n- Set up TanStack Query for data fetching with providers\n- Created custom hooks for API data fetching (useCompanies, useCompanyDetails, useScreening, useBulkAnalysisJob)\n- Built reusable components:\n  - ScoreCard: Visual display of analysis scores with color-coded metrics\n  - FinancialMetrics: Comprehensive display of income statement, balance sheet, and cash flow data\n- Created main dashboard page showing:\n  - Top 3 performing companies with score cards\n  - All companies table with filtering and navigation\n- Implemented detailed company analysis page with:\n  - Analysis scores and recommendations\n  - Key insights (strengths, weaknesses, opportunities, risks)\n  - Financial metrics display\n- Resolved Tailwind CSS v4 conflicts by downgrading to v3\n- Application is now running successfully on localhost:3000\n</info added on 2025-06-21T14:26:22.667Z>",
             "status": "done"
           }
@@ -314,10 +254,7 @@
         "title": "Build FastAPI Gateway for FE/BE Communication",
         "description": "Develop a FastAPI gateway to connect frontend and backend services, implementing specific endpoints required by the Next.js frontend.",
         "status": "done",
-        "dependencies": [
-          1,
-          2
-        ],
+        "dependencies": [1, 2],
         "priority": "medium",
         "details": "Use FastAPI v0.109 for API endpoints. Implement basic auth and request validation. Ensure all endpoints match the frontend's API contract requirements. Pydantic models must align with TypeScript interfaces in apps/web/src/types/financial.ts. Recommended: FastAPI v0.109, Pydantic v2.6.",
         "testStrategy": "Test API endpoints with Postman/curl, validate request/response flow. Ensure responses match the expected formats from the frontend contract.",
@@ -336,9 +273,7 @@
             "title": "Endpoint Definition",
             "description": "Define the API endpoints for the gateway according to the frontend contract requirements.",
             "status": "done",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Create a main.py file and implement the required endpoints: GET /api/companies, GET /api/companies/{ticker}, GET /api/analysis/screen, and GET/POST /api/analysis/bulk. Structure endpoints to match frontend expectations.",
             "testStrategy": ""
           },
@@ -347,9 +282,7 @@
             "title": "Authentication Implementation",
             "description": "Add authentication to the API gateway to secure endpoints.",
             "status": "done",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement authentication (e.g., OAuth2, JWT, or API key) using FastAPI's security utilities. Protect all endpoints to require authentication as needed.",
             "testStrategy": ""
           },
@@ -358,9 +291,7 @@
             "title": "Pydantic Model Implementation",
             "description": "Create Pydantic models that match the TypeScript interfaces in the frontend.",
             "status": "done",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement Pydantic models that align with TypeScript interfaces in apps/web/src/types/financial.ts. Include models for FMP financial statements (IncomeStatement, BalanceSheet, CashFlow), Analysis models (AnalysisResult, MetricScores, AnalysisInsights), and Company and FinancialData models.",
             "testStrategy": ""
           },
@@ -369,10 +300,7 @@
             "title": "Request Validation",
             "description": "Implement request validation for incoming data using the defined Pydantic models.",
             "status": "done",
-            "dependencies": [
-              3,
-              4
-            ],
+            "dependencies": [3, 4],
             "details": "Use the Pydantic models in endpoint definitions to ensure data is validated automatically. Implement proper error handling that matches frontend expectations.",
             "testStrategy": ""
           },
@@ -381,10 +309,7 @@
             "title": "Companies List Endpoint Implementation",
             "description": "Implement the GET /api/companies endpoint to return a list of companies with basic information.",
             "status": "done",
-            "dependencies": [
-              2,
-              4
-            ],
+            "dependencies": [2, 4],
             "details": "Create the endpoint that returns company list data in the format expected by the frontend. Include pagination if necessary and ensure response format matches frontend expectations.",
             "testStrategy": ""
           },
@@ -393,10 +318,7 @@
             "title": "Company Detail Endpoint Implementation",
             "description": "Implement the GET /api/companies/{ticker} endpoint to return detailed company data.",
             "status": "done",
-            "dependencies": [
-              2,
-              4
-            ],
+            "dependencies": [2, 4],
             "details": "Create the endpoint that returns detailed company information including financials and analysis for a specific ticker. Ensure the response format matches frontend expectations.",
             "testStrategy": ""
           },
@@ -405,10 +327,7 @@
             "title": "Analysis Screening Endpoint Implementation",
             "description": "Implement the GET /api/analysis/screen endpoint for filtering companies.",
             "status": "done",
-            "dependencies": [
-              2,
-              4
-            ],
+            "dependencies": [2, 4],
             "details": "Create the endpoint that allows screening companies with filters such as minScore, sector, etc. Ensure query parameters are properly validated and the response format matches frontend expectations.",
             "testStrategy": ""
           },
@@ -417,10 +336,7 @@
             "title": "Bulk Analysis Endpoint Implementation",
             "description": "Implement the GET/POST /api/analysis/bulk endpoints for handling bulk analysis jobs.",
             "status": "done",
-            "dependencies": [
-              2,
-              4
-            ],
+            "dependencies": [2, 4],
             "details": "Create endpoints to handle bulk analysis jobs with progress tracking. Implement both GET (status check) and POST (job submission) methods. Ensure response formats match frontend expectations.",
             "testStrategy": ""
           },
@@ -429,13 +345,7 @@
             "title": "Integration Testing",
             "description": "Write integration tests to verify all endpoint functionality, authentication, and validation.",
             "status": "done",
-            "dependencies": [
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
+            "dependencies": [5, 6, 7, 8, 9],
             "details": "Set up a testing framework (e.g., pytest) and write tests that simulate requests to all API endpoints, checking for correct responses, authentication enforcement, and validation errors. Ensure tests verify that responses match the expected formats from the frontend contract.",
             "testStrategy": ""
           }
@@ -448,10 +358,7 @@
         "details": "Extend data ingestion adapter to parse and store data in FinancialData table. Use async processing for efficiency. Recommended: SQLAlchemy v2.0, httpx v0.27.",
         "testStrategy": "Validate data integrity, parsing accuracy, and storage in PostgreSQL.",
         "priority": "high",
-        "dependencies": [
-          2,
-          3
-        ],
+        "dependencies": [2, 3],
         "status": "done",
         "subtasks": [
           {
@@ -466,9 +373,7 @@
             "id": 2,
             "title": "Implement Data Type Parsing Logic",
             "description": "Develop parsing routines for each supported data type to convert raw input into structured objects.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "For each data type, write parsing functions that handle transformation from raw data to structured format, referencing best practices for data parsing and transformation.\n<info added on 2025-06-24T14:56:54.763Z>\nImplemented comprehensive data type parsing logic with significant enhancements:\n\n1. Extended Data Models:\n   - Created SEC Filing Models (SECFiling, TenKFiling, TenQFiling) for 10-K/10-Q document parsing\n   - Developed CompanyProfile model for company information parsing\n   - Added support for financial statements (Income Statement, Balance Sheet, Cash Flow), SEC filings, and company profiles\n\n2. Enhanced Parser (EnhancedFMPParser):\n   - Implemented robust error handling with graceful recovery mechanisms\n   - Built comprehensive data transformation pipeline including:\n     * Numeric field cleaning (handling \"null\", \"N/A\", \"-\", string numbers)\n     * Date field normalization to consistent YYYY-MM-DD format\n     * Intelligent default handling for missing fields\n     * Field name normalization for underscore/dash variations\n   - Added support for both single dictionary and list inputs\n   - Developed fuzzy endpoint matching for handling API endpoint variations\n   - Integrated statistics tracking for monitoring parser performance\n\n3. Advanced Parsing Features:\n   - Created intelligent recovery mechanisms for validation failures\n   - Implemented type-specific parsing logic for different document types\n   - Added multi-layer data quality validation with fallback mechanisms\n   - Set up comprehensive logging for debugging and monitoring\n\n4. Testing Infrastructure:\n   - Developed comprehensive test suite with 13 test methods\n   - Added edge case testing for invalid data, missing fields, and format variations\n   - Implemented recovery testing to validate error handling\n   - Created tests for parsing metrics tracking\n\nThe enhanced parser significantly improves data quality and reliability, making the system more resilient to real-world API variations and data inconsistencies.\n</info added on 2025-06-24T14:56:54.763Z>",
             "status": "done"
           },
@@ -476,9 +381,7 @@
             "id": 3,
             "title": "Integrate Asynchronous Processing",
             "description": "Enable async processing for data ingestion and parsing to support real-time workflows.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Refactor parsing and storage logic to use asynchronous patterns (e.g., async/await, promises, or background tasks) to prevent blocking and improve throughput.",
             "status": "done"
           },
@@ -486,9 +389,7 @@
             "id": 4,
             "title": "Design and Implement Data Validation",
             "description": "Create validation logic to ensure data integrity and correctness before storage.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Define validation rules for each data type and implement checks to catch malformed or invalid data prior to storage.",
             "status": "done"
           },
@@ -496,10 +397,7 @@
             "id": 5,
             "title": "Develop Storage Logic for Parsed Data",
             "description": "Implement logic to persist validated, parsed data into the backend storage system.",
-            "dependencies": [
-              3,
-              4
-            ],
+            "dependencies": [3, 4],
             "details": "Design storage routines that efficiently save data objects, ensuring atomicity and consistency, and handle different data types as required by the backend.",
             "status": "done"
           },
@@ -507,11 +405,7 @@
             "id": 6,
             "title": "Implement Robust Error Handling",
             "description": "Add comprehensive error handling throughout the ingestion, parsing, validation, and storage pipeline.",
-            "dependencies": [
-              3,
-              4,
-              5
-            ],
+            "dependencies": [3, 4, 5],
             "details": "Identify potential failure points, implement try/catch or equivalent mechanisms, and ensure errors are logged and surfaced appropriately for debugging and alerting.",
             "status": "done"
           },
@@ -530,10 +424,7 @@
         "title": "Develop Hard-Coded Prompt Chain for Single Template",
         "description": "Implement a basic LangChain prompt chain for a single sector template.",
         "status": "done",
-        "dependencies": [
-          2,
-          3
-        ],
+        "dependencies": [2, 3],
         "priority": "medium",
         "details": "Use LangChain.js v0.3.29 for prompt orchestration. Hard-code prompt logic for the Tech sector template. Required packages: @langchain/core v0.3.61, langchain v0.3.29, @langchain/openai v0.5.16 for GPT-4o-mini integration.",
         "testStrategy": "Test prompt chain execution and output quality with sample financial data. Verify integration with existing types and data structures.",
@@ -552,9 +443,7 @@
             "title": "Create LangChain Directory Structure and Install Dependencies",
             "description": "Set up the required directory structure for LangChain implementation and install all necessary dependencies.",
             "status": "done",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Create the following directory structure in the web app:\n- `apps/web/src/lib/langchain/chains/` - For chain implementations\n- `apps/web/src/lib/langchain/templates/` - For sector-specific templates\n- `apps/web/src/lib/langchain/utils/` - For utility functions\n\nInstall required packages using pnpm:\n- @langchain/core v0.3.61\n- langchain v0.3.29\n- @langchain/openai v0.5.16\n\nCreate basic index files in each directory to facilitate imports.",
             "testStrategy": "Verify that all directories are created with the correct structure. Confirm that dependencies are properly installed and can be imported in a test file."
           },
@@ -563,9 +452,7 @@
             "title": "Create Data Transformer Utility",
             "description": "Implement a utility function to transform financial data into the format required by the LangChain prompts.",
             "status": "done",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Create a data transformer utility in `lib/langchain/utils/data-transformer.ts` that converts raw financial data from the FMPFinancialStatements type into a format optimized for prompt templates. Calculate derived metrics like margins, growth rates, and efficiency ratios that are specific to tech sector analysis.",
             "testStrategy": "Test with sample financial data to ensure all required metrics are correctly calculated. Verify that the output format matches what the prompt templates expect."
           },
@@ -574,9 +461,7 @@
             "title": "Implement Tech Sector Template Configuration",
             "description": "Create a detailed configuration object for the Tech sector template with dimension-specific prompts and weights.",
             "status": "done",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement the Tech sector template configuration in `lib/langchain/templates/tech-sector.ts` with:\n- Prompt templates for each dimension (profitability, growth, balance sheet, capital allocation, valuation)\n- Dimension weights (growth: 0.3, profitability: 0.2, balance sheet: 0.2, capital allocation: 0.2, valuation: 0.1)\n- Tech-specific evaluation criteria and benchmarks\n- Proper TypeScript typing for the template configuration",
             "testStrategy": "Verify that all prompt templates are properly formatted and contain the necessary placeholders. Ensure weights sum to 1.0 and the configuration follows the required structure."
           },
@@ -585,10 +470,7 @@
             "title": "Develop Core Analysis Chain Logic",
             "description": "Implement the core LangChain analysis chain that orchestrates the prompt execution and result processing.",
             "status": "done",
-            "dependencies": [
-              3,
-              4
-            ],
+            "dependencies": [3, 4],
             "details": "Create the main analysis chain in `lib/langchain/chains/tech-sector.ts` that:\n- Uses RunnableSequence and RunnableParallel for chain composition\n- Processes each dimension in parallel for efficiency\n- Calculates weighted scores based on template configuration\n- Generates comprehensive insights using a separate prompt\n- Structures the output according to the AnalysisResult type\n- Supports streaming for real-time UI updates",
             "testStrategy": "Test the chain with mock data to verify correct execution flow, proper scoring calculations, and valid output structure. Ensure streaming functionality works as expected."
           },
@@ -597,9 +479,7 @@
             "title": "Create Output Mapping Utility",
             "description": "Implement a utility function to map LangChain output to the AnalysisResult type.",
             "status": "done",
-            "dependencies": [
-              5
-            ],
+            "dependencies": [5],
             "details": "Create a utility function in `lib/langchain/utils/output-mapper.ts` that:\n- Takes the raw LangChain output and transforms it to match the AnalysisResult interface\n- Ensures all required fields are properly formatted\n- Adds metadata like timestamps and IDs\n- Handles any necessary type conversions or validations",
             "testStrategy": "Test with sample LangChain output to verify correct mapping to the AnalysisResult type. Ensure all required fields are present and properly formatted."
           },
@@ -608,10 +488,7 @@
             "title": "Implement API Route for Template Analysis",
             "description": "Create the Next.js API route for template-based financial analysis.",
             "status": "done",
-            "dependencies": [
-              5,
-              6
-            ],
+            "dependencies": [5, 6],
             "details": "Implement the API route in `app/api/analysis/template/[templateId]/route.ts` that:\n- Accepts financial data and company information as input\n- Validates the template ID (currently only supporting Tech sector template)\n- Initializes the appropriate LangChain model (GPT-4o-mini)\n- Executes the analysis chain with proper error handling\n- Returns a streaming response for real-time UI updates\n- Maps the chain output to the expected AnalysisResult format",
             "testStrategy": "Test the API route with Postman or similar tools to verify correct handling of requests, proper error responses, and valid streaming output format."
           },
@@ -620,9 +497,7 @@
             "title": "Implement Frontend Integration Hook",
             "description": "Create a TanStack Query hook for integrating the analysis API with the frontend.",
             "status": "done",
-            "dependencies": [
-              7
-            ],
+            "dependencies": [7],
             "details": "Implement a custom hook in `hooks/useCompanyAnalysis.ts` that:\n- Uses TanStack Query for data fetching and caching\n- Handles the streaming response from the analysis API\n- Provides real-time updates to the UI as analysis progresses\n- Properly manages loading, error, and success states\n- Returns the final analysis result in the expected format",
             "testStrategy": "Test the hook in a simple component to verify proper integration with the API, correct handling of streaming data, and appropriate UI state management."
           },
@@ -631,14 +506,7 @@
             "title": "Create Comprehensive Test Suite",
             "description": "Develop a test suite for the entire prompt chain implementation.",
             "status": "done",
-            "dependencies": [
-              3,
-              4,
-              5,
-              6,
-              7,
-              8
-            ],
+            "dependencies": [3, 4, 5, 6, 7, 8],
             "details": "Create a comprehensive test suite in `__tests__/langchain/` that tests:\n- Data transformer utility with various financial data inputs\n- Template configuration for correctness and completeness\n- Core analysis chain with mock data and model responses\n- API route with mocked requests and responses\n- Output mapper with various input formats\n- Frontend integration hook with mocked API responses\n- End-to-end flow with mock data",
             "testStrategy": "Use Jest for unit testing and mock the OpenAI API calls to avoid actual API usage during tests. Test both happy paths and error scenarios to ensure robust implementation."
           }
@@ -651,10 +519,7 @@
         "details": "Use Pydantic v2.6 for data validation. Implement scoring logic for Profitability, Growth, Balance-Sheet, Capital Allocation, Valuation. Store weights per template. Recommended: Pydantic v2.6.",
         "testStrategy": "Validate scoring logic with test cases for each dimension and overall score.",
         "priority": "medium",
-        "dependencies": [
-          2,
-          7
-        ],
+        "dependencies": [2, 7],
         "status": "done",
         "subtasks": [
           {
@@ -669,9 +534,7 @@
             "id": 2,
             "title": "Pydantic Model Creation",
             "description": "Create Pydantic models to validate and structure the input data, scoring configuration, and output scores.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Design models for input metrics, scoring rules, weights, and output results. Ensure models enforce data types, required fields, and value constraints.",
             "status": "done"
           },
@@ -679,9 +542,7 @@
             "id": 3,
             "title": "Weight Configuration",
             "description": "Implement a system for configuring and adjusting the weights assigned to each metric or scoring criterion.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Allow weights to be set via configuration files or environment variables, and validate them using the Pydantic models. Ensure the system supports easy updates and reflects changes in scoring logic.",
             "status": "done"
           },
@@ -689,9 +550,7 @@
             "id": 4,
             "title": "Test Case Development",
             "description": "Develop comprehensive test cases to validate the scoring logic, Pydantic models, and weight configuration.",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Create unit and integration tests covering normal, edge, and invalid cases. Ensure tests verify correct scoring, validation errors, and configurability.",
             "status": "done"
           },
@@ -699,9 +558,7 @@
             "id": 5,
             "title": "Integration",
             "description": "Integrate the scoring logic, Pydantic models, and weight configuration into the main application or service.",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Ensure seamless data flow between components, proper error handling, and that the system is ready for end-to-end testing and deployment.",
             "status": "done"
           }
@@ -711,12 +568,8 @@
         "id": 9,
         "title": "Display Scores & Insights in UI",
         "description": "Integrate backend scoring results into the Next.js dashboard, focusing on connecting to real backend endpoints.",
-        "status": "pending",
-        "dependencies": [
-          4,
-          5,
-          8
-        ],
+        "status": "done",
+        "dependencies": [4, 5, 8],
         "priority": "medium",
         "details": "Connect the existing TanStack Query v5 implementation to real FastAPI endpoints. The UI components (ScoreCard, FinancialMetrics) and dashboard pages are already implemented. Focus on backend integration and real-time updates.",
         "testStrategy": "Verify backend integration with real API endpoints, test real-time data updates, and ensure proper error handling with production data.",
@@ -725,7 +578,7 @@
             "id": 1,
             "title": "Backend Integration Setup",
             "description": "Connect to real FastAPI endpoints instead of mock APIs, ensuring secure and reliable connections for metric retrieval.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Update API configuration to point to production/staging FastAPI endpoints. Implement proper authentication and ensure data formats match what the existing UI components expect.",
             "testStrategy": ""
@@ -734,10 +587,8 @@
             "id": 2,
             "title": "Data Fetching Updates",
             "description": "Update existing TanStack Query hooks (useCompanies, useCompanyDetails, useScreening, useBulkAnalysisJob) to connect to real backend endpoints.",
-            "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "status": "done",
+            "dependencies": [1],
             "details": "Modify the existing hooks to use real API URLs, update any data transformation logic to match real API responses, and ensure caching strategies are appropriate for production use.",
             "testStrategy": ""
           },
@@ -745,10 +596,8 @@
             "id": 3,
             "title": "Real-time Updates Implementation",
             "description": "Add WebSocket connections or polling mechanisms to provide real-time data updates for dashboard metrics and analysis results.",
-            "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "status": "done",
+            "dependencies": [2],
             "details": "Implement WebSocket client or configure TanStack Query's polling capabilities to refresh data at appropriate intervals. Ensure UI components respond smoothly to data changes.",
             "testStrategy": ""
           },
@@ -756,10 +605,8 @@
             "id": 4,
             "title": "Enhanced Error Handling",
             "description": "Improve error handling for real API integration, including graceful fallbacks, user-friendly error messages, and recovery strategies.",
-            "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "status": "done",
+            "dependencies": [2],
             "details": "Implement comprehensive error boundaries, create user-friendly error states for each component, and add logging for backend integration issues to aid troubleshooting.",
             "testStrategy": ""
           },
@@ -767,13 +614,8 @@
             "id": 5,
             "title": "Integration Testing",
             "description": "Test the integration between frontend components and real backend services, ensuring data flows correctly and UI updates appropriately.",
-            "status": "pending",
-            "dependencies": [
-              1,
-              2,
-              3,
-              4
-            ],
+            "status": "done",
+            "dependencies": [1, 2, 3, 4],
             "details": "Create test scenarios that verify end-to-end functionality with real APIs. Test edge cases like slow connections, API errors, and data format changes. Document any issues discovered during testing.",
             "testStrategy": ""
           }
@@ -784,10 +626,7 @@
         "title": "Add Caching for Repeat Requests",
         "description": "Implement caching for prompt results and scores to reduce latency and API costs. Note: Caching for raw financial data (API responses) is now handled by the data-adapter package.",
         "status": "pending",
-        "dependencies": [
-          3,
-          6
-        ],
+        "dependencies": [3, 6],
         "priority": "medium",
         "details": "Use Redis v7 for caching prompt results and generated scores. Key by relevant identifiers (e.g., input hash for prompts, company ID + template ID for scores). Implement freshness checks and appropriate TTLs. Recommended: Redis v7.",
         "testStrategy": "Test cache hit/miss behavior and data freshness validation.",
@@ -804,9 +643,7 @@
             "id": 2,
             "title": "Cache Key Design",
             "description": "Design a cache key schema that supports prompt results and scores, considering namespace separation and efficient retrieval.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Define naming conventions and key patterns for prompt results (using input hash) and scores (using company ID + template ID). Ensure keys are unique and support future scalability.",
             "status": "pending"
           },
@@ -814,9 +651,7 @@
             "id": 3,
             "title": "Integration with Data Flows",
             "description": "Integrate Redis caching into application data flows for prompt results and scores, using appropriate caching patterns.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Modify data access logic to interact with Redis according to the chosen caching strategy. Focus on prompt results and score generation flows, not raw financial data which is now handled by the data-adapter package.",
             "status": "pending"
           },
@@ -824,9 +659,7 @@
             "id": 4,
             "title": "Freshness and Expiry Checks",
             "description": "Implement mechanisms to validate cache freshness, including TTL (time-to-live) settings and stale cache handling for prompt results and scores.",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Set appropriate expiration policies for prompt results and scores. Implement logic to check data freshness and reload or invalidate stale entries based on business requirements.",
             "status": "pending"
           },
@@ -834,9 +667,7 @@
             "id": 5,
             "title": "Cache Hit/Miss Logic Implementation",
             "description": "Develop logic to handle cache hits and misses for prompt results and scores, ensuring correct fallback to generation services and cache population on misses.",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Implement cache-aside logic: check cache first, handle hits by returning cached data, handle misses by generating new prompt results or scores and updating the cache.",
             "status": "pending"
           },
@@ -844,9 +675,7 @@
             "id": 6,
             "title": "Testing and Validation",
             "description": "Test the caching system for correctness, performance, and resilience, including cache hit/miss rates, data consistency, and freshness validation.",
-            "dependencies": [
-              5
-            ],
+            "dependencies": [5],
             "details": "Write and execute tests to verify cache integration, key design, freshness checks, and hit/miss logic. Monitor metrics and adjust configuration as needed.",
             "status": "pending"
           }
@@ -859,10 +688,7 @@
         "details": "Store templates in PostgreSQL as JSONB. Load template dynamically per scan. Support 3–5 pre-loaded sector templates. Recommended: PostgreSQL v15, Pydantic v2.6.",
         "testStrategy": "Validate template loading, prompt chain execution, and scoring with multiple templates.",
         "priority": "medium",
-        "dependencies": [
-          2,
-          7
-        ],
+        "dependencies": [2, 7],
         "status": "pending",
         "subtasks": [
           {
@@ -877,9 +703,7 @@
             "id": 2,
             "title": "Storage Logic",
             "description": "Design and implement the logic for storing JSON templates and their schemas in a database, supporting both static and dynamic structures.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Determine how to store templates and schema definitions efficiently, considering whether to use a single JSON column or multiple columns. Optimize for dynamic keys and frequent schema changes as needed.",
             "status": "pending"
           },
@@ -887,9 +711,7 @@
             "id": 3,
             "title": "Dynamic Loading",
             "description": "Implement mechanisms to dynamically load templates and their associated schemas from storage at runtime.",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Ensure that templates and schemas can be retrieved and instantiated on demand, supporting runtime flexibility and minimizing load times.",
             "status": "pending"
           },
@@ -897,9 +719,7 @@
             "id": 4,
             "title": "Template Switching",
             "description": "Enable runtime switching between different templates based on user input or application logic.",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Develop logic to allow seamless switching between templates, ensuring that the correct schema and data are loaded and rendered appropriately.",
             "status": "pending"
           },
@@ -907,9 +727,7 @@
             "id": 5,
             "title": "Multi-Template Support",
             "description": "Support the coexistence and management of multiple templates, each with its own schema and data.",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Implement features to manage, list, and select among multiple templates, ensuring that each template can be independently validated, loaded, and switched.",
             "status": "pending"
           },
@@ -917,10 +735,7 @@
             "id": 6,
             "title": "Validation",
             "description": "Validate data against the appropriate JSON schema for each template, both at input and before storage.",
-            "dependencies": [
-              1,
-              5
-            ],
+            "dependencies": [1, 5],
             "details": "Use automated validation tools and best practices to ensure that data conforms to the defined schemas, catching errors early and maintaining data integrity.",
             "status": "pending"
           }
@@ -931,10 +746,7 @@
         "title": "Implement Responsive Layout & Filtering",
         "description": "Enhance UI with responsive design and advanced filtering capabilities.",
         "status": "pending",
-        "dependencies": [
-          4,
-          9
-        ],
+        "dependencies": [4, 9],
         "priority": "medium",
         "details": "Use Tailwind CSS v3.4 and shadcn/ui v0.7 for responsive components. Add sortable/filterable tables. Recommended: Next.js v14, Tailwind CSS v3.4, shadcn/ui v0.7.",
         "testStrategy": "Test UI responsiveness and filtering on different devices.",
@@ -953,9 +765,7 @@
             "title": "Update and Refactor UI Components",
             "description": "Update existing UI components to ensure they are modular, reusable, and responsive, following card-based and auto-layout principles.",
             "status": "completed",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Refactor components to use card interfaces where appropriate, leverage flexbox or CSS grid for layout efficiency, and ensure buttons and interactive elements are large and tap-friendly. Prioritize essential content and maintain a minimalist approach.",
             "testStrategy": ""
           },
@@ -964,9 +774,7 @@
             "title": "Implement Advanced Table Features",
             "description": "Enhance table functionality with sorting, column filtering, and search capabilities.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Build upon the basic table functionality for companies list by adding column sorting (ascending/descending), column-specific filtering options, and a global search feature. Ensure all controls are accessible and responsive across device sizes.",
             "testStrategy": ""
           },
@@ -975,9 +783,7 @@
             "title": "Optimize Mobile Navigation",
             "description": "Enhance the navigation experience specifically for mobile devices.",
             "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Implement a mobile-friendly navigation pattern (e.g., hamburger menu, bottom navigation bar) that provides easy access to all key sections while maximizing screen space for content. Ensure touch targets are appropriately sized and positioned.",
             "testStrategy": ""
           },
@@ -986,10 +792,7 @@
             "title": "Implement Responsive Data Visualization",
             "description": "Ensure all charts and graphics adapt appropriately to different screen sizes.",
             "status": "pending",
-            "dependencies": [
-              1,
-              2
-            ],
+            "dependencies": [1, 2],
             "details": "Optimize data visualizations to be fully responsive, potentially using different visualization approaches for mobile vs. desktop. Consider simplified views for small screens while maintaining data integrity and readability.",
             "testStrategy": ""
           },
@@ -998,10 +801,7 @@
             "title": "Develop Advanced Filtering UI Components",
             "description": "Create sophisticated filtering interfaces including dropdowns, date pickers, and multi-select options.",
             "status": "pending",
-            "dependencies": [
-              2,
-              3
-            ],
+            "dependencies": [2, 3],
             "details": "Implement advanced filtering UI components that allow users to refine data views. Include date range pickers, multi-select dropdowns, and tag-based filtering. Ensure all filter components are responsive and maintain usability on mobile devices.",
             "testStrategy": ""
           },
@@ -1010,10 +810,7 @@
             "title": "Implement Performance Optimizations",
             "description": "Optimize performance for large datasets using virtual scrolling and other techniques.",
             "status": "pending",
-            "dependencies": [
-              3,
-              6
-            ],
+            "dependencies": [3, 6],
             "details": "Implement virtual scrolling or pagination for tables with large datasets to improve performance. Consider lazy loading for images and components that aren't immediately visible. Monitor and optimize render performance across different device capabilities.",
             "testStrategy": ""
           },
@@ -1022,13 +819,7 @@
             "title": "Conduct Cross-Device and Cross-Browser Testing",
             "description": "Test the UI and components on various devices and browsers to ensure consistent appearance and functionality.",
             "status": "pending",
-            "dependencies": [
-              3,
-              4,
-              5,
-              6,
-              7
-            ],
+            "dependencies": [3, 4, 5, 6, 7],
             "details": "Perform manual and automated testing across a range of devices (iOS, Android, tablets, desktops) and browsers (Chrome, Firefox, Safari, Edge). Validate that layouts, components, and advanced features work as intended, and address any issues found.",
             "testStrategy": ""
           }
@@ -1039,10 +830,7 @@
         "title": "Integrate Recharts for Data Visualization",
         "description": "Add financial charts and score gauges using Recharts to visualize financial data and analysis scores.",
         "status": "pending",
-        "dependencies": [
-          4,
-          9
-        ],
+        "dependencies": [4, 9],
         "priority": "medium",
         "details": "Use Recharts v2.8 to implement various chart types including score gauges/radar charts, line charts for trends, bar charts for comparisons, donut/pie charts for breakdowns, and treemaps for portfolio visualization. Leverage existing data structures in the Next.js frontend for financial statements, analysis scores, historical data, and performance metrics. Integrate with TanStack Query data fetching and ensure TypeScript type safety.",
         "testStrategy": "Validate chart rendering and data accuracy across different chart types. Test responsiveness on mobile and desktop. Verify correct data mapping for financial metrics and scores.",
@@ -1061,9 +849,7 @@
             "title": "Develop Chart Component",
             "description": "Create a reusable chart component using Recharts, following best practices for component structure.",
             "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Implement a chart component (e.g., LineChart, BarChart) in the appropriate directory (such as src/components/charts/). Include necessary Recharts elements like XAxis, YAxis, Tooltip, and Legend.",
             "testStrategy": ""
           },
@@ -1072,9 +858,7 @@
             "title": "Bind Data to Chart Component",
             "description": "Connect the chart component to dynamic data sources and ensure correct data mapping.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Fetch or receive data (e.g., via props or API call), and pass it to the chart component. Map data fields to chart axes and series as required by Recharts.",
             "testStrategy": ""
           },
@@ -1083,9 +867,7 @@
             "title": "Validate Chart Rendering and Data Accuracy",
             "description": "Test the chart component to confirm it renders correctly and accurately reflects the bound data.",
             "status": "pending",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Visually inspect the chart in the application, verify that all chart elements display as expected, and confirm that the data shown matches the source data. Address any rendering or data binding issues.",
             "testStrategy": ""
           },
@@ -1094,9 +876,7 @@
             "title": "Implement Score Gauges/Radar Charts",
             "description": "Create visualizations for analysis scores by dimension (profitability, growth, balance sheet, capital allocation, valuation).",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Use Recharts RadarChart or create custom gauge components to display MetricScores. Ensure proper color coding based on score values. Integrate with the existing ScoreCard component.",
             "testStrategy": ""
           },
@@ -1105,9 +885,7 @@
             "title": "Develop Financial Trend Line Charts",
             "description": "Implement line charts to visualize financial metrics over time.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Create line charts that display historical financial data across multiple periods (Q1, Q2, Q3, Q4). Include proper tooltips, legends, and responsive configurations. Integrate with the FinancialMetrics component.",
             "testStrategy": ""
           },
@@ -1116,9 +894,7 @@
             "title": "Create Quarterly Comparison Bar Charts",
             "description": "Build bar charts for comparing financial metrics across quarters.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement bar charts that allow users to compare key financial metrics across different quarters. Include proper labeling, tooltips, and color coding.",
             "testStrategy": ""
           },
@@ -1127,9 +903,7 @@
             "title": "Implement Financial Breakdown Donut/Pie Charts",
             "description": "Create donut or pie charts to visualize financial breakdowns.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Use Recharts PieChart to display financial breakdowns such as revenue sources, expense categories, or other proportional financial data. Include proper legends and interactive elements.",
             "testStrategy": ""
           },
@@ -1138,9 +912,7 @@
             "title": "Develop Portfolio Treemap Visualization",
             "description": "Implement a treemap chart for portfolio visualization.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Create a treemap using Recharts to visualize portfolio allocation or other hierarchical financial data. Configure proper sizing, coloring, and tooltips for effective data representation.",
             "testStrategy": ""
           },
@@ -1149,13 +921,7 @@
             "title": "Create Dedicated ChartsSection Component",
             "description": "Develop a dedicated section for the dashboard to showcase various financial charts.",
             "status": "pending",
-            "dependencies": [
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
+            "dependencies": [5, 6, 7, 8, 9],
             "details": "Create a ChartsSection component that organizes and displays the various chart types in a cohesive layout. Implement tabs or other navigation elements to allow users to switch between different chart views.",
             "testStrategy": ""
           },
@@ -1164,13 +930,7 @@
             "title": "Implement Responsive Chart Configurations",
             "description": "Ensure all charts are responsive and display properly on both mobile and desktop devices.",
             "status": "pending",
-            "dependencies": [
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
+            "dependencies": [5, 6, 7, 8, 9],
             "details": "Configure charts to adapt to different screen sizes. Implement responsive width/height calculations, adjust font sizes and spacing, and possibly create alternative layouts for mobile views.",
             "testStrategy": ""
           },
@@ -1179,9 +939,7 @@
             "title": "Integrate with TanStack Query and TypeScript",
             "description": "Ensure proper integration with existing data fetching mechanisms and type safety.",
             "status": "pending",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Leverage the existing TanStack Query setup for data fetching. Create appropriate TypeScript interfaces for chart data and props. Ensure type safety throughout the chart components and data mapping functions.",
             "testStrategy": ""
           }
@@ -1192,10 +950,7 @@
         "title": "Enable Report Export to PDF/CSV",
         "description": "Add functionality to export analysis results to PDF and CSV.",
         "status": "pending",
-        "dependencies": [
-          9,
-          12
-        ],
+        "dependencies": [9, 12],
         "priority": "medium",
         "details": "Use pdf-lib v1.17 for PDF generation, csv-writer v6.0 for CSV. Integrate with existing Next.js frontend that already has UI components and data structures ready for export functionality. Focus on backend implementation and seamless frontend integration.",
         "testStrategy": "Test export functionality and file content accuracy. Verify all exportable data types (company analysis, financial statements, recommendations, company lists) render correctly in both formats.",
@@ -1223,10 +978,7 @@
             "title": "Integrate Export Options into UI",
             "description": "Add export buttons and options to the user interface, allowing users to trigger PDF or CSV exports.",
             "status": "pending",
-            "dependencies": [
-              1,
-              2
-            ],
+            "dependencies": [1, 2],
             "details": "Integrate with existing Next.js frontend components at specified integration points: company detail pages, companies table toolbar, and dashboard for bulk exports. Implement format selection UI (PDF vs CSV options).",
             "testStrategy": ""
           },
@@ -1235,9 +987,7 @@
             "title": "Handle File Download in Frontend",
             "description": "Implement logic to handle file downloads in the browser after export is triggered from the UI.",
             "status": "pending",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Use browser APIs (File API, URL.createObjectURL) to handle downloads. Implement progress indicators for large export jobs. Ensure files download automatically with meaningful filenames and correct MIME types. Implement error handling for export failures.",
             "testStrategy": ""
           },
@@ -1246,9 +996,7 @@
             "title": "Validate Export Functionality",
             "description": "Test and validate that exported files (PDF and CSV) contain correct data, proper formatting, and are downloadable from the UI.",
             "status": "pending",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Perform manual and automated tests to verify data accuracy, file integrity, and user experience for both export formats. Test all integration points (company detail pages, table toolbar, dashboard) and all exportable data types (analysis results, financial statements, recommendations, company lists).",
             "testStrategy": ""
           },
@@ -1257,10 +1005,7 @@
             "title": "Implement Bulk Export Functionality",
             "description": "Add capability to export multiple companies or reports simultaneously from the dashboard.",
             "status": "pending",
-            "dependencies": [
-              1,
-              2
-            ],
+            "dependencies": [1, 2],
             "details": "Develop backend logic to handle bulk export requests, potentially using background processing for large exports. Ensure proper progress indication and notification when exports are complete.",
             "testStrategy": ""
           }
@@ -1271,11 +1016,7 @@
         "title": "Implement Bulk Screening Workflow",
         "description": "Enable processing of 1–1,000+ tickers in parallel with progress tracking.",
         "status": "pending",
-        "dependencies": [
-          2,
-          6,
-          11
-        ],
+        "dependencies": [2, 6, 11],
         "priority": "medium",
         "details": "Use Celery v5.3 or AWS Lambda for task queue. Stream results to UI with progress bars. Leverage existing Next.js frontend components and hooks for bulk analysis job handling.",
         "testStrategy": "Test bulk processing, progress updates, and result accuracy. Ensure compatibility with existing frontend API contract.",
@@ -1294,9 +1035,7 @@
             "title": "Parallel Processing Logic",
             "description": "Develop logic for parallel task execution using a pool of worker processes or threads that fetch and process tasks from the queue.",
             "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Implement worker pool management, task fetching, and execution logic. Ensure efficient resource utilization and avoid race conditions. Support processing of 1-1,000+ tickers simultaneously.",
             "testStrategy": ""
           },
@@ -1305,9 +1044,7 @@
             "title": "Progress Tracking",
             "description": "Implement mechanisms to track the progress of each task and overall job status in real time.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement backend progress tracking compatible with the existing frontend data structure (status: PENDING/IN_PROGRESS/COMPLETED/FAILED, progress: 0.0-1.0). Ensure compatibility with the useBulkAnalysisJob hook.",
             "testStrategy": ""
           },
@@ -1316,9 +1053,7 @@
             "title": "Result Streaming",
             "description": "Enable streaming of task results to the UI or client as soon as they are available, rather than waiting for all tasks to complete.",
             "status": "pending",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Implement WebSocket connections for real-time updates. Ensure compatibility with existing TanStack Query implementation in the frontend for result streaming.",
             "testStrategy": ""
           },
@@ -1327,9 +1062,7 @@
             "title": "Error Handling",
             "description": "Design and implement comprehensive error handling for failed tasks, including retries, logging, and user notifications.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Define error categories, implement retry logic, and ensure errors are surfaced to progress tracking and result streaming systems. Align with frontend error handling mechanisms.",
             "testStrategy": ""
           },
@@ -1338,10 +1071,7 @@
             "title": "Scaling Tests",
             "description": "Conduct scalability and performance tests to ensure the system can handle high task volumes and parallelism efficiently.",
             "status": "pending",
-            "dependencies": [
-              2,
-              5
-            ],
+            "dependencies": [2, 5],
             "details": "Simulate large workloads (up to 1,000+ tickers), monitor resource usage, and identify bottlenecks or failure points under load.",
             "testStrategy": ""
           },
@@ -1350,11 +1080,7 @@
             "title": "Backend API Implementation",
             "description": "Implement the backend API endpoints to match the existing frontend contract.",
             "status": "pending",
-            "dependencies": [
-              3,
-              4,
-              5
-            ],
+            "dependencies": [3, 4, 5],
             "details": "Implement GET/POST /api/analysis/bulk endpoints to match the existing mock API contract. Ensure proper integration with the task queue and progress tracking systems.",
             "testStrategy": ""
           },
@@ -1363,10 +1089,7 @@
             "title": "Job Persistence and Recovery",
             "description": "Implement mechanisms for job persistence and recovery in case of system failures.",
             "status": "pending",
-            "dependencies": [
-              1,
-              2
-            ],
+            "dependencies": [1, 2],
             "details": "Design and implement a storage solution for job state that allows recovery after crashes or restarts. Ensure jobs can be resumed from their last known state.",
             "testStrategy": ""
           },
@@ -1375,10 +1098,7 @@
             "title": "WebSocket Server Implementation",
             "description": "Set up WebSocket server for real-time progress and result updates.",
             "status": "pending",
-            "dependencies": [
-              3,
-              4
-            ],
+            "dependencies": [3, 4],
             "details": "Implement WebSocket server that can push updates to connected clients. Ensure proper authentication, connection management, and message formatting compatible with the frontend expectations.",
             "testStrategy": ""
           }
@@ -1389,10 +1109,7 @@
         "title": "Add Auth & Multi-Tenant Support",
         "description": "Implement email/social sign-in, workspace separation, and team roles.",
         "status": "pending",
-        "dependencies": [
-          2,
-          5
-        ],
+        "dependencies": [2, 5],
         "priority": "medium",
         "details": "Use Supabase Auth or Auth0. Enforce tenancy at API gateway. Leverage existing Next.js frontend integration points for authentication and multi-tenancy features, including layout components, API hooks, middleware for route protection, and workspace context throughout the app.",
         "testStrategy": "Test user authentication, workspace isolation, role-based access, and Next.js-specific integration points including middleware, server-side authentication, client-side auth state management, and API route authentication middleware.",
@@ -1411,9 +1128,7 @@
             "title": "Implement Workspace Separation Logic",
             "description": "Design and implement multi-tenancy logic to separate data and access by workspace or tenant, ensuring isolation and security between different customer environments.",
             "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Define workspace boundaries in the data model and enforce access controls at the API and database layers to prevent cross-tenant data leakage. Use tenant identifiers in authentication tokens and API requests to scope data access appropriately.",
             "testStrategy": "Test workspace isolation by verifying data access is properly scoped to the current workspace and that cross-workspace access is prevented."
           },
@@ -1422,9 +1137,7 @@
             "title": "Develop Role Management System",
             "description": "Create a role-based access control (RBAC) system to manage user permissions within each workspace, assigning roles that grant the minimum necessary privileges.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement roles and permissions aligned with the principle of least privilege. Integrate role assignments with authentication tokens and enforce role checks in API endpoints to control user actions based on their assigned roles.",
             "testStrategy": "Verify that users can only perform actions allowed by their assigned roles and that role changes are immediately reflected in access permissions."
           },
@@ -1433,9 +1146,7 @@
             "title": "Enforce API Security and Access Controls",
             "description": "Apply authentication and authorization enforcement on all API endpoints, including validation of tokens, workspace scoping, and role-based permissions.",
             "status": "pending",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Use HTTPS/TLS for all API communications. Validate JWT or OAuth tokens on each request, check workspace identifiers, and verify user roles before granting access. Implement rate limiting, input validation, and logging for security and auditing purposes.",
             "testStrategy": "Test API security by attempting unauthorized access, cross-workspace requests, and actions beyond role permissions to ensure proper enforcement."
           },
@@ -1444,9 +1155,7 @@
             "title": "Update User Interface for Authentication and Authorization",
             "description": "Modify the UI to support authentication flows, workspace selection, and role-based access controls, providing users with appropriate views and actions based on their permissions.",
             "status": "pending",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Integrate login/logout flows using the chosen authentication provider. Display workspace context and allow users to switch workspaces if permitted. Show or hide UI elements based on user roles to prevent unauthorized actions.",
             "testStrategy": "Verify that UI elements correctly reflect authentication state, workspace context, and user roles, with appropriate elements hidden or disabled based on permissions."
           },
@@ -1455,10 +1164,7 @@
             "title": "Conduct Security Testing and Audits",
             "description": "Perform comprehensive security testing including penetration tests, vulnerability scans, and audits to ensure the authentication, workspace separation, role management, and API enforcement are secure and robust.",
             "status": "pending",
-            "dependencies": [
-              4,
-              5
-            ],
+            "dependencies": [4, 5],
             "details": "Test for common vulnerabilities such as injection attacks, improper access controls, token misuse, and data leakage between workspaces. Verify compliance with security best practices and document findings for remediation.",
             "testStrategy": "Conduct penetration testing, vulnerability scanning, and security audits to identify and address potential security issues."
           },
@@ -1467,9 +1173,7 @@
             "title": "Implement Next.js-Specific Authentication Integration",
             "description": "Leverage Next.js features for authentication and authorization, including middleware for route protection and server-side authentication.",
             "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Implement Next.js middleware for route protection, set up server-side authentication with getServerSideProps where needed, and create client-side auth state management using context providers. Ensure authentication state persists across page refreshes and implement automatic token refresh handling.",
             "testStrategy": "Test route protection, server-side authentication, client-side auth state management, and token refresh functionality across different page navigation scenarios."
           },
@@ -1478,11 +1182,7 @@
             "title": "Integrate Auth with TanStack Query and API Hooks",
             "description": "Enhance existing API hooks to include authentication headers and workspace context for all data fetching operations.",
             "status": "pending",
-            "dependencies": [
-              1,
-              2,
-              7
-            ],
+            "dependencies": [1, 2, 7],
             "details": "Modify TanStack Query hooks to automatically include authentication tokens and workspace identifiers in API requests. Implement error handling for authentication failures and token refresh scenarios.",
             "testStrategy": "Verify that API requests include proper authentication headers and workspace context, and that authentication failures are properly handled."
           },
@@ -1491,10 +1191,7 @@
             "title": "Develop Workspace Switching UI in Navigation",
             "description": "Create a user interface component for workspace selection and switching within the application navigation.",
             "status": "pending",
-            "dependencies": [
-              2,
-              5
-            ],
+            "dependencies": [2, 5],
             "details": "Implement a dropdown or similar UI element in the navigation bar that displays the current workspace and allows users to switch between workspaces they have access to. Ensure the workspace context is updated throughout the application when switched.",
             "testStrategy": "Test workspace switching functionality, verifying that the UI updates correctly and that data access is properly scoped to the newly selected workspace."
           },
@@ -1503,11 +1200,7 @@
             "title": "Implement Component-Level Role-Based Visibility Controls",
             "description": "Create a system for conditionally rendering UI components based on user roles and permissions.",
             "status": "pending",
-            "dependencies": [
-              3,
-              5,
-              7
-            ],
+            "dependencies": [3, 5, 7],
             "details": "Develop higher-order components or hooks that can wrap UI elements to conditionally render them based on the user's role and permissions. Integrate with the authentication context to access role information.",
             "testStrategy": "Test component visibility controls by verifying that UI elements are correctly shown or hidden based on user roles and permissions."
           },
@@ -1516,10 +1209,7 @@
             "title": "Implement Auth State Persistence and Token Refresh",
             "description": "Ensure authentication state persists across page refreshes and implement automatic token refresh handling.",
             "status": "pending",
-            "dependencies": [
-              1,
-              7
-            ],
+            "dependencies": [1, 7],
             "details": "Use secure storage mechanisms for persisting authentication state. Implement token refresh logic to handle expiring tokens without disrupting the user experience. Ensure all components react appropriately to auth state changes.",
             "testStrategy": "Test auth state persistence across page refreshes and browser sessions. Verify automatic token refresh works correctly when tokens approach expiration."
           },
@@ -1528,11 +1218,7 @@
             "title": "Create API Route Authentication Middleware",
             "description": "Develop middleware for Next.js API routes to enforce authentication and authorization checks.",
             "status": "pending",
-            "dependencies": [
-              1,
-              4,
-              7
-            ],
+            "dependencies": [1, 4, 7],
             "details": "Create reusable middleware for Next.js API routes that validates authentication tokens, checks workspace context, and enforces role-based permissions before allowing access to API functionality.",
             "testStrategy": "Test API route middleware by attempting various authenticated and unauthenticated requests with different roles and workspace contexts."
           },
@@ -1541,10 +1227,7 @@
             "title": "Integrate Login/Logout Pages with Existing Layout",
             "description": "Implement authentication UI pages that integrate seamlessly with the existing application layout.",
             "status": "pending",
-            "dependencies": [
-              1,
-              5
-            ],
+            "dependencies": [1, 5],
             "details": "Create login, logout, and related authentication pages that maintain consistent branding and UX with the rest of the application. Ensure smooth transitions between authenticated and unauthenticated states.",
             "testStrategy": "Test authentication UI for usability, visual consistency, and proper integration with the existing application layout and navigation flow."
           }
@@ -1555,10 +1238,7 @@
         "title": "Implement Embeddings Store with pgvector",
         "description": "Implement an embeddings store using pgvector for AI-generated content and user queries to reduce latency and costs. This task focuses exclusively on storing embeddings for AI outputs, not raw financial data which is now handled by the data-adapter package.",
         "status": "pending",
-        "dependencies": [
-          2,
-          10
-        ],
+        "dependencies": [2, 10],
         "priority": "low",
         "details": "Use PostgreSQL with the pgvector extension to store and retrieve embeddings for AI-generated text (analysis summaries, insights) and user queries. Key embeddings by a hash of the content that was embedded. Implement freshness checks to re-generate embeddings if the source text changes. Recommended: PostgreSQL v15, pgvector v0.6.",
         "testStrategy": "Test embedding storage, retrieval, and freshness validation for AI-generated content and user queries.",
@@ -1577,9 +1257,7 @@
             "title": "Embedding Storage Logic",
             "description": "Design and implement the database schema for storing embeddings of AI-generated content and user queries. Develop logic to insert and update vector embeddings in the database.",
             "status": "pending",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Create tables with a vector column (e.g., `embedding vector(1536)`). Implement application logic to store and update embeddings, ensuring compatibility with pgvector's data types. Use content hash as the primary key. Create separate tables for AI-generated content embeddings and user query embeddings.",
             "testStrategy": ""
           },
@@ -1588,9 +1266,7 @@
             "title": "Retrieval API",
             "description": "Develop an API endpoint for retrieving embeddings using vector similarity search. Support nearest neighbor queries for finding similar AI-generated content or past user queries.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement API logic to query the database using pgvector's similarity operators (e.g., `<->` for Euclidean distance). Ensure the API can handle query parameters for similarity search across AI-generated content and previous user queries.",
             "testStrategy": ""
           },
@@ -1599,9 +1275,7 @@
             "title": "Freshness Checks",
             "description": "Implement mechanisms to ensure AI-generated content embeddings are up-to-date. Add logic to check and refresh embeddings when source text changes.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Track timestamps and content hashes for embeddings. Add logic to verify embedding freshness before retrieval, and trigger re-embedding if the source AI-generated content has changed.",
             "testStrategy": ""
           },
@@ -1610,10 +1284,7 @@
             "title": "Integration Testing",
             "description": "Develop and execute integration tests covering embedding storage, retrieval, and freshness logic for AI-generated content and user queries. Validate end-to-end functionality and performance.",
             "status": "pending",
-            "dependencies": [
-              3,
-              4
-            ],
+            "dependencies": [3, 4],
             "details": "Write tests that insert, update, and retrieve embeddings via the API. Test freshness checks and ensure correct results are returned. Measure performance and correctness for both AI-generated content and user query scenarios.",
             "testStrategy": ""
           },
@@ -1622,9 +1293,7 @@
             "title": "Clear Separation from data-adapter",
             "description": "Ensure clear separation between this embeddings store and the data-adapter package's caching functionality.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Document the distinct responsibilities: data-adapter handles raw financial filing caching, while this embeddings store focuses exclusively on AI-generated content and user queries. Ensure no overlap in functionality or data storage.",
             "testStrategy": ""
           },
@@ -1633,9 +1302,7 @@
             "title": "User Query Embedding Storage",
             "description": "Implement specialized storage for user query embeddings to enable finding similar past queries.",
             "status": "pending",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Create a dedicated table structure for storing user query embeddings with appropriate metadata (timestamp, user context, etc.). Implement logic to store new query embeddings and find similar past queries.",
             "testStrategy": ""
           }
@@ -1648,10 +1315,7 @@
         "details": "Use Docker v24 for containerization. Deploy to Kubernetes v1.28 or AWS ECS. Recommended: Docker v24, Kubernetes v1.28.",
         "testStrategy": "Validate container deployment, service discovery, and scaling.",
         "priority": "medium",
-        "dependencies": [
-          1,
-          5
-        ],
+        "dependencies": [1, 5],
         "status": "pending",
         "subtasks": [
           {
@@ -1666,9 +1330,7 @@
             "id": 2,
             "title": "Service Definition",
             "description": "Define clear service boundaries and interfaces for each microservice, including API contracts and dependencies.",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Utilize domain-driven design to identify natural service boundaries and ensure each service is cohesive and loosely coupled. Document APIs and expected behaviors.",
             "status": "pending"
           },
@@ -1676,10 +1338,7 @@
             "id": 3,
             "title": "Deployment Script Creation",
             "description": "Develop scripts to automate the deployment of containerized services to the target environment.",
-            "dependencies": [
-              1,
-              2
-            ],
+            "dependencies": [1, 2],
             "details": "Write scripts (e.g., Docker Compose, Helm charts, or Kubernetes manifests) to build, push, and deploy containers, ensuring repeatability and consistency across environments.",
             "status": "pending"
           },
@@ -1687,9 +1346,7 @@
             "id": 4,
             "title": "Cluster Setup",
             "description": "Provision and configure the orchestration cluster (e.g., Kubernetes, Docker Swarm) for running the containerized microservices.",
-            "dependencies": [
-              3
-            ],
+            "dependencies": [3],
             "details": "Set up the cluster infrastructure, configure networking, storage, and security policies, and ensure the environment is ready for service deployment.",
             "status": "pending"
           },
@@ -1697,9 +1354,7 @@
             "id": 5,
             "title": "Service Discovery Configuration",
             "description": "Implement service discovery mechanisms to enable dynamic location and communication between microservices.",
-            "dependencies": [
-              4
-            ],
+            "dependencies": [4],
             "details": "Configure built-in service discovery features of the orchestration platform or integrate third-party solutions to allow services to find and communicate with each other reliably.",
             "status": "pending"
           },
@@ -1707,9 +1362,7 @@
             "id": 6,
             "title": "Scaling Configuration",
             "description": "Set up scaling policies and configurations to ensure services can scale horizontally based on demand.",
-            "dependencies": [
-              5
-            ],
+            "dependencies": [5],
             "details": "Define resource requests/limits, configure auto-scaling rules, and test scaling behavior to maintain performance and availability under varying loads.",
             "status": "pending"
           },

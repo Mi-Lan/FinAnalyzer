@@ -42,6 +42,7 @@ services:
     volumes:
       - ./packages/api-gateway:/app
       - ./packages/data-adapter:/data-adapter
+      - ./scripts:/app/scripts
     command: poetry run uvicorn api_gateway.main:app --host 0.0.0.0 --port 8000 --reload
 
   web:
@@ -65,9 +66,11 @@ services:
     volumes:
       - ./apps/web:/app/apps/web
       - ./packages:/app/packages
+      - ./packages/data-adapter:/app/packages/data-adapter
       - /app/node_modules
       - /app/apps/web/node_modules
       - /app/packages/database/node_modules
+    entrypoint: /app/scripts/entrypoint.sh
     command: pnpm dev --filter web
 
 volumes:

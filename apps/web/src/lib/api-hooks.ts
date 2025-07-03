@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import type {
   ScreeningResult,
   CompanyDetailsResponse,
+  CompanyWithAnalysis,
 } from '@/types/financial';
 
 // Fetch all companies
@@ -12,10 +13,17 @@ export function useCompanies() {
     queryKey: ['companies'],
     queryFn: async () => {
       const response = await fetch('/api/companies');
-      if (!response.ok) throw new Error('Failed to fetch companies');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error ||
+            'Failed to fetch companies. Please try again later.'
+        );
+      }
       return response.json();
     },
     staleTime: 15 * 60 * 1000, // 15 minutes
+    refetchInterval: 60 * 1000, // Refetch every 1 minute
   });
 }
 
@@ -47,7 +55,7 @@ export function useScreening(filters: {
 }) {
   return useQuery({
     queryKey: ['screening', filters],
-    queryFn: async (): Promise<ScreeningResult> => {
+    queryFn: async (): Promise<CompanyWithAnalysis[]> => {
       const params = new URLSearchParams();
 
       if (filters.sector) params.append('sector', filters.sector);
@@ -61,12 +69,17 @@ export function useScreening(filters: {
       const response = await fetch(`/api/analysis/screen?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch screening results');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error ||
+            'Failed to fetch screening results. Please try again later.'
+        );
       }
 
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 }
 
@@ -75,7 +88,7 @@ export function useBulkAnalysisJob(jobId?: string) {
   return useQuery({
     queryKey: ['bulk-analysis', jobId],
     queryFn: async () => {
-      const response = await fetch('/api/analysis/bulk');
+      const response = await fetch(`/api/analysis/bulk?jobId=${jobId}`);
       if (!response.ok) throw new Error('Failed to fetch bulk analysis status');
       return response.json();
     },
@@ -93,14 +106,11 @@ import {
   FMPFinancialStatements,
   Company,
 } from '@/types/financial';
-import { AnalysisChainOutput } from './langchain/chains';
-import { mapChainOutputToAnalysisResult } from './langchain/utils/output-mapper';
 
 export const useCompanyAnalysis = () => {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [progress, setProgress] = useState<AnalysisChainOutput | null>(null);
 
   const runAnalysis = useCallback(
     async (
@@ -111,7 +121,6 @@ export const useCompanyAnalysis = () => {
       setIsLoading(true);
       setError(null);
       setAnalysis(null);
-      setProgress(null);
 
       try {
         const response = await fetch(`/api/analysis/template/${templateId}`, {
@@ -125,47 +134,8 @@ export const useCompanyAnalysis = () => {
           throw new Error(errorData.error || 'Analysis failed');
         }
 
-        if (!response.body) throw new Error('Response body is null');
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let lastResult: AnalysisChainOutput | null = null;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const jsonString = line.substring(6);
-              if (jsonString) {
-                try {
-                  const parsedChunk = JSON.parse(
-                    jsonString
-                  ) as AnalysisChainOutput;
-                  lastResult = parsedChunk;
-                  setProgress(parsedChunk); // Update progress with the latest chunk
-                } catch {
-                  console.error('Failed to parse stream chunk:', jsonString);
-                }
-              }
-            }
-          }
-        }
-
-        if (lastResult) {
-          const finalResult = mapChainOutputToAnalysisResult({
-            chainOutput: lastResult,
-            companyId: company.id,
-            templateId,
-          });
-          setAnalysis(finalResult);
-        } else {
-          throw new Error('Stream ended without a final result.');
-        }
+        const analysisResult = await response.json();
+        setAnalysis(analysisResult);
       } catch (err) {
         setError(err as Error);
       } finally {
@@ -175,5 +145,5 @@ export const useCompanyAnalysis = () => {
     []
   );
 
-  return { analysis, progress, isLoading, error, runAnalysis };
+  return { analysis, isLoading, error, runAnalysis };
 };

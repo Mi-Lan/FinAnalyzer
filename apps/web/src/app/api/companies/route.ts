@@ -21,14 +21,6 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      // For now, return empty list since backend doesn't implement this yet
-      if (response.status === 501) {
-        return NextResponse.json({
-          companies: [],
-          total: 0,
-        });
-      }
-
       const errorData = await response.json();
       return NextResponse.json(
         { error: errorData.detail || 'Failed to fetch from API Gateway' },
@@ -37,16 +29,12 @@ export async function GET() {
     }
 
     const data = await response.json();
-    return NextResponse.json({
-      companies: data,
-      total: data.length,
-    });
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching from API Gateway:', error);
-    // Return empty list for now
-    return NextResponse.json({
-      companies: [],
-      total: 0,
-    });
+    return NextResponse.json(
+      { error: 'An internal error occurred' },
+      { status: 500 }
+    );
   }
 }

@@ -35,6 +35,9 @@ importers:
       '@langchain/openai':
         specifier: 0.5.16
         version: 0.5.16(@langchain/core@0.3.61(openai@5.8.2(ws@8.18.3)(zod@3.25.67)))(ws@8.18.3)
+      '@prisma/client':
+        specifier: 5.14.0
+        version: 5.14.0(prisma@5.14.0)
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@19.1.8)(react@19.1.0)
@@ -50,6 +53,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      database@workspace:*:
+        specifier: link:packages/database@workspace:*
+        version: link:packages/database@workspace:*
       langchain:
         specifier: 0.3.29
         version: 0.3.29(@langchain/core@0.3.61(openai@5.8.2(ws@8.18.3)(zod@3.25.67)))(openai@5.8.2(ws@8.18.3)(zod@3.25.67))(ws@8.18.3)
