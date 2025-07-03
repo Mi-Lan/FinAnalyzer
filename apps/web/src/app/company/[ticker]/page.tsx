@@ -16,7 +16,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { FMPFinancialStatements } from '@/types/financial';
+import {
+  FMPFinancialStatements,
+  FMPIncomeStatement,
+  FMPBalanceSheetStatement,
+  FMPCashFlowStatement,
+} from '@/types/financial';
+
+// Define wrapper types for the nested financial data
+type IncomeDataWrapper = { income_statements?: Partial<FMPIncomeStatement>[] };
+type BalanceSheetDataWrapper = {
+  balance_sheets?: Partial<FMPBalanceSheetStatement>[];
+};
+type CashFlowDataWrapper = { cash_flows?: Partial<FMPCashFlowStatement>[] };
 
 function CompanyDetailContent({ ticker }: { ticker: string }) {
   const { data, isLoading, error } = useCompanyDetails(ticker);
@@ -74,12 +86,9 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
   // Transform database financial data to FMPFinancialStatements format
 
   const transformDatabaseDataToFMPFormat = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    incomeData: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    balanceData: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cashFlowData: any
+    incomeData: IncomeDataWrapper,
+    balanceData: BalanceSheetDataWrapper,
+    cashFlowData: CashFlowDataWrapper
   ): FMPFinancialStatements => {
     // Extract the actual financial statement data from the nested structure
     const incomeStatement = incomeData?.income_statements?.[0] || {};
@@ -94,14 +103,12 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         revenue: incomeStatement.revenue || 0,
         grossProfit:
           incomeStatement.grossProfit ||
-          incomeStatement.revenue - incomeStatement.costOfRevenue ||
-          0,
+          (incomeStatement.revenue ?? 0) - (incomeStatement.costOfRevenue ?? 0),
         operatingIncome:
           incomeStatement.operatingIncome || incomeStatement.ebit || 0,
         netIncome:
           incomeStatement.netIncome || incomeStatement.bottomLineNetIncome || 0,
         interestExpense: incomeStatement.interestExpense || 0,
-        // Add other required fields with defaults
         costOfRevenue: incomeStatement.costOfRevenue || 0,
         researchAndDevelopmentExpenses:
           incomeStatement.researchAndDevelopmentExpenses || 0,
@@ -121,7 +128,7 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         epsDiluted: incomeStatement.epsDiluted || 0,
         weightedAverageShsOut: incomeStatement.weightedAverageShsOut || 0,
         weightedAverageShsOutDil: incomeStatement.weightedAverageShsOutDil || 0,
-      } as any,
+      } as unknown as FMPIncomeStatement,
       balanceSheet: {
         totalAssets: balanceSheet.totalAssets || 0,
         totalCurrentAssets: balanceSheet.totalCurrentAssets || 0,
@@ -131,7 +138,6 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
           balanceSheet.totalStockholdersEquity || balanceSheet.totalEquity || 0,
         totalLiabilities: balanceSheet.totalLiabilities || 0,
         cashAndCashEquivalents: balanceSheet.cashAndCashEquivalents || 0,
-        // Add other fields with defaults as needed
         shortTermInvestments: balanceSheet.shortTermInvestments || 0,
         cashAndShortTermInvestments:
           balanceSheet.cashAndShortTermInvestments || 0,
@@ -158,23 +164,21 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         retainedEarnings: balanceSheet.retainedEarnings || 0,
         accumulatedOtherComprehensiveIncomeLoss:
           balanceSheet.accumulatedOtherComprehensiveIncomeLoss || 0,
-        othertotalStockholdersEquity:
-          balanceSheet.othertotalStockholdersEquity || 0,
+        otherTotalStockholdersEquity:
+          balanceSheet.otherTotalStockholdersEquity || 0,
         totalStockholdersEquity: balanceSheet.totalStockholdersEquity || 0,
-        totalLiabilitiesAndStockholdersEquity:
-          balanceSheet.totalLiabilitiesAndStockholdersEquity || 0,
+        totalLiabilitiesAndTotalEquity:
+          balanceSheet.totalLiabilitiesAndTotalEquity || 0,
         minorityInterest: balanceSheet.minorityInterest || 0,
         totalInvestments: balanceSheet.totalInvestments || 0,
-        totalDebtAndCapitalLease: balanceSheet.totalDebtAndCapitalLease || 0,
         netDebt: balanceSheet.netDebt || 0,
-      } as any,
+      } as unknown as FMPBalanceSheetStatement,
       cashFlow: {
         operatingCashFlow:
           cashFlow.operatingCashFlow ||
           cashFlow.netCashProvidedByOperatingActivities ||
           0,
         freeCashFlow: cashFlow.freeCashFlow || 0,
-        // Add other required fields with defaults
         netIncome: cashFlow.netIncome || 0,
         depreciationAndAmortization: cashFlow.depreciationAndAmortization || 0,
         deferredIncomeTax: cashFlow.deferredIncomeTax || 0,
@@ -191,24 +195,19 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         purchasesOfInvestments: cashFlow.purchasesOfInvestments || 0,
         salesMaturitiesOfInvestments:
           cashFlow.salesMaturitiesOfInvestments || 0,
-        otherInvestingActivites: cashFlow.otherInvestingActivites || 0,
-        netCashUsedForInvestingActivites:
-          cashFlow.netCashUsedForInvestingActivites || 0,
-        debtRepayment: cashFlow.debtRepayment || 0,
-        commonStockIssued: cashFlow.commonStockIssued || 0,
+        otherInvestingActivities: cashFlow.otherInvestingActivities || 0,
+        netCashProvidedByInvestingActivities:
+          cashFlow.netCashProvidedByInvestingActivities || 0,
+        netDebtIssuance: cashFlow.netDebtIssuance || 0,
         commonStockRepurchased: cashFlow.commonStockRepurchased || 0,
-        dividendsPaid: cashFlow.dividendsPaid || 0,
-        otherFinancingActivites: cashFlow.otherFinancingActivites || 0,
-        netCashUsedProvidedByFinancingActivities:
-          cashFlow.netCashUsedProvidedByFinancingActivities || 0,
+        otherFinancingActivities: cashFlow.otherFinancingActivities || 0,
+        netCashProvidedByFinancingActivities:
+          cashFlow.netCashProvidedByFinancingActivities || 0,
         effectOfForexChangesOnCash: cashFlow.effectOfForexChangesOnCash || 0,
         netChangeInCash: cashFlow.netChangeInCash || 0,
         cashAtEndOfPeriod: cashFlow.cashAtEndOfPeriod || 0,
         cashAtBeginningOfPeriod: cashFlow.cashAtBeginningOfPeriod || 0,
-        operatingCashFlowOverNetIncome:
-          cashFlow.operatingCashFlowOverNetIncome || 0,
-        freeCashFlowOverNetIncome: cashFlow.freeCashFlowOverNetIncome || 0,
-      } as any,
+      } as unknown as FMPCashFlowStatement,
     } as FMPFinancialStatements;
   };
 
@@ -280,9 +279,9 @@ function CompanyDetailContent({ ticker }: { ticker: string }) {
         )
         .map((group) =>
           transformDatabaseDataToFMPFormat(
-            group.incomeStatement,
-            group.balanceSheet,
-            group.cashFlow
+            group.incomeStatement as IncomeDataWrapper,
+            group.balanceSheet as BalanceSheetDataWrapper,
+            group.cashFlow as CashFlowDataWrapper
           )
         )
         .sort(

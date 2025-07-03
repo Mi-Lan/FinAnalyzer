@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type {
-  ScreeningResult,
   CompanyDetailsResponse,
   CompanyWithAnalysis,
 } from '@/types/financial';
