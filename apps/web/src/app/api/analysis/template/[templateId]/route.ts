@@ -5,9 +5,9 @@ import { mapChainOutputToAnalysisResult } from '@/lib/langchain/utils/output-map
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { templateId: string } }
+  { params }: { params: Promise<{ templateId: string }> }
 ) {
-  const { templateId } = params;
+  const { templateId } = await params;
 
   // Validate template ID
   if (templateId !== 'tech_v1') {

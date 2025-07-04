@@ -282,8 +282,9 @@ class DatabaseManager:
             result = await session.execute(query)
             rows = result.fetchall()
             
-            return [
-                {
+            companies = []
+            for row in rows:
+                company_data = {
                     "id": row[0],
                     "name": row[1],
                     "ticker": row[2],
@@ -294,8 +295,12 @@ class DatabaseManager:
                     "score": row[7],
                     "insights": row[8],
                 }
-                for row in rows
-            ]
+                # Deserialize insights JSON string if it exists
+                if isinstance(company_data.get('insights'), str):
+                    company_data['insights'] = json.loads(company_data['insights'])
+                companies.append(company_data)
+            
+            return companies
     
     async def get_financial_data(self, company_id: str, year: int = None, period: str = None) -> List[Dict[str, Any]]:
         """Get financial data for a company, optionally filtered by year and period."""
@@ -405,12 +410,25 @@ class DatabaseManager:
             result = await session.execute(query, {"company_id": company_id})
             row = result.fetchone()
             if row:
-                return dict(row._mapping)
+                data = dict(row._mapping)
+                # Deserialize JSON strings back to Python dicts
+                if isinstance(data.get('insights'), str):
+                    data['insights'] = json.loads(data['insights'])
+                if isinstance(data.get('metricScores'), str):
+                    data['metricScores'] = json.loads(data['metricScores'])
+                return data
         return None
     
     async def save_analysis_result(self, result_data: Dict[str, Any]):
         """Saves or updates an analysis result in the database."""
         async with self.get_session() as session:
+            # Serialize insights and metricScores to JSON strings if they are dicts
+            processed_data = result_data.copy()
+            if isinstance(processed_data.get('insights'), dict):
+                processed_data['insights'] = json.dumps(processed_data['insights'])
+            if isinstance(processed_data.get('metricScores'), dict):
+                processed_data['metricScores'] = json.dumps(processed_data['metricScores'])
+            
             # Use a MERGE or ON CONFLICT statement to handle upsert
             stmt = text("""
                 INSERT INTO "AnalysisResult" (id, "companyId", "templateId", score, insights, "metricScores", "createdAt", "updatedAt")
@@ -421,5 +439,5 @@ class DatabaseManager:
                     "metricScores" = EXCLUDED."metricScores",
                     "updatedAt" = EXCLUDED."updatedAt"
             """)
-            await session.execute(stmt, result_data)
+            await session.execute(stmt, processed_data)
             await session.commit() 
