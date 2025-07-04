@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from .security import get_api_key
 from .database import connect_db, disconnect_db
-from .models import CompanyDetailsResponse, Company, FinancialData
+from .models import CompanyDetailsResponse, Company, FinancialData, AnalysisResult, CompanyWithAnalysis
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import os
@@ -96,8 +96,9 @@ def transform_company_data(db_company: Dict[str, Any]) -> Company:
         ticker=db_company['ticker'],
         sector=db_company.get('sector') or 'Unknown',
         industry=db_company.get('industry') or 'Unknown',
+        score=db_company.get('score'),
         createdAt=created_at,
-        updatedAt=updated_at
+        updatedAt=updated_at,
     )
 
 def transform_financial_data(db_financial: Dict[str, Any]) -> FinancialData:
@@ -299,11 +300,15 @@ async def get_company_details(ticker: str, processor: AsyncProcessor = Depends(g
         # Assemble the latest financials payload from financial statements only
         latest_financials_payload = assemble_latest_financials(filtered_data['financial_statements'])
 
+        # Get the latest analysis result
+        analysis_result_data = await processor.db_manager.get_latest_analysis_result(company.id)
+        analysis_result = AnalysisResult(**analysis_result_data) if analysis_result_data else None
+
         return CompanyDetailsResponse(
             company=company,
             financialData=relevant_financials,  # Now contains only relevant data
             latestFinancials=latest_financials_payload,
-            analysisResult=None  # AI analysis not yet implemented
+            analysisResult=analysis_result
         )
     except Exception as e:
         print(f"Error in get_company_details for {ticker}: {e}")
@@ -325,9 +330,75 @@ def find_latest_annual_financials(financials: List[FinancialData]) -> Optional[F
     return max(annual_financials, key=lambda f: f.year, default=None)
 
 @router.get("/companies", response_model=List[Company])
-async def get_companies():
-    # This would need a proper implementation to list all companies from DB
-    raise HTTPException(status_code=501, detail="Not implemented")
+async def get_companies(processor: AsyncProcessor = Depends(get_processor)):
+    """Fetches all companies from the database."""
+    try:
+        # Use the new db_manager property
+        all_companies_data = await processor.db_manager.get_all_companies()
+        
+        if not all_companies_data:
+            return []
+            
+        # Transform the list of company data
+        return [transform_company_data(c) for c in all_companies_data]
+    except Exception as e:
+        logger.error(f"Error fetching all companies: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch companies")
+
+@router.post("/analysis/save", status_code=201)
+async def save_analysis_result(result: AnalysisResult, processor: AsyncProcessor = Depends(get_processor)):
+    """Saves an analysis result to the database."""
+    try:
+        # Use the new db_manager property
+        await processor.db_manager.save_analysis_result(result.dict())
+        return {"status": "success", "id": result.id}
+    except Exception as e:
+        logger.error(f"Error saving analysis result: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save analysis result")
+
+@router.get("/analysis/screen", response_model=List[CompanyWithAnalysis])
+async def screen_companies(
+    sector: Optional[str] = None,
+    minScore: Optional[float] = None,
+    maxScore: Optional[float] = None,
+    recommendation: Optional[str] = None,
+    processor: AsyncProcessor = Depends(get_processor)
+):
+    """
+    Screens companies based on various criteria.
+    Returns companies with their latest analysis data.
+    """
+    try:
+        # Use the new db_manager property to get companies with analysis data
+        all_companies_data = await processor.db_manager.get_all_companies()
+        
+        if not all_companies_data:
+            return []
+            
+        # Transform the list of company data using the new model
+        companies = [CompanyWithAnalysis(**c) for c in all_companies_data]
+        
+        # Apply filters
+        if sector:
+            companies = [c for c in companies if c.sector and c.sector.lower() == sector.lower()]
+        
+        if minScore is not None:
+            companies = [c for c in companies if c.score is not None and c.score >= minScore]
+
+        if maxScore is not None:
+            companies = [c for c in companies if c.score is not None and c.score <= maxScore]
+            
+        if recommendation:
+            companies = [
+                c for c in companies 
+                if c.insights and c.insights.recommendation and c.insights.recommendation.lower() == recommendation.lower()
+            ]
+        
+        return companies
+        
+    except Exception as e:
+        logger.error(f"Error screening companies: {e}")
+        raise HTTPException(status_code=500, detail="Failed to screen companies")
 
 @router.get("/health")
 async def health_check():

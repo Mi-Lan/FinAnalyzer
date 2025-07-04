@@ -17,9 +17,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const [filters] = useState({
-    minScore: 60,
-  });
+  const [filters] = useState({});
 
   const { data: screeningResult, isLoading, error } = useScreening(filters);
 
@@ -41,8 +39,16 @@ export default function DashboardPage() {
     );
   }
 
-  const topPerformers = screeningResult?.companies
-    .sort((a, b) => b.analysis.score - a.analysis.score)
+  // The API now returns a direct array of CompanyWithAnalysis
+  const companies = screeningResult || [];
+
+  // Filter companies that have analysis scores for top performers
+  const companiesWithScores = companies.filter(
+    (item) => typeof item.score === 'number'
+  );
+
+  const topPerformers = companiesWithScores
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
     .slice(0, 3);
 
   return (
@@ -57,22 +63,42 @@ export default function DashboardPage() {
       {/* Top Performers */}
       <div>
         <h2 className="text-2xl font-semibold mb-4">Top Performers</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {topPerformers?.map((item) => (
-            <ScoreCard
-              key={item.company.id}
-              title={`${item.company.name} (${item.company.ticker})`}
-              scores={item.analysis.metricScores}
-              recommendation={item.analysis.insights.recommendation}
-            />
-          ))}
-        </div>
+        {topPerformers.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {topPerformers.map((item) => (
+              <ScoreCard
+                key={item.id}
+                title={`${item.name} (${item.ticker})`}
+                scores={{
+                  overall: item.score || 0,
+                  // The detailed metricScores are not available in the screening response,
+                  // so we create a simplified structure for the ScoreCard.
+                  profitability: item.score || 0,
+                  growth: item.score || 0,
+                  balanceSheet: item.score || 0,
+                  capitalAllocation: item.score || 0,
+                  valuation: item.score || 0,
+                }}
+                recommendation={item.insights?.recommendation}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-muted-foreground text-center">
+                Analysis scores are not yet available. Companies are loaded but
+                analysis is pending.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* All Companies Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Companies</CardTitle>
+          <CardTitle>All Companies ({companies.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -82,64 +108,70 @@ export default function DashboardPage() {
                 <TableHead>Sector</TableHead>
                 <TableHead>Score</TableHead>
                 <TableHead>Recommendation</TableHead>
-                <TableHead>Latest Financials</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {screeningResult?.companies.map((item) => (
-                <TableRow key={item.company.id}>
-                  <TableCell className="font-medium">
-                    <div>
-                      <div>{item.company.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {item.company.ticker}
+              {companies.map((company) => {
+                return (
+                  <TableRow key={company.id}>
+                    <TableCell className="font-medium">
+                      <div>
+                        <div>{company.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {company.ticker}
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{item.company.sector}</TableCell>
-                  <TableCell>
-                    <div
-                      className={`font-medium ${
-                        item.analysis.score >= 80
-                          ? 'text-green-600'
-                          : item.analysis.score >= 60
-                          ? 'text-yellow-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {item.analysis.score}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        item.analysis.insights.recommendation === 'BUY'
-                          ? 'default'
-                          : item.analysis.insights.recommendation === 'HOLD'
-                          ? 'secondary'
-                          : 'destructive'
-                      }
-                    >
-                      {item.analysis.insights.recommendation}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {item.latestFinancials ? (
-                      `${item.latestFinancials.period} ${item.latestFinancials.year}`
-                    ) : (
-                      <span className="text-muted-foreground">N/A</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button asChild size="sm">
-                      <Link href={`/company/${item.company.ticker}`}>
-                        View Details
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {company.sector || 'Unknown'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {typeof company.score === 'number' ? (
+                        <div
+                          className={`font-medium ${
+                            company.score >= 80
+                              ? 'text-green-600'
+                              : company.score >= 60
+                              ? 'text-yellow-600'
+                              : 'text-red-600'
+                          }`}
+                        >
+                          {company.score}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">Pending</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {company.insights?.recommendation ? (
+                        <Badge
+                          variant={
+                            company.insights.recommendation === 'BUY'
+                              ? 'default'
+                              : company.insights.recommendation === 'HOLD'
+                              ? 'secondary'
+                              : 'destructive'
+                          }
+                        >
+                          {company.insights.recommendation}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">Pending</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Button asChild size="sm">
+                        <Link href={`/company/${company.ticker}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

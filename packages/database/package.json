@@ -12,8 +12,10 @@
   "scripts": {
     "db:generate": "dotenv -e ../../.env -- prisma generate",
     "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:migrate:local": "dotenv -e ../../.env -- DATABASE_URL=postgresql://user:password@localhost:5432/findb prisma migrate dev",
     "db:reset": "dotenv -e ../../.env -- prisma migrate reset --force",
-    "db:studio": "dotenv -e ../../.env -- prisma studio",
+    "db:studio": "dotenv -e ../../.env -- sh -c 'DATABASE_URL=postgresql://user:password@localhost:5432/findb npx prisma studio'",
+    "db:studio:local": "dotenv -e ../../.env -- DATABASE_URL=postgresql://user:password@localhost:5432/findb prisma studio",
     "type-check": "tsc --noEmit",
     "lint": "echo 'No linting configured for database package' && exit 0",
     "test": "echo 'No tests configured yet' && exit 0",

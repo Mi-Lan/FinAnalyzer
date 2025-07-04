@@ -251,6 +251,57 @@ class DatabaseManager:
                 }
         return None
     
+    async def get_all_companies(self) -> List[Dict[str, Any]]:
+        """Get all companies from the database, including their latest analysis result."""
+        async with self.get_session() as session:
+            # This query joins the Company table with the latest analysis result for each company
+            query = text("""
+                WITH LatestAnalysis AS (
+                    SELECT 
+                        "companyId",
+                        score,
+                        insights,
+                        ROW_NUMBER() OVER(PARTITION BY "companyId" ORDER BY "createdAt" DESC) as rn
+                    FROM "AnalysisResult"
+                )
+                SELECT 
+                    c.id, 
+                    c.name, 
+                    c.ticker, 
+                    c.sector, 
+                    c.industry, 
+                    c."createdAt", 
+                    c."updatedAt",
+                    la.score,
+                    la.insights
+                FROM "Company" c
+                LEFT JOIN LatestAnalysis la ON c.id = la."companyId" AND la.rn = 1
+                ORDER BY c.ticker
+            """)
+            
+            result = await session.execute(query)
+            rows = result.fetchall()
+            
+            companies = []
+            for row in rows:
+                company_data = {
+                    "id": row[0],
+                    "name": row[1],
+                    "ticker": row[2],
+                    "sector": row[3],
+                    "industry": row[4],
+                    "createdAt": row[5],
+                    "updatedAt": row[6],
+                    "score": row[7],
+                    "insights": row[8],
+                }
+                # Deserialize insights JSON string if it exists
+                if isinstance(company_data.get('insights'), str):
+                    company_data['insights'] = json.loads(company_data['insights'])
+                companies.append(company_data)
+            
+            return companies
+    
     async def get_financial_data(self, company_id: str, year: int = None, period: str = None) -> List[Dict[str, Any]]:
         """Get financial data for a company, optionally filtered by year and period."""
         query = 'SELECT id, year, period, type, data, "createdAt", "updatedAt" FROM "FinancialData" WHERE "companyId" = :company_id'
@@ -344,4 +395,49 @@ class DatabaseManager:
                 "old_10k_count": old_10k_count,
                 "recent_filings_count": recent_filings_count,
                 "oldest_required_year": oldest_required_year
-            } 
+            }
+    
+    async def get_latest_analysis_result(self, company_id: str) -> Optional[Dict[str, Any]]:
+        """Get the latest analysis result for a company."""
+        query = text("""
+            SELECT id, "companyId", "templateId", score, insights, "metricScores", "createdAt", "updatedAt"
+            FROM "AnalysisResult"
+            WHERE "companyId" = :company_id
+            ORDER BY "createdAt" DESC
+            LIMIT 1
+        """)
+        async with self.get_session() as session:
+            result = await session.execute(query, {"company_id": company_id})
+            row = result.fetchone()
+            if row:
+                data = dict(row._mapping)
+                # Deserialize JSON strings back to Python dicts
+                if isinstance(data.get('insights'), str):
+                    data['insights'] = json.loads(data['insights'])
+                if isinstance(data.get('metricScores'), str):
+                    data['metricScores'] = json.loads(data['metricScores'])
+                return data
+        return None
+    
+    async def save_analysis_result(self, result_data: Dict[str, Any]):
+        """Saves or updates an analysis result in the database."""
+        async with self.get_session() as session:
+            # Serialize insights and metricScores to JSON strings if they are dicts
+            processed_data = result_data.copy()
+            if isinstance(processed_data.get('insights'), dict):
+                processed_data['insights'] = json.dumps(processed_data['insights'])
+            if isinstance(processed_data.get('metricScores'), dict):
+                processed_data['metricScores'] = json.dumps(processed_data['metricScores'])
+            
+            # Use a MERGE or ON CONFLICT statement to handle upsert
+            stmt = text("""
+                INSERT INTO "AnalysisResult" (id, "companyId", "templateId", score, insights, "metricScores", "createdAt", "updatedAt")
+                VALUES (:id, :companyId, :templateId, :score, :insights, :metricScores, :createdAt, :updatedAt)
+                ON CONFLICT (id) DO UPDATE SET
+                    score = EXCLUDED.score,
+                    insights = EXCLUDED.insights,
+                    "metricScores" = EXCLUDED."metricScores",
+                    "updatedAt" = EXCLUDED."updatedAt"
+            """)
+            await session.execute(stmt, processed_data)
+            await session.commit() 

@@ -1,64 +1,95 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { techSectorAnalysisChain } from '@/lib/langchain/chains';
+import { techSectorAnalysisChain } from '@/lib/langchain/chains/tech-sector';
 import { transformFinancialDataForPrompts } from '@/lib/langchain/utils/data-transformer';
-import { FMPFinancialStatements, Company } from '@/types/financial';
-
-export const runtime = 'edge';
+import { mapChainOutputToAnalysisResult } from '@/lib/langchain/utils/output-mapper';
 
 export async function POST(
   req: NextRequest,
-  context: { params: Promise<{ templateId: string }> }
+  { params }: { params: Promise<{ templateId: string }> }
 ) {
-  const { templateId } = await context.params;
+  const { templateId } = await params;
 
-  // For now, we only support the tech sector template
-  if (templateId !== 'tech-default-v1') {
+  // Validate template ID
+  if (templateId !== 'tech_v1') {
     return NextResponse.json(
-      { error: `Template ${templateId} not found.` },
+      {
+        error:
+          'Template not found. Currently only "tech_v1" template is supported.',
+      },
       { status: 404 }
+    );
+  }
+
+  // Check for OpenAI API key
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: 'OpenAI API key is not configured' },
+      { status: 500 }
     );
   }
 
   try {
     const body = await req.json();
-    const {
-      financials,
-      company,
-    }: { financials: FMPFinancialStatements[]; company: Company } = body;
+    const { financials, company } = body;
 
-    if (!financials || !company || financials.length === 0) {
+    if (!financials || !Array.isArray(financials) || financials.length === 0) {
       return NextResponse.json(
-        { error: 'Missing or invalid financial data or company info' },
+        { error: 'Financial data is required' },
         { status: 400 }
       );
     }
 
+    if (!company?.ticker) {
+      return NextResponse.json(
+        { error: 'Company ticker is required' },
+        { status: 400 }
+      );
+    }
+
+    console.log(
+      `🔍 Starting analysis for ${company.ticker} with ${financials.length} years of data`
+    );
+
+    // Transform financial data for the prompt chain
     const transformedData = transformFinancialDataForPrompts(financials);
 
-    const stream = await techSectorAnalysisChain.stream(transformedData);
+    console.log(
+      `📊 Transformed data for ${transformedData.companyInfo.symbol}`
+    );
 
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of stream) {
-          controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
-        }
-        controller.close();
-      },
+    // Run the analysis chain
+    const chainResult = await techSectorAnalysisChain.invoke(transformedData);
+
+    console.log(`✅ Analysis complete for ${company.ticker}`);
+
+    // Map to the expected AnalysisResult format
+    const result = mapChainOutputToAnalysisResult({
+      chainOutput: chainResult,
+      companyId: company.id,
+      templateId,
     });
 
-    return new Response(readableStream, {
+    // Save the result to the database via the API gateway
+    const gatewayUrl = process.env.API_GATEWAY_URL || 'http://api-gateway:8000';
+    await fetch(`${gatewayUrl}/api/analysis/save`, {
+      method: 'POST',
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.API_KEY || 'your-secret-api-key',
       },
+      body: JSON.stringify(result),
     });
-  } catch (e: unknown) {
-    console.error(e);
-    let error = 'Failed to run analysis';
-    if (e instanceof Error) {
-      error = e.message;
+
+    // Return the result as a JSON response
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('❌ Analysis failed:', error);
+
+    let errorMessage = 'Failed to run analysis';
+    if (error instanceof Error) {
+      errorMessage = error.message;
     }
-    return NextResponse.json({ error }, { status: 500 });
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

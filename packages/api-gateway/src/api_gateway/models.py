@@ -8,8 +8,9 @@ class Company(BaseModel):
     id: str
     name: str
     ticker: str
-    sector: str
-    industry: str
+    sector: Optional[str] = None
+    industry: Optional[str] = None
+    score: Optional[int] = None
     createdAt: datetime
     updatedAt: datetime
 
@@ -20,10 +21,10 @@ class Company(BaseModel):
 class FinancialData(BaseModel):
     id: str
     companyId: str
+    type: str
     year: int
-    period: str  # "Q1", "Q2", "Q3", "Q4", "FY"
-    type: str  # e.g., "income-statement", "balance-sheet-statement", "10-K", "10-Q"
-    data: Dict[str, Any]  # This will store the FMP data as JSON
+    period: str
+    data: Dict[str, Any]
     createdAt: datetime
     updatedAt: datetime
 
@@ -31,9 +32,50 @@ class FinancialData(BaseModel):
         from_attributes = True
 
 
+class MetricScores(BaseModel):
+    profitability: int
+    growth: int
+    balanceSheet: int
+    capitalAllocation: int
+    valuation: int
+    overall: int
+
+
+class AnalysisInsights(BaseModel):
+    summary: str
+    strengths: List[str]
+    weaknesses: List[str]
+    opportunities: List[str]
+    risks: List[str]
+    recommendation: Optional[str] = None
+
+
+class AnalysisResult(BaseModel):
+    id: str
+    companyId: str
+    templateId: str
+    score: int
+    insights: AnalysisInsights
+    metricScores: MetricScores
+    createdAt: datetime
+    updatedAt: datetime
+
+
+class CompanyWithAnalysis(BaseModel):
+    id: str
+    name: str
+    ticker: str
+    sector: Optional[str] = None
+    industry: Optional[str] = None
+    score: Optional[int] = None
+    insights: Optional[AnalysisInsights] = None
+    createdAt: datetime
+    updatedAt: datetime
+
+
 # API request/response models
 class CompanyDetailsResponse(BaseModel):
     company: Company
     financialData: List[FinancialData]
     latestFinancials: Optional[FinancialData] = None
-    analysisResult: Optional[Dict[str, Any]] = None 
+    analysisResult: Optional[AnalysisResult] = None 

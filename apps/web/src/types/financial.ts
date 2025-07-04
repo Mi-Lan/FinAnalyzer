@@ -253,11 +253,11 @@ export interface MetricScores {
 
 // API Response types
 export interface ScreeningResult {
-  companies: Array<{
+  companies: {
     company: Company;
     latestFinancials: FinancialData;
     analysis: AnalysisResult;
-  }>;
+  }[];
   totalCount: number;
   filters: {
     sector?: string;
@@ -307,4 +307,16 @@ export interface FinancialMetricsData {
   incomeStatement?: FinancialMetricsIncomeStatement;
   balanceSheet?: FinancialMetricsBalanceSheetStatement;
   cashFlow?: FinancialMetricsCashFlowStatement;
+}
+
+export interface CompanyWithAnalysis {
+  id: string;
+  name: string;
+  ticker: string;
+  sector?: string;
+  industry?: string;
+  score?: number;
+  insights?: AnalysisInsights;
+  createdAt: string;
+  updatedAt: string;
 }

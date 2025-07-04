@@ -16,7 +16,16 @@ class AsyncProcessor:
     """
     def __init__(self, concurrency_limit: int = DEFAULT_CONCURRENCY_LIMIT):
         self.semaphore = asyncio.Semaphore(concurrency_limit)
-        # We no longer create a shared adapter here
+        self._db_manager = None
+    
+    @property
+    def db_manager(self):
+        """Lazy-loads and returns a single DatabaseManager instance."""
+        if self._db_manager is None:
+            # The adapter provides access to the shared DatabaseManager
+            adapter = self._get_adapter()
+            self._db_manager = adapter.db_manager
+        return self._db_manager
     
     def _get_adapter(self) -> StorageEnabledFMPAdapter:
         """Creates a new instance of the storage adapter."""
